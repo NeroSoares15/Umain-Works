@@ -1,0 +1,625 @@
+
+
+--- COULD NOT FIND FILE MATCHING: IPTomar - Risco Abandono Escolar ---
+
+
+--- EXTRACTING: RiskRadar - Definição de Produto - IPTomar (3).pdf ---
+ Deﬁnição  do  Produto  -  Risk Radar 
+ Gestão de Produto 
+ Deﬁnição do Produto 
+ [Produto] 
+ Risk Radar 
+ Versão 
+ 02-11-2025 
+
+ Gestão de Produto 
+ Deﬁnição do Produto 
+ Produto 
+ Risk Radar 
+ © Umain.works 
+ All rights reserved  2 
+ Âmbito do Documento 
+ Este  documento  serve  como  ﬁcha 
+ técnico-comercial do produto Risk Radar. 
+ Índice 
+ Índice  3 
+ 1. 
+ Deﬁnição do Produto  5 
+ 1.1 Declaração de Posicionamento  6 
+ 1.2 O Problema que Resolve  6 
+ 1.3 A Solução  7 
+ 1.4 Para quem e Porquê  7 
+ 1.5 Ética, Compliance e Transparência AI  8 
+ 2. 
+ Arquitectura e Integrações  10 
+ 2.1 Perfis de Utilizadores  11 
+ 2.2 Capacidades Essenciais (MVP)  12 
+ 2.3 Workflow Simples  13 
+ 2.4 Integrações Necessárias  14 
+ 2.5 Requisitos de Infraestrutura  14 
+ Gestão de Produto 
+ Deﬁnição do Produto 
+ Produto 
+ Risk Radar 
+ © Umain.works 
+ All rights reserved  3 
+ Versionamento e Aprovações 
+ Versão 
+ 1.0 
+ Data 
+ 29.10.2025 
+ Autor 
+ João 
+ Aguiar 
+ Alterações 
+ Deﬁnição  do  âmbito  e  requisitos  a 
+ preencher 
+ Aprovações 
+ All 
+ 1. 
+ Deﬁnição do Produto 
+ Gestão de Produto 
+ Deﬁnição do Produto 
+ Produto 
+ Risk Radar 
+ © Umain.works 
+ All rights reserved  4 
+ 1.1 Declaração de Posicionamento 
+ Para  Serviços  Académicos  e  Orientadores  Pedagógicos  de  Instituições  de  Ensino  Superior  que 
+ procuram  ativamente  reduzir  as  taxas  de  insucesso  e  abandono  escolar  ,  o  RiskRadar  é  um 
+ motor  de  Análise  Preditiva  baseado  em  Machine  Learning  que  transforma  dados  académicos, 
+ comportamentais  e  administrativos  em  Risk  Scores  acionáveis,  permitindo  uma  Intervenção 
+ Precoce  e  focada  .  Ao  contrário  de  sistemas  reativos  baseados  em  notas  ﬁnais  ,  o  RiskRadar 
+ atua de forma contínua e proativa  . 
+ 1.2 O Problema que Resolve 
+ Compreender  o  problema  que  resolvemos  é  o  primeiro  passo  para  medir  o  ROI.  A  Umain  Works 
+ não  vende  apenas  software;  resolvemos  a  dor  crítica  que  está  a  impedir  a  sua  organização  de 
+ escalar,  aumentar  a  rentabilidade  ou  reduzir  o  risco.  O  Risk  Radar  foi  desenhado 
+ especiﬁcamente  para  eliminar  o  ponto  de  estrangulamento  que  afeta  as  suas  métricas  de 
+ negócio mais importantes. 
+ Abandono/Insucesso  Académico  não  identiﬁcado  atempadamente  .  O  problema  é  a 
+ incapacidade  das  instituições  de  identiﬁcar  objetiva  e  proativamente  os  alunos  em  risco, 
+ resultando em perdas ﬁnanceiras (propinas) e impacto reputacional. 
+ A  inação  tem  um  preço  alto  e  crescente.  Sem  o  Risk  Radar  ,  a  sua  organização  continuará  a 
+ enfrentar as seguintes consequências críticas: 
+ ●  Perda  de  Receita  por  Propinas  e  Financiamento:  O  abandono  não  mitigado  resulta  na 
+ perda  direta  das  propinas  do  aluno  e,  potencialmente,  na  perda  de  ﬁnanciamento 
+ público  (ex:  fundos  europeus,  alocação  orçamental)  que  depende  das  taxas  de 
+ retenção e sucesso académico. 
+ ●  Degradação  da  Qualidade  e  Reputação  Institucional:  Sem  uma  ferramenta  proativa, 
+ as  intervenções  são  tardias  e  ineﬁcazes,  levando  à  percepção  de  baixa  qualidade  no 
+ apoio  ao  aluno  .  Isto  afeta  a  reputação,  os  rankings  e  o  feedback  de  mercado  (ex: 
+ satisfação dos estudantes), diﬁcultando futuras captações e alianças estratégicas. 
+ ●  Sobrecarga  Reativa  e  Desperdício  de  Tempo  dos  Orientadores:  As  equipas  de 
+ Serviços  Académicos  e  Orientadores  Pedagógicos  gastam  tempo  valioso  a  reagir  a 
+ crises  ou  a  realizar  intervenções  não  direcionadas  (com  baixa  taxa  de  sucesso).  Estão 
+ presos  a  tarefas  administrativas  e  reativas  ,  em  vez  de  se  focarem  em  programas  de 
+ apoio estratégicos, personalizados e de alto valor. 
+ Gestão de Produto 
+ Deﬁnição do Produto 
+ Produto 
+ Risk Radar 
+ © Umain.works 
+ All rights reserved  5 
+ 1.3 A Solução 
+ O  Risk  Radar  não  é  apenas  uma  ferramenta;  é  a  resposta  estratégica  para  os  desaﬁos 
+ identiﬁcados.  A  nossa  solução  transforma  a  ineﬁciência  crítica  em  vantagem  competitiva 
+ através  de  inteligência  artiﬁcial  adaptativa,  garantindo  que  o  seu  investimento  resulta  em 
+ impacto de negócio mensurável. 
+ O  Risk  Radar  transforma  o  seu  desaﬁo  crítico  através  da  Inteligência  Artiﬁcial  Adaptativa  ,  é 
+ uma  plataforma  de  Machine  Learning  que  ingere  e  correlaciona  dados  de  desempenho  e 
+ comportamento,  calculando  uma  Pontuação  de  Risco  (Risk  Score)  semanal.  O  output  são 
+ alertas prioritários para os orientadores, maximizando a eﬁciência da intervenção humana. 
+ 1.4 Para quem e Porquê 
+ O  Risk  Radar  foi  desenhado  com  um  perﬁl  de  cliente  ideal  em  mente,  maximizando  o  ﬁt 
+ tecnológico  e  o  retorno  ﬁnanceiro.  Esta  seção  detalha  as  indústrias  e  as  características  que 
+ garantem o maior sucesso com a nossa solução. 
+ Indústria  Porquê Somos a Solução Ideal? (O Que Resolvemos Aqui) 
+ Ensino Universitário  Resolvemos
+
+--- EXTRACTING: RiskRadar OnePager  (1).pdf ---
+RiskRadar
+Proactive Student Success Through 
+Predictive Analytics and Early Intervention.
+The Challenge 
+● Delayed Response: Institutions only 
+realize a student is at risk after they have 
+already failed or stopped aending, 
+making intervention ineective.
+● Fragmented Data: Student information 
+(grades, aendance, behavioral 
+paerns) is siloed across dierent 
+systems, preventing a holistic view of the 
+student journey.
+● Economic & Social Impact: High dropout 
+rates lead to signiﬁcant ﬁnancial loss for 
+the institution and negatively impact the 
+long-term career prospects of students.
+RiskRadar is an advanced AI predictive 
+engine that identiﬁes students at risk of 
+dropping out or failing long before it 
+happens. 
+By analyzing historical and real-time data 
+from multiple sources, it classiﬁes risk 
+levels and provides faculty and mentors 
+with actionable insights and automated 
+alerts to trigger personalized support 
+workﬂows.
+The Solution
+Key Features
+Integrated Risk 
+Intelligence Command 
+Center
+Advanced AI scoring engine 
+that  categorize students into 
+risk levels (Low, Medium, High), 
+providing Course Directors with 
+granular student views and 
+Institutional Leadership with 
+aggregated strategic reports.  
+Proactive Alert System
+Automated notiﬁcations that 
+alert mentors and pedagogical 
+support teams the moment a 
+student’s risk proﬁle changes.
+Intervention Tracking
+Enables the monitoring of 
+support actions taken, allowing 
+the institution to measure the 
+eectiveness of dierent 
+intervention strategies.
+Business Value
+Retention
+Reduction in Arition 
+Rates
+Early identiﬁcation allows for timely 
+intervention, signiﬁcantly 
+decreasing dropout rates and 
+increasing institutional revenue 
+stability.
+Productivity
+Optimized Resource 
+Allocation
+Directs student support services 
+and mentorship programs to the 
+students who need them most, 
+maximizing the impact of human 
+resources.
+Reputation
+Institutional 
+Reputation
+Improves graduation rates and 
+student satisfaction, enhancing the 
+institution’s ranking and appeal to 
+future applicants.
+A partner to make it work. hello@umain.works www.umain.works Schedule a personalized 15-Minute Demo →
+
+
+--- EXTRACTING: [IPTomar] - Processo To Be v1.0.docx (2).pdf ---
+ 
+   
+       
+Proposta  de  
+Transformação
+ 
+       
+ 
+ 
+  
+AI  Assessment  
+IPTomar  
+Processo  
+Observatório  do  Estudante  To  Be  
+Versão  19  de  dezembro  de  2025  
+
+ 
+ AI  Assessment  Process  To  be  
+Processo  IPTomar  -  Observatório  do  Estudante  
+ ©  Umain  Works  All  rights  reserved  
+2  
+ 
+Objetivo  do  Documento  
+Este  documento  apresenta  a  visão  futura  ("To  Be")  do  processo  Observatório  do  Estudante,  com  foco  na  monitorização  e  prevenção  do  abandono  escolar,  suportado  pela  centralização  de  dados,  automação  e  utilização  de  regras  determinísticas.  
+A  proposta  descreve  os  casos  de  uso  priorizados,  os  componentes  da  solução,  as  integrações  previstas,  os  requisitos  técnicos  e  a  avaliação  de  viabilidade  (risco,  esforço  e  impacto  esperado),  assegurando  que  a  solução  é  exequível,  sustentável  e  alinhada  com  o  contexto  técnico,  organizacional  e  regulatório  do  IPTomar.  
+Este  documento  é  apresentado  como  não  vinculativo  e  não  constitui  uma  proposta  formal.  
+     
+ 
+Versionamento  e  Aprovações  
+  
+Versão  
+1.0
+ 
+Data  
+19.12.2025
+ 
+Autor  
+Amanda  Rezende  
+Alterações 
+Deﬁnição  do  processo  e  descrição  
+da
+ 
+infraestrutura
+ 
+corrente
+.  
+Aprovações  
+A  aguardar  aprovação  do  cliente  
+Índice   1.  Processo  6 Objetivos  do  processo  6 Âmbito  7 Proposta  de  Valor  8 Impacto  Esperado  8 Beneficiários  8 2.  Use  Cases  10 2.1  Descrição  de  Casos  de  Uso  11 2.1.1  UC1  -  Centralização  e  Digitalização  de  Dados  11 2.1.2  UC2  -  Cálculo  do  Score  de  Risco  12 2.1.3  UC3  -  Gestão  de  Alertas  e  Privacidade  13 2.2  Diagrama  13 2.3  Relatórios  e  Dashboards  14 2.3.1  Dashboard  Operacional  14 2.3.2  Relatórios  Agregados  15 2.3.3  Formato  de  Dados  15 2.4  Fluxo  de  Intervenção  15 3.  Requisitos  Técnicos  e  17 Especificações  17 3.1  Integração  de  Sistemas  18 3.2  Integração  de  Dados  19 3.3  Níveis  de  Acesso  e  Privacidade  20 3.3.1  Princípios  Fundamentais  20 3.3.2  Níveis  de  Acesso  20 4.  Avaliação  da  Viabilidade  da  22 Implementação  22 4.1  Componentes  da  Solução  23 4.2  Tecnologias  e  Ferramentas  24 4.3  Avaliação  da  Infraestrutura  24 5.  Avaliação  de  Risco  26 5.1  Contexto  dos  Indicadores  de  Risco  27 5.1.1  Indicadores  Académicos  27 5.1.2  Indicadores  de  Entrada  27 5.1.3  Indicadores  Socioeconómicos  27 5.1.4  Indicadores  Comportamentais  27 5.1.5  Indicadores  de  Saúde  e  Bem-Estar  28 5.2  Riscos  Identificados  e  Mitigação  28 5.3  Considerações  sobre  a  Interpretação  do  Risco  29 
+ AI  Assessment  Process  To  be  
+Processo  IPTomar  -  Observatório  do  Estudante  
+ ©  Umain  Works  All  rights  reserved  
+3  
+ 
+5.4  Proposta  Inicial  de  Fórmula  de  Scoring  30 5.4.1  Fatores  de  Contexto  (Ajustes)  31 6.  Avaliação  Global  e  Conclusão  32 6.1  Análise  de  Viabilidade  33  
+ AI  Assessment  Process  To  be  
+Processo  IPTomar  -  Observatório  do  Estudante  
+ ©  Umain  Works  All  rights  reserved  
+4  
+ 
+Escala  de  Viabilidade  
+A  maioria  das  tabelas  neste  documento  incluem  uma  avaliação  de  viabilidade  para  cada  um  dos  
+itens
+ 
+listados.
+ 
+A
+ 
+avaliação
+ 
+é
+ 
+apresentada
+ 
+em
+ 
+três
+ 
+níveis:
+  
+H  
+Nível  de  viabilidade  Alto  -  A  Umain  Works  considera  que  o  item  é  viável,  sem  grandes  riscos  ou  problemas.  
+M  
+Nível  de  viabilidade  Médio  -  A  Umain  Works  considera  o  item  viável,  mas  identiﬁca  alguns  aspetos  que  podem  representar  um  desaﬁo  à  sua  implementação  ou  afetar  negativamente  o  seu  resultado.  
+L  
+Nível  de  viabilidade  Baixo  -  A  Umain  Works  considera  o  item  muito  difícil  ou  impossível  de  implementar,  ou  que  não  produzirá  o  resultado  pretendido  pela  empresa.  
+ Glossário  
+ Agente  IA  -  Programa  que  recorre  ao  uso  da  IA  para  executar  uma  função  especíﬁca.  Plataforma  IA  -  O  conjunto  de  todos  os  agentes,  modelos,  dados  e  integrações  que  constituem  
+a
+ 
+solução
+ 
+apresentada
+ 
+neste
+ 
+documento.
+ 
+ AI  Assessment  Process  To  be  
+Processo  IPTomar  -  Observatório  do  Estudante  
+ ©  Umain  Works  All  rights  reserved  
+5  
+ 
+1.  Processo  Monitorização  e  Prevenção  do  Abandono  Escolar  (Observatório  do  Estudante)  Manuela  Oliveira  e  Sílvia  Silva  (IPTomar)    
+Objetivos  do  processo O  objetivo  deste  projeto  é  implementar  uma  plataforma  centralizada  de  dados  –  Observatório  
+do
+ 
+Estudante,
+ 
+que
+ 
+automatize
+ 
+a
+ 
+correlação
+ 
+de
+ 
+informação
+ 
+atualmente
+ 
+dispersa
+ 
+por
+ 
+múltiplos
+ 
+sistemas
+ 
+e
+ 
+formatos,
+ 
+permitindo
+ 
+identiﬁcar
+ 
+precocemente
+ 
+estudantes
+ 
+em
+ 
+diferentes
+ 
+níveis
+ 
+de
+ 
+risco
+ 
+de
+ 
+abandono.
+ 
+A  solução  substitui  avaliações  baseadas  em  perceções  isoladas  e  sinalizações  manuais  por  um  
+Sistema
+ 
+de
+ 
+Score
+ 
+(0–100),
+ 
+assente
+ 
+em
+ 
+regras
+ 
+de
+ 
+negócio
+ 
+determinísticas,
+ 
+apoiando
+ 
+a
+ 
+tomada
+ 
+de
+ 
+decisão
+ 
+humana
+ 
+por
+
+
+--- EXTRACTING: iptomar_pontos_discussao (2).pdf ---
+UMAIN  Works  |  IPTomar  -  Observatório  do  Estudante
+ 
+ Pontos  de  Discussão  e  Plano  de  Resposta  
+IPTomar  -  Observatório  do  Estudante  (To  Be  v1.0)  
+Reunião  Interna  UMAIN  Works  |  Janeiro  2026  
+ 
+1.  Pontos  Levantados  no  Email  (Manuela  Fernandes  /  Sílvia  
+Silva)
+ 
+Os  seguintes  pontos  foram  identificados  no  email  como  prioritários  para  discussão:  
+1.1  Matriz  de  Perfis  e  RGPD  
+"Precisamos  de  definir  com  rigor  quem  visualiza  o  quê.  É  importante  assegurar  que  a  
+integração
+ 
+com
+ 
+o
+ 
+sistema
+ 
+de
+ 
+sumários
+ 
+e
+ 
+o
+ 
+ERP
+ 
+apenas
+ 
+dispare
+ 
+sinalizações
+ 
+de
+ 
+alerta,
+ 
+sem
+ 
+expor
+ 
+dados
+ 
+de
+ 
+natureza
+ 
+sensível
+ 
+(clínica
+ 
+ou
+ 
+socioeconómica)
+ 
+a
+ 
+quem
+ 
+não
+ 
+tem
+ 
+competência
+ 
+para
+ 
+os
+ 
+tratar."
+ 
+Questão  Resposta/Plano  UMAIN  
+Quem  são  os  perfis  de  acesso  a  definir?   Definir  os  Perfis  
+Diretor  de  Curso  (Perfil  de  Gestão):  Visualiza  apenas  os  alertas  de  risco  e  indicadores  académicos  (faltas,  notas)  dos  alunos  do  seu  curso.  Não  tem  acesso  a  dados  clínicos  ou  socioeconómicos  detalhados.    
+Técnico  SAS  /  Gabinete  de  Apoio  (Perfil  Especialista):  Acesso  total  aos  dados  sensíveis  (socioeconómicos  e  clínicos)  para  realizar  a  triagem  e  definir  o  plano  de  intervenção.    
+ Observatório  do  Estudante  (Perfil  Analítico):  Visualiza  dados  anonimizados  ou  agregados  para  relatórios  de  melhoria  contínua  e  SIGQ.    
+ 
+Página  1  |  Documento  interno  -  Preparação  de  reunião
+ 
+UMAIN  Works  |  IPTomar  -  Observatório  do  Estudante
+ 
+Que  dados  vê  cada  perfil?   
+Como  garantir  separação  alerta  vs.  dados  sensíveis?  Gatilhos  Automáticos:  O  sistema  processa  dados  do  ERP  e  Moodle  internamente.  Se  um  aluno  ultrapassar  o  threshold  (ex:  >25%  de  faltas  ou  propinas  em  atraso),  o  sistema  gera  um  "Cartão  de  Alerta".    
+ Visibilidade  do  Alerta:  O  Diretor  de  Curso  recebe  a  notificação  de  que  o  "Aluno  X  está  em  risco  elevado",  mas  os  motivos  específicos  de  natureza  sensível  (ex:  dificuldades  financeiras  ou  questões  de  saúde)  aparecem  apenas  como  "Motivo  Confidencial  -  Reservado  aos  SAS".    
+ Fluxo  de  Triagem:  Apenas  o  perfil  com  competência  técnica  (SAS)  pode  clicar  no  alerta  para  abrir  o  formulário  de  triagem  e  ver  o  detalhe  clínico  ou  social.  
+ 
+Quem  é  o  DPO  responsável  no  IPT?  Joao  Patricio  
+1.2  Identificação  Unívoca  
+"Devemos  clarificar  como  será  feita  a  correlação  de  dados  entre  plataformas  (N.º  de  
+Aluno
+ 
+vs.
+ 
+Cartão
+ 
+de
+ 
+Cidadão)
+ 
+para
+ 
+evitar
+ 
+inconsistências
+ 
+nos
+ 
+fluxos
+ 
+de
+ 
+sinalização."
+ 
+Questão  Resposta/Plano  UMAIN  
+Qual  a  chave  primária  de  integração  recomendada?  
+ 
+Todos  os  sistemas  usam  o  mesmo  identificador?  Questionar  o  IPTomar  sobre  os  identificadores  existentes  nas  plataformas.  
+Como  tratar  duplicados/inconsistências?   
+1.3  Regras  de  Negócio  e  Gatilhos  
+Página  2  |  Documento  interno  -  Preparação  de  reunião
+ 
+UMAIN  Works  |  IPTomar  -  Observatório  do  Estudante
+ 
+"Devemos  aproveitar  a  reunião  para  definir  que  indicadores  específicos  das  
+plataformas
+ 
+institucionais
+ 
+(ex:
+ 
+%
+ 
+de
+ 
+faltas,
+ 
+ausência
+ 
+de
+ 
+login,
+ 
+avaliações
+ 
+negativas)
+ 
+devem
+ 
+gerar
+ 
+alertas
+ 
+automáticos
+ 
+de
+ 
+risco
+ 
+de
+ 
+abandono."
+ 
+Questão  Resposta/Plano  UMAIN  
+Quais  os  thresholds  iniciais  propostos?   Adicionar  uma  proposta  ●  25%  das  faltas  permitidas  por  disciplina/ano.  ●  Não  entrega  de  trabalhos  que  contam  para  a  avaliação  das  Unidades  Curriculares  (UC).  ●  25%  de  negativas  por  UC  por  semestre.  ●  Incumprimento  do  prazo  por  mês,  para  pagamento  de  propinas.  
+(notas  da  reunião  a  azul)  
+●  perfil  de  aluno  (ordinário  /vs/  internacional,  perfil,  bolseiro,  portador  de  deficiência,  programa  maior  de  23)  ○  alunos  do  1º  ano:  em  que  fase  é  que  entrou/DATA  da  matrícula/  ●  Avaliações:  peso  da  avaliação  ●  Faltas  às  avaliações  ●  o  1º  ano  deve  ter  um  peso  maior  que  os  outros  porque  é  mais  crítico.  
+Os  gatilhos  são  configuráveis  pelo  IPT?  sim  
+Como  calibrar  os  pesos  com  o  IPT?  dar  mais  peso  aos  dados  existentes  e  identificados  como  críticos.  
+1.4  Propriedade  do  Processo  (RACI)  
+"Importa  clarificar,  para  cada  ecrã  e  funcionalidade  descrita  na  proposta,  quem  é  o  
+proprietário
+ 
+da
+ 
+etapa
+ 
+(quem
+ 
+sinaliza,
+ 
+quem
+ 
+faz
+ 
+a
+ 
+triagem
+ 
+e
+ 
+quem
+ 
+define
+ 
+o
+ 
+plano
+ 
+de
+ 
+intervenção),
+ 
+garantindo
+ 
+a
+ 
+conformidade
+ 
+com
+ 
+as
+ 
+competências
+ 
+formais
+ 
+dos
+ 
+serviços."
+ 
+Questão  Resposta/Plano  UMAIN  
+Propomos  entregar  uma  matriz  RACI?  
+ Adicionar  uma  proposta  
+ 
+Página  3  |  Documento  interno  -  Preparação  de  reunião
+ 
+UMAIN  Works  |  IPTomar  -  Observatório  do  Estudante
+ 
+Atividade  /  Etapa  Diretor  de  Curso  (Gestão)  
+Té

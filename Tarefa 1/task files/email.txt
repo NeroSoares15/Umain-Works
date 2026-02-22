@@ -1,0 +1,34 @@
+Nero,
+
+
+Precisamos de dar vida ao RiskRadar, um dos nossos produtos core da suíte Lumina. O objetivo é criar um pack de venda/demo para um cliente genérico (vamos chamar-lhe Universidade X) que deixe qualquer Reitor impressionado.
+
+Para isto, não quero que percas tempo a desenhar cada botão do zero. Queremos agilidade e AI-first. Podes usar ferramentas como o v0.dev para gerar o código do dashboard, ou plugins de AI no Figma para acelerar os mockups.
+
+O que precisamos (Outputs):
+
+Frontend Funcional (Demo): Uma página interativa que mostre o ciclo de dados (desde a ingestão do Moodle até ao alerta de risco).
+
+Mockups de Alta Fidelidade: Focados no dashboard principal e na visão individual do aluno (usa a lógica de Radar de Risco).
+
+Vídeo Inspiracional: Um clip curto (tipo "concept video") que mostre o RiskRadar a salvar alunos do abandono escolar (podes usar ferramentas de vídeo AI).
+
+Conteúdo Dinâmico: Nada de "Lorem Ipsum". Usa dados que façam sentido para uma universidade.
+
+Notas:
+
+Cores: Cores e tipo de letra Umain
+
+Layout: Enterprise SaaS, limpo e focado em dados.
+
+Metodologia BMAD: O design tem de guiar o utilizador através do Business (dados), Model (IA), Analysis (insights) e Decision (ação).
+
+Estou a anexar toda a documentação do produto (diagramas de fluxo e especificações) para teres contexto total do que a ferramenta faz no mundo real. Qualquer dúvida funcional, podes falar comigo que sou o PO do produto.
+
+Prazo:  Próxima quarta-feira.
+
+Abraço
+
+Cumprimentos / Best Regards,
+
+João Aguiar 

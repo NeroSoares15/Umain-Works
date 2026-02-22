@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-umain-primary: #020817; /* Slate 950 */
+  --color-umain-secondary: #0f172a; /* Slate 900 */
+  --color-umain-accent: #3b82f6; /* Blue 500 */
+  --color-umain-background: #020817; /* Slate 950 base */
+  --color-umain-surface: #0f172a; /* Slate 900 cards */
+  --color-umain-border: #1e293b; /* Slate 800 borders */
+  --color-umain-text: #f8fafc; /* Slate 50 */
+  --color-umain-text-muted: #94a3b8; /* Slate 400 */
+  --color-umain-muted: #1e293b; /* Slate 800 backgrounds */
+  
+  --color-risk-low: #10b981; 
+  --color-risk-medium: #f59e0b; 
+  --color-risk-high: #ef4444; 
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-umain-background);
+  color: var(--color-umain-text);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Custom utilities for Enterprise SaaS feel */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-umain-border);
+}
+
+.anim-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"c:/Users/NeroS/OneDrive -:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(printf:*)",
+      "Bash(powershell.exe -Command \"Write-Output ''PowerShell available''\")",
+      "Bash(powershell.exe -Command:*)",
+      "Bash(powershell.exe -File /tmp/test.ps1)",
+      "Bash(powershell.exe -File /tmp/write_students.ps1)",
+      "Bash(powershell.exe -File \"C:/Users/NeroS/AppData/Local/Temp/write_ps.ps1\")",
+      "Bash(xxd:*)",
+      "Bash(powershell.exe -File:*)",
+      "Bash(set:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}
