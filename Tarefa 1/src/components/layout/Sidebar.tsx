@@ -9,7 +9,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="w-60 min-h-screen bg-umain-primary flex flex-col border-r border-umain-border">
+    <aside className="w-60 h-screen sticky top-0 bg-umain-primary flex flex-col border-r border-umain-border">
       <div className="px-6 py-5 border-b border-umain-border">
         <div>
           <p className="text-white font-black text-base tracking-tight leading-none">

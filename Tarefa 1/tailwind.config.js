@@ -8,9 +8,12 @@ export default {
         extend: {
             colors: {
                 umain: {
-                    primary: '#0f172a', // Slate 900 - Deep Navy
-                    secondary: '#334155', // Slate 700
-                    accent: '#2563eb', // Blue 600
+                    primary: '#020817', // Slate 950
+                    secondary: '#0f172a', // Slate 900
+                    accent: '#ea580c', // Orange 600 - Copper
+                    background: '#020817', // Slate 950
+                    surface: '#0f172a', // Slate 900
+                    border: '#1e293b', // Slate 800
                     background: '#f8fafc', // Slate 50
                     surface: '#ffffff',
                     text: '#0f172a',
@@ -23,9 +26,9 @@ export default {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['Manrope', 'system-ui', 'sans-serif'],
             },
         },
     },
-    plugins: [],
+    plugins: [require("tailwindcss-animate")],
 }

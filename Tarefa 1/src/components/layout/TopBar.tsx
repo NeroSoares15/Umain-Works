@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react'
+import { Bell, Search } from 'lucide-react'
 import { alerts } from '../../data/alerts'
 
 interface TopBarProps {
@@ -15,6 +15,17 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         <h1 className="text-xl font-black text-umain-text tracking-tight">{title}</h1>
         {subtitle && <p className="text-xs text-umain-text-muted font-medium mt-0.5">{subtitle}</p>}
       </div>
+      <div className="flex-1 max-w-xl mx-8">
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-umain-text-muted group-focus-within:text-umain-accent transition-colors" />
+          <input
+            type="text"
+            placeholder="Pesquisar estudante por nome ou número..."
+            className="w-full bg-umain-background/50 border border-umain-border rounded-xl pl-10 pr-4 py-2 text-sm text-umain-text placeholder:text-umain-text-muted/50 focus:outline-none focus:ring-2 focus:ring-umain-accent/40 focus:bg-umain-surface transition-all"
+          />
+        </div>
+      </div>
+
       <div className="flex items-center gap-6">
         <div className="text-right">
           <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted">Última Sync</p>

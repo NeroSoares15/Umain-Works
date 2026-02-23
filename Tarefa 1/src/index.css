@@ -3,10 +3,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Manrope', system-ui, sans-serif;
   --color-umain-primary: #020817; /* Slate 950 */
   --color-umain-secondary: #0f172a; /* Slate 900 */
-  --color-umain-accent: #3b82f6; /* Blue 500 */
+  --color-umain-accent: #ea580c; /* Orange 600 - Copper */
   --color-umain-background: #020817; /* Slate 950 base */
   --color-umain-surface: #0f172a; /* Slate 900 cards */
   --color-umain-border: #1e293b; /* Slate 800 borders */

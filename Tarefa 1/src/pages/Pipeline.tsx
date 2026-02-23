@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CheckCircle2, RefreshCw, Database, Zap, BarChart3, Bell } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
+import { Pipeline3D } from '../components/ui/Pipeline3D'
 import { cn } from '../lib/utils'
 
 const dataSources = [
@@ -32,9 +33,9 @@ export function Pipeline() {
       setTimeout(() => {
         setActiveStep(step)
         if (i === steps.length - 1) {
-          setTimeout(() => { setCalculating(false); setDone(true); setActiveStep(null) }, 800)
+          setTimeout(() => { setCalculating(false); setDone(true); setActiveStep(null) }, 1000)
         }
-      }, i * 900)
+      }, i * 1000)
     })
   }
 
@@ -43,10 +44,12 @@ export function Pipeline() {
       <TopBar title="Pipeline de Dados" subtitle="Fluxo de ingestão e cálculo — BMAD Methodology" />
       <main className="flex-1 p-8 space-y-8 overflow-auto bg-umain-background">
 
+        <Pipeline3D calculating={calculating} activeStep={activeStep} />
+
         {/* BMAD steps */}
         <div>
           <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-muted mb-3">Metodologia BMAD</p>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {bmadSteps.map((step, i) => {
               const Icon = step.icon
               const isActive = activeStep === i
@@ -55,33 +58,48 @@ export function Pipeline() {
                 <Card
                   key={step.id}
                   className={cn(
-                    'transition-all duration-500 overflow-hidden border',
-                    isActive ? 'border-umain-accent shadow-[0_8px_32px_rgba(196,87,43,0.2)] scale-[1.02]' : 'border-umain-border',
-                    isCompleted && 'border-emerald-500/50',
-                    !isActive && !isCompleted && 'opacity-60 grayscale hover:opacity-100 hover:grayscale-0'
+                    'transition-all duration-500 overflow-hidden border relative flex flex-col',
+                    isActive ? 'border-umain-accent shadow-[0_8px_32px_rgba(234,88,12,0.25)] scale-[1.04] z-10 bg-umain-surface' : 'border-umain-border',
+                    isCompleted && 'border-emerald-500/50 bg-emerald-950/20',
+                    !isActive && !isCompleted && 'opacity-60 grayscale hover:opacity-100 hover:grayscale-0 hover:scale-[1.01]'
                   )}
                 >
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 pb-8 flex-1 flex flex-col">
                     <div className="flex items-start justify-between mb-4">
-                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center border', step.bg, step.border)}>
-                        <Icon className={cn('w-5 h-5', step.color)} />
+                      <div className={cn(
+                        'w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500',
+                        step.bg, step.border,
+                        isActive && 'shadow-[0_0_20px_currentColor]'
+                      )} style={{ color: isActive ? step.accent : undefined }}>
+                        <Icon className={cn('w-6 h-6', isActive ? 'animate-pulse' : step.color)} />
                       </div>
-                      {isCompleted && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                      {isCompleted && <CheckCircle2 className="w-5 h-5 text-emerald-400 animate-in zoom-in fade-in" />}
                     </div>
-                    <p className={cn('text-5xl font-black leading-none mb-2 drop-shadow-sm', step.color)}>{step.id}</p>
-                    <p className="text-sm font-bold text-umain-text tracking-tight">{step.label}</p>
-                    <p className="text-xs text-umain-text-muted mt-1 leading-relaxed">{step.description}</p>
-                    {isActive && (
-                      <div className="mt-3 flex items-center gap-1.5 text-xs text-umain-accent font-bold">
-                        <RefreshCw className="w-3 h-3 animate-spin" />
-                        A processar...
-                      </div>
-                    )}
+                    <p className={cn('text-5xl font-black leading-none mb-2 drop-shadow-sm transition-colors duration-500', isActive || isCompleted ? step.color : 'text-umain-muted/50')}>{step.id}</p>
+                    <p className={cn("text-sm font-bold tracking-tight transition-colors duration-500", isActive || isCompleted ? 'text-umain-text' : 'text-umain-text-muted')}>{step.label}</p>
+                    <p className="text-xs text-umain-text-muted mt-1 leading-relaxed flex-1">{step.description}</p>
+
+                    <div className={cn(
+                      'flex items-center gap-2 text-xs font-bold transition-all duration-500',
+                      isActive ? 'opacity-100 text-umain-accent mt-4 h-4' : 'opacity-0 h-0 mt-0 overflow-hidden'
+                    )}>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      A processar...
+                    </div>
                   </CardContent>
-                  <div
-                    className={cn('h-0.5 transition-all duration-500', isActive || isCompleted ? 'opacity-100' : 'opacity-0')}
-                    style={{ backgroundColor: step.accent }}
-                  />
+
+                  {/* Progress Bar absolute at the bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-umain-border shadow-inner">
+                    <div
+                      className={cn(
+                        'h-full transition-[width] relative',
+                        isActive ? 'w-full duration-1000 ease-linear' : isCompleted ? 'w-full duration-0' : 'w-0 duration-0'
+                      )}
+                      style={{ backgroundColor: step.accent }}
+                    >
+                      {isActive && <div className="absolute inset-0 bg-white/30 animate-pulse" />}
+                    </div>
+                  </div>
                 </Card>
               )
             })}
@@ -119,11 +137,16 @@ export function Pipeline() {
                 <div
                   key={source.id}
                   className={cn(
-                    'px-6 py-4 grid grid-cols-[16px_1fr_auto_auto] gap-6 items-center transition-colors duration-300',
-                    activeStep === 0 && 'bg-sky-950/20'
+                    'px-6 py-4 grid grid-cols-[16px_1fr_auto_auto] gap-6 items-center transition-all duration-500 border-l-2',
+                    calculating && 'bg-umain-surface/50 border-transparent opacity-50',
+                    activeStep === 0 && 'bg-sky-950/20 border-sky-500/50 shadow-[inset_0_0_20px_rgba(14,165,233,0.1)] opacity-100',
+                    !calculating && 'border-transparent'
                   )}
                 >
-                  <div className={cn('w-2 h-2 rounded-full shrink-0 shadow-[0_0_8px_currentColor]', source.status === 'ok' ? 'bg-emerald-400 text-emerald-400' : 'bg-amber-400 text-amber-400')} />
+                  <div className={cn('w-2 h-2 rounded-full shrink-0 shadow-[0_0_8px_currentColor] transition-all duration-500',
+                    source.status === 'ok' ? 'bg-emerald-400 text-emerald-400' : 'bg-amber-400 text-amber-400',
+                    activeStep === 0 && 'animate-pulse scale-150 shadow-[0_0_12px_currentColor]'
+                  )} />
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-umain-text">{source.name}</p>

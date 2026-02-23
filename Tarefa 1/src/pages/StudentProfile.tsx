@@ -8,6 +8,42 @@ import { Badge } from '../components/ui/Badge'
 import { students } from '../data/students'
 import { scoreToLevel, riskConfig } from '../lib/riskUtils'
 import { cn } from '../lib/utils'
+import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+
+function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
+  const [displayText, setDisplayText] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>
+    let currentIndex = 0
+    setDisplayText('')
+    setIsTyping(true)
+
+    const startTyping = () => {
+      timeout = setInterval(() => {
+        if (currentIndex < text.length) {
+          setDisplayText((prev) => prev + text[currentIndex])
+          currentIndex++
+        } else {
+          setIsTyping(false)
+          clearInterval(timeout)
+        }
+      }, 15) // writing speed
+    }
+
+    const initialDelay = setTimeout(startTyping, delay)
+    return () => { clearTimeout(initialDelay); clearInterval(timeout) }
+  }, [text, delay])
+
+  return (
+    <span className="relative inline-block">
+      {displayText}
+      {isTyping && <span className="inline-block w-1.5 h-3 ml-0.5 bg-current animate-pulse align-middle" />}
+    </span>
+  )
+}
 
 function IndicatorRow({ label, value, status }: { label: string; value: string; status: 'ok' | 'warning' | 'critical' }) {
   return (
@@ -76,66 +112,72 @@ export function StudentProfile() {
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Dashboard
         </button>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Score */}
-          <Card className="flex flex-col items-center justify-center py-10">
-            <CardContent className="flex flex-col items-center gap-4">
-              <div className={cn('w-36 h-36 rounded-full border-[10px] flex items-center justify-center', config.border, 'bg-umain-background shadow-inner')}>
-                <div className="text-center">
-                  <p
-                    className="text-5xl font-black text-umain-text leading-none drop-shadow-sm"
-                    style={{ fontVariantNumeric: 'tabular-nums' }}
-                  >
-                    {student.riskScore}
-                  </p>
-                  <p className="text-xs text-umain-text-muted mt-1 font-medium">/ 100</p>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="h-full">
+            <Card className="flex flex-col items-center justify-center py-10 h-full">
+              <CardContent className="flex flex-col items-center gap-4">
+                <div className={cn('w-36 h-36 rounded-full border-[10px] flex items-center justify-center', config.border, 'bg-umain-background shadow-inner')}>
+                  <div className="text-center">
+                    <p
+                      className="text-5xl font-black text-umain-text leading-none drop-shadow-sm"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {student.riskScore}
+                    </p>
+                    <p className="text-xs text-umain-text-muted mt-1 font-medium">/ 100</p>
+                  </div>
                 </div>
-              </div>
-              <RiskBadge score={student.riskScore} />
-              <div className={cn('flex items-center gap-1.5 text-sm font-semibold', trendColor)}>
-                <TrendIcon className="w-4 h-4" />
-                {student.scoreTrend === 'up' ? 'A agravar' : student.scoreTrend === 'down' ? 'A melhorar' : 'Estável'}
-              </div>
-            </CardContent>
-          </Card>
+                <RiskBadge score={student.riskScore} />
+                <div className={cn('flex items-center gap-1.5 text-sm font-semibold', trendColor)}>
+                  <TrendIcon className="w-4 h-4" />
+                  {student.scoreTrend === 'up' ? 'A agravar' : student.scoreTrend === 'down' ? 'A melhorar' : 'Estável'}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Profile */}
-          <Card>
-            <CardHeader>
-              <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Perfil do Estudante</p>
-            </CardHeader>
-            <CardContent className="space-y-0">
-              <IndicatorRow label="Número" value={student.number} status="ok" />
-              <IndicatorRow label="Curso" value={student.course} status="ok" />
-              <IndicatorRow label="Ano Curricular" value={`${student.year}º Ano`} status="ok" />
-              <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'} />
-              <div className="pt-3 flex flex-wrap gap-1.5">
-                {student.statuses.map((s: string) => (
-                  <Badge key={s} className="bg-umain-muted text-umain-text text-[10px] font-bold border border-umain-border">{s}</Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="h-full">
+            <Card className="h-full">
+              <CardHeader>
+                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Perfil do Estudante</p>
+              </CardHeader>
+              <CardContent className="space-y-0">
+                <IndicatorRow label="Número" value={student.number} status="ok" />
+                <IndicatorRow label="Curso" value={student.course} status="ok" />
+                <IndicatorRow label="Ano Curricular" value={`${student.year}º Ano`} status="ok" />
+                <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'} />
+                <div className="pt-3 flex flex-wrap gap-1.5">
+                  {student.statuses.map((s: string) => (
+                    <Badge key={s} className="bg-umain-muted text-umain-text text-[10px] font-bold border border-umain-border">{s}</Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Radar */}
-          <Card>
-            <CardHeader>
-              <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Radar de Risco / BMAD</p>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                  <PolarGrid stroke="#1e293b" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 500 }} />
-                  <Radar name="Risco" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} strokeWidth={2} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="h-full">
+            <Card className="h-full">
+              <CardHeader>
+                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Radar de Risco / BMAD</p>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                    <PolarGrid stroke="#1e293b" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 500 }} />
+                    <Radar name="Risco" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} strokeWidth={2} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <SectionLabel icon={BookOpen} iconColor="text-umain-accent">Indicadores Académicos</SectionLabel>
@@ -208,17 +250,33 @@ export function StudentProfile() {
                 ))}
               </div>
             )}
-            {scoreToLevel(student.riskScore) === 'high' && (
-              <div className="mt-5 p-4 rounded-xl bg-red-950/30 border border-red-900/50">
-                <p className="text-[10px] font-bold tracking-widest uppercase text-red-400 mb-1">Ação Recomendada Oportuna</p>
-                <p className="text-sm text-red-300 leading-relaxed">
-                  Contactar estudante e encaminhar para SAS dado o nível de risco crítico detetado na última sync (`{ind.academic.attendancePercent}%` de assiduidade e `{ind.behavioral.daysSinceLastAccess}` dias sem Moodle).
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className={cn("mt-6 p-5 rounded-xl border relative overflow-hidden", level === 'high' ? 'bg-red-950/20 border-red-900/50' : 'bg-umain-muted/10 border-umain-border')}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+              <div className="flex items-center gap-2 mb-3">
+                <Monitor className={cn("w-4 h-4", level === 'high' ? 'text-red-400' : 'text-umain-text')} />
+                <p className={cn("text-xs font-bold tracking-widest uppercase", level === 'high' ? 'text-red-400' : 'text-umain-text')}>
+                  AI Risk Narrative
                 </p>
               </div>
-            )}
+              <p className={cn("text-sm leading-relaxed font-mono", level === 'high' ? 'text-red-300' : 'text-umain-text-muted')}>
+                <TypewriterText
+                  text={level === 'high'
+                    ? `> DETETADO PADRÃO DE CHURN: O score de risco atingiu ${student.riskScore} pontos, ultrapassando o limiar crítico. Observa-se uma quebra de ${ind.academic.attendancePercent}% na assiduidade combinada com ${ind.behavioral.daysSinceLastAccess} dias de ausência na plataforma Moodle. A situação agrava-se com os ${ind.financial.tuitionArrearsMonths} meses de propinas em atraso. Recomenda-se acionamento do protocolo SAS imediatamente.`
+                    : `> ANÁLISE ESTÁVEL: O estudante apresenta um score de ${student.riskScore} pontos. Os indicadores de assiduidade (${ind.academic.attendancePercent}%) e engajamento Moodle (último acesso há ${ind.behavioral.daysSinceLastAccess} dias) estão dentro dos limites operacionais seguros.`
+                  }
+                  delay={1000}
+                />
+              </p>
+            </motion.div>
           </CardContent>
         </Card>
-      </main>
+      </main >
     </>
   )
 }
