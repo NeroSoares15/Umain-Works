@@ -8,16 +8,14 @@ export default {
         extend: {
             colors: {
                 umain: {
-                    primary: '#020817', // Slate 950
-                    secondary: '#0f172a', // Slate 900
-                    accent: '#ea580c', // Orange 600 - Copper
-                    background: '#020817', // Slate 950
-                    surface: '#0f172a', // Slate 900
-                    border: '#1e293b', // Slate 800
-                    background: '#f8fafc', // Slate 50
-                    surface: '#ffffff',
-                    text: '#0f172a',
-                    muted: '#64748b',
+                    primary: '#181b1f',
+                    secondary: '#22262b',
+                    accent: '#f97316',
+                    background: '#181b1f',
+                    surface: '#26292e',
+                    border: '#353940',
+                    text: '#f8fafc',
+                    muted: '#94a3b8',
                 },
                 risk: {
                     low: '#10b981', // Emerald 500

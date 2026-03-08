@@ -3,6 +3,7 @@ import { CheckCircle2, RefreshCw, Database, Zap, BarChart3, Bell } from 'lucide-
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { Pipeline3D } from '../components/ui/Pipeline3D'
+import { useAppContext } from '../contexts/AppContext'
 import { cn } from '../lib/utils'
 
 const dataSources = [
@@ -13,13 +14,14 @@ const dataSources = [
 ]
 
 const bmadSteps = [
-  { id: 'B', label: 'Business', description: 'Centralização de dados das fontes institucionais', icon: Database, color: 'text-sky-400', bg: 'bg-sky-950/40', border: 'border-sky-800/50', accent: '#38bdf8' },
-  { id: 'M', label: 'Model', description: 'Motor de regras determinístico — cálculo do score 0–100', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-950/40', border: 'border-amber-800/50', accent: '#fbbf24' },
-  { id: 'A', label: 'Analysis', description: 'Dashboards hierarquizados por perfil de acesso', icon: BarChart3, color: 'text-violet-400', bg: 'bg-violet-950/40', border: 'border-violet-800/50', accent: '#a78bfa' },
-  { id: 'D', label: 'Decision', description: 'Alertas e plano de intervenção com validação humana', icon: Bell, color: 'text-rose-400', bg: 'bg-rose-950/40', border: 'border-rose-800/50', accent: '#fb7185' },
+  { id: 'B', label: 'Business', description: 'Centralização de dados das fontes institucionais', icon: Database, color: 'text-orange-300', bg: 'bg-orange-950/40', border: 'border-orange-800/50', accent: '#fdba74' },
+  { id: 'M', label: 'Model', description: 'Motor de regras determinístico — cálculo do score 0–100', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-950/40', border: 'border-orange-700/50', accent: '#f97316' },
+  { id: 'A', label: 'Analysis', description: 'Dashboards hierarquizados por perfil de acesso', icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-950/40', border: 'border-orange-600/50', accent: '#c2410c' },
+  { id: 'D', label: 'Decision', description: 'Alertas e plano de intervenção com validação humana', icon: Bell, color: 'text-orange-700', bg: 'bg-orange-950/40', border: 'border-orange-500/50', accent: '#7c2d12' },
 ]
 
 export function Pipeline() {
+  const { settings } = useAppContext()
   const [calculating, setCalculating] = useState(false)
   const [activeStep, setActiveStep] = useState<number | null>(null)
   const [done, setDone] = useState(false)
@@ -41,14 +43,14 @@ export function Pipeline() {
 
   return (
     <>
-      <TopBar title="Pipeline de Dados" subtitle="Fluxo de ingestão e cálculo — BMAD Methodology" />
-      <main className="flex-1 p-8 space-y-8 overflow-auto bg-umain-background">
+      <TopBar title="Pipeline de Dados" subtitle="Fluxo de ingestão e cálculo — IPTomar Core" />
+      <main className="flex-1 p-4 md:p-8 space-y-6 md:space-y-8 overflow-auto">
 
-        <Pipeline3D calculating={calculating} activeStep={activeStep} />
+        {settings.enableEffects && <Pipeline3D calculating={calculating} activeStep={activeStep} />}
 
         {/* BMAD steps */}
         <div>
-          <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-muted mb-3">Metodologia BMAD</p>
+          <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-muted mb-3">Motor de Ingestão de Dados</p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {bmadSteps.map((step, i) => {
               const Icon = step.icon

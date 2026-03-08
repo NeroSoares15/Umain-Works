@@ -4,15 +4,15 @@
 
 @theme {
   --font-sans: 'Manrope', system-ui, sans-serif;
-  --color-umain-primary: #020817; /* Slate 950 */
-  --color-umain-secondary: #0f172a; /* Slate 900 */
-  --color-umain-accent: #ea580c; /* Orange 600 - Copper */
-  --color-umain-background: #020817; /* Slate 950 base */
-  --color-umain-surface: #0f172a; /* Slate 900 cards */
-  --color-umain-border: #1e293b; /* Slate 800 borders */
+  --color-umain-primary: #181b1f; /* Dark background */
+  --color-umain-secondary: #22262b; /* Slightly lighter background */
+  --color-umain-accent: #f97316; /* Orange 500 */
+  --color-umain-background: #181b1f; 
+  --color-umain-surface: #26292e; /* Card background */
+  --color-umain-border: #353940; /* Subtle borders */
   --color-umain-text: #f8fafc; /* Slate 50 */
   --color-umain-text-muted: #94a3b8; /* Slate 400 */
-  --color-umain-muted: #1e293b; /* Slate 800 backgrounds */
+  --color-umain-muted: #333942; /* Subdued backgrounds */
   
   --color-risk-low: #10b981; 
   --color-risk-medium: #f59e0b; 
@@ -41,7 +41,7 @@ body {
 
 /* Custom utilities for Enterprise SaaS feel */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(23, 23, 23, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-umain-border);

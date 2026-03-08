@@ -1,8 +1,10 @@
 import { cn } from '../../lib/utils'
 import { riskConfig, scoreToLevel } from '../../lib/riskUtils'
+import { useAppContext } from '../../contexts/AppContext'
 
 export function RiskBadge({ score }: { score: number }) {
-  const level = scoreToLevel(score)
+  const { settings } = useAppContext()
+  const level = scoreToLevel(score, settings.riskThresholds)
   const config = riskConfig[level]
   return (
     <span className={cn(

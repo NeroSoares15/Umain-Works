@@ -10,6 +10,13 @@ import { scoreToLevel, riskConfig } from '../lib/riskUtils'
 import { cn } from '../lib/utils'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useAppContext } from '../contexts/AppContext'
+
+function obfuscateName(name: string, isObs: boolean) {
+  if (!isObs) return name
+  const parts = name.split(' ')
+  return `Estudante Anónimo #${parts[0].length}${parts[1]?.length || '0'}`
+}
 
 function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
   const [displayText, setDisplayText] = useState('')
@@ -24,7 +31,8 @@ function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
     const startTyping = () => {
       timeout = setInterval(() => {
         if (currentIndex < text.length) {
-          setDisplayText((prev) => prev + text[currentIndex])
+          const char = text[currentIndex]
+          setDisplayText((prev) => prev + char)
           currentIndex++
         } else {
           setIsTyping(false)
@@ -59,7 +67,7 @@ function IndicatorRow({ label, value, status }: { label: string; value: string; 
   )
 }
 
-function SectionLabel({ icon: Icon, iconColor, children }: { icon: React.ElementType; iconColor: string; children: string }) {
+function SectionLabel({ icon: Icon, iconColor, children }: { icon: React.ComponentType<{ className?: string }>; iconColor: string; children: string }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className={cn('w-3.5 h-3.5', iconColor)} />
@@ -71,7 +79,11 @@ function SectionLabel({ icon: Icon, iconColor, children }: { icon: React.Element
 export function StudentProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { activeProfileId, settings } = useAppContext()
   const student = students.find(s => s.id === id)
+
+  const isObs = activeProfileId === 'obs'
+  const isDiretor = activeProfileId === 'diretor'
 
   if (!student) {
     return (
@@ -84,7 +96,7 @@ export function StudentProfile() {
     )
   }
 
-  const level = scoreToLevel(student.riskScore)
+  const level = scoreToLevel(student.riskScore, settings.riskThresholds)
   const config = riskConfig[level]
   const TrendIcon = student.scoreTrend === 'up' ? TrendingUp : student.scoreTrend === 'down' ? TrendingDown : Minus
   const trendColor = student.scoreTrend === 'up' ? 'text-red-400' : student.scoreTrend === 'down' ? 'text-emerald-400' : 'text-umain-text-muted'
@@ -101,10 +113,10 @@ export function StudentProfile() {
   return (
     <>
       <TopBar
-        title={student.name}
-        subtitle={`${student.course} · ${student.year}º Ano · Nº ${student.number}`}
+        title={obfuscateName(student.name, isObs)}
+        subtitle={`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}
       />
-      <main className="flex-1 p-8 space-y-6 overflow-auto bg-umain-background">
+      <main className="flex-1 p-4 md:p-8 space-y-4 md:space-y-6 overflow-auto">
         <button
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-umain-text-muted hover:text-umain-accent transition-colors"
@@ -112,7 +124,7 @@ export function StudentProfile() {
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Dashboard
         </button>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
           {/* Score */}
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="h-full">
             <Card className="flex flex-col items-center justify-center py-10 h-full">
@@ -144,10 +156,14 @@ export function StudentProfile() {
                 <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Perfil do Estudante</p>
               </CardHeader>
               <CardContent className="space-y-0">
-                <IndicatorRow label="Número" value={student.number} status="ok" />
+                <IndicatorRow label="Número" value={isObs ? 'Oculto' : student.number} status="ok" />
                 <IndicatorRow label="Curso" value={student.course} status="ok" />
                 <IndicatorRow label="Ano Curricular" value={`${student.year}º Ano`} status="ok" />
-                <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'} />
+                <IndicatorRow
+                  label="Residência"
+                  value={isDiretor ? 'Acesso Restrito' : ind.socioeconomic.residence}
+                  status={isDiretor ? 'ok' : ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'}
+                />
                 <div className="pt-3 flex flex-wrap gap-1.5">
                   {student.statuses.map((s: string) => (
                     <Badge key={s} className="bg-umain-muted text-umain-text text-[10px] font-bold border border-umain-border">{s}</Badge>
@@ -161,7 +177,7 @@ export function StudentProfile() {
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="h-full">
             <Card className="h-full">
               <CardHeader>
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Radar de Risco / BMAD</p>
+                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Análise Multidimensional</p>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={220}>
@@ -192,12 +208,23 @@ export function StudentProfile() {
 
           <Card>
             <CardHeader>
-              <SectionLabel icon={DollarSign} iconColor="text-amber-400">Indicadores Financeiros</SectionLabel>
+              <SectionLabel icon={DollarSign} iconColor={isDiretor ? "text-umain-text-muted" : "text-amber-400"}>Indicadores Financeiros</SectionLabel>
             </CardHeader>
             <CardContent>
-              <IndicatorRow label="Propinas em Atraso" value={ind.financial.tuitionArrearsMonths === 0 ? 'Regularizado' : `${ind.financial.tuitionArrearsMonths} meses`} status={ind.financial.tuitionArrearsMonths === 0 ? 'ok' : ind.financial.tuitionArrearsMonths <= 1 ? 'warning' : 'critical'} />
-              <IndicatorRow label="Bolsa de Estudo" value={ind.financial.scholarshipStatus} status={ind.financial.scholarshipStatus === 'Bolseiro' ? 'ok' : 'warning'} />
-              <IndicatorRow label="Acordo de Pagamento" value={ind.financial.paymentAgreement ? 'Sim' : 'Não'} status={ind.financial.paymentAgreement ? 'warning' : 'ok'} />
+              {isDiretor ? (
+                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
+                  <DollarSign className="w-5 h-5 text-umain-text-muted/50 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
+                  <p className="text-xs text-umain-text-muted/70">Dados financeiros são da exclusiva competência dos Serviços de Ação Social (SAS).</p>
+                </div>
+              ) : (
+                <>
+                  <IndicatorRow label="Impacto Mensal (ROI)" value={ind.financial.monthlyFee > 0 ? `€${ind.financial.monthlyFee}` : 'Funded'} status="ok" />
+                  <IndicatorRow label="Propinas em Atraso" value={ind.financial.tuitionArrearsMonths === 0 ? 'Regularizado' : `${ind.financial.tuitionArrearsMonths} meses`} status={ind.financial.tuitionArrearsMonths === 0 ? 'ok' : ind.financial.tuitionArrearsMonths <= 1 ? 'warning' : 'critical'} />
+                  <IndicatorRow label="Bolsa de Estudo" value={ind.financial.scholarshipStatus} status={ind.financial.scholarshipStatus === 'Bolseiro' ? 'ok' : 'warning'} />
+                  <IndicatorRow label="Acordo de Pagamento" value={ind.financial.paymentAgreement ? 'Sim' : 'Não'} status={ind.financial.paymentAgreement ? 'warning' : 'ok'} />
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -214,12 +241,22 @@ export function StudentProfile() {
 
           <Card>
             <CardHeader>
-              <SectionLabel icon={Heart} iconColor="text-rose-400">Contexto Socioeconómico</SectionLabel>
+              <SectionLabel icon={Heart} iconColor={isDiretor ? "text-umain-text-muted" : "text-rose-400"}>Contexto Socioeconómico</SectionLabel>
             </CardHeader>
             <CardContent>
-              <IndicatorRow label="Perfil de Entrada" value={ind.socioeconomic.entryProfile} status="ok" />
-              <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Local' ? 'ok' : 'warning'} />
-              <IndicatorRow label="NEE" value={ind.socioeconomic.nee ? 'Sim' : 'Não'} status={ind.socioeconomic.nee ? 'warning' : 'ok'} />
+              {isDiretor ? (
+                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
+                  <Heart className="w-5 h-5 text-umain-text-muted/50 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
+                  <p className="text-xs text-umain-text-muted/70">Dados de saúde e contexto socioeconómico reservados aos SAS.</p>
+                </div>
+              ) : (
+                <>
+                  <IndicatorRow label="Perfil de Entrada" value={ind.socioeconomic.entryProfile} status="ok" />
+                  <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Local' ? 'ok' : 'warning'} />
+                  <IndicatorRow label="NEE" value={ind.socioeconomic.nee ? 'Sim' : 'Não'} status={ind.socioeconomic.nee ? 'warning' : 'ok'} />
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -240,9 +277,13 @@ export function StudentProfile() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Badge className="bg-umain-accent/10 text-umain-accent text-[10px] font-bold border border-umain-accent/20">{intervention.type}</Badge>
-                          <span className="text-xs text-umain-text-muted">{intervention.author}</span>
+                          <span className="text-xs text-umain-text-muted">{isObs ? 'Técnico(a)' : intervention.author}</span>
                         </div>
-                        <p className="text-sm text-umain-text leading-relaxed">{intervention.description}</p>
+                        <p className="text-sm text-umain-text leading-relaxed">
+                          {isDiretor && (intervention.description.toLowerCase().includes('financeir') || intervention.description.toLowerCase().includes('apoio') || intervention.description.toLowerCase().includes('psico'))
+                            ? 'Detalhes da intervenção de natureza confidencial mantidos em segredo (apenas SAS).'
+                            : intervention.description}
+                        </p>
                       </div>
                       <span className="text-xs text-umain-text-muted shrink-0 font-medium">{intervention.date}</span>
                     </div>

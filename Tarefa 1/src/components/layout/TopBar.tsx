@@ -1,5 +1,5 @@
-import { Bell, Search } from 'lucide-react'
-import { alerts } from '../../data/alerts'
+import { Menu, Building2, Download, RefreshCw } from 'lucide-react'
+import { useAppContext } from '../../contexts/AppContext'
 
 interface TopBarProps {
   title: string
@@ -7,37 +7,36 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, subtitle }: TopBarProps) {
-  const pendingCount = alerts.filter(a => a.status === 'pending').length
+  const { setIsOpen } = useAppContext()
 
   return (
-    <header className="h-[72px] bg-umain-primary border-b border-umain-border px-8 flex items-center justify-between flex-shrink-0">
-      <div>
-        <h1 className="text-xl font-black text-umain-text tracking-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-umain-text-muted font-medium mt-0.5">{subtitle}</p>}
-      </div>
-      <div className="flex-1 max-w-xl mx-8">
-        <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-umain-text-muted group-focus-within:text-umain-accent transition-colors" />
-          <input
-            type="text"
-            placeholder="Pesquisar estudante por nome ou número..."
-            className="w-full bg-umain-background/50 border border-umain-border rounded-xl pl-10 pr-4 py-2 text-sm text-umain-text placeholder:text-umain-text-muted/50 focus:outline-none focus:ring-2 focus:ring-umain-accent/40 focus:bg-umain-surface transition-all"
-          />
+    <header className="h-[72px] bg-umain-primary border-b border-umain-border px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-20 relative">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="md:hidden p-2 -ml-2 rounded-lg text-umain-text-muted hover:text-white hover:bg-white/5 transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg border border-umain-border bg-umain-surface flex items-center justify-center shrink-0">
+            <Building2 className="w-4 h-4 text-umain-text-muted" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-umain-text tracking-tight">{title}</h1>
+            {subtitle && <p className="text-[10px] sm:text-xs text-umain-text-muted mt-0.5 truncate max-w-[200px] sm:max-w-none">{subtitle}</p>}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="text-right">
-          <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted">Última Sync</p>
-          <p className="text-xs font-semibold text-umain-text">15 Fev 2026 — 09:30</p>
-        </div>
-        <button className="relative p-2.5 rounded-xl hover:bg-umain-muted transition-colors">
-          <Bell className="w-4 h-4 text-umain-text-muted" />
-          {pendingCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] rounded-full bg-umain-accent text-white text-[9px] flex items-center justify-center font-bold px-1 leading-none">
-              {pendingCount}
-            </span>
-          )}
+      <div className="flex items-center gap-3">
+        <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-umain-border text-sm font-medium text-umain-text-muted hover:text-white hover:bg-white/5 transition-colors">
+          <Download className="w-4 h-4" />
+          Exportar SIGQ
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-umain-accent hover:bg-umain-accent/90 text-white text-sm font-medium transition-colors shadow-lg shadow-umain-accent/20">
+          <RefreshCw className="w-4 h-4" />
+          Processar Dados
         </button>
       </div>
     </header>

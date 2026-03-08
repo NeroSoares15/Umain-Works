@@ -3,13 +3,13 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, Icosahedron, Sparkles, Float, Line } from '@react-three/drei'
 import * as THREE from 'three'
 
-// Themed colors for each BMAD step
+// Themed colors for each BMAD step (Orange/Black tones)
 const stepColors = {
     idle: new THREE.Color('#ea580c'),    // Umain Orange
-    step0: new THREE.Color('#38bdf8'),   // B - Sky
-    step1: new THREE.Color('#fbbf24'),   // M - Amber
-    step2: new THREE.Color('#a78bfa'),   // A - Violet
-    step3: new THREE.Color('#fb7185')    // D - Rose
+    step0: new THREE.Color('#fdba74'),   // B - Light Orange
+    step1: new THREE.Color('#f97316'),   // M - Orange
+    step2: new THREE.Color('#c2410c'),   // A - Dark Orange
+    step3: new THREE.Color('#7c2d12')    // D - Rust/Brown
 }
 
 function getTargetColor(activeStep: number | null) {
@@ -34,35 +34,56 @@ function AdaptiveLights({ activeStep, calculating }: { activeStep: number | null
     return <pointLight ref={lightRef} position={[10, 10, 10]} intensity={1} color="#ea580c" />
 }
 
-function DataNode({ position, color, label, calculating, activeStep, nodeIndex }: { position: [number, number, number], color: string, label: string, calculating: boolean, activeStep: number | null, nodeIndex: number }) {
+function DataNode({ position, color, calculating, activeStep, nodeIndex }: { position: [number, number, number], color: string, calculating: boolean, activeStep: number | null, nodeIndex: number }) {
     const nodeRef = useRef<THREE.Group>(null)
     const initialPos = useMemo(() => new THREE.Vector3(...position), [position])
     const inPos = useMemo(() => new THREE.Vector3(...position).multiplyScalar(0.4), [position])
     const baseColor = useMemo(() => new THREE.Color(color), [color])
+    const isActive = activeStep === nodeIndex
+    const materialRef = useRef<THREE.MeshStandardMaterial>(null)
 
     useFrame((state) => {
         if (nodeRef.current) {
             let currentTarget = initialPos
 
-            if (activeStep === 0) {
-                // Step 0 (Business/Ingestion) - Nodes pull tightly inwards
-                currentTarget = inPos
-            } else if (calculating) {
-                // Other steps keep them somewhat constrained but orbiting/bouncing
-                currentTarget = new THREE.Vector3().copy(initialPos).multiplyScalar(0.7)
-                currentTarget.y += Math.sin(state.clock.elapsedTime * 4 + nodeIndex) * 0.4
-                currentTarget.x += Math.cos(state.clock.elapsedTime * 3 + nodeIndex) * 0.3
+            if (calculating) {
+                if (isActive) {
+                    // This specific node is active: It pulls inward and orbits aggressively
+                    currentTarget = new THREE.Vector3().copy(inPos).multiplyScalar(0.8)
+                    currentTarget.y += Math.sin(state.clock.elapsedTime * 8 + nodeIndex) * 0.5
+                    currentTarget.x += Math.cos(state.clock.elapsedTime * 6 + nodeIndex) * 0.5
+                } else if (activeStep !== null && nodeIndex < activeStep) {
+                    // Already processed nodes: stay close to center but calm
+                    currentTarget = new THREE.Vector3().copy(inPos).multiplyScalar(1.2)
+                } else {
+                    // Pending nodes: stay further out, gentle orbit
+                    currentTarget = new THREE.Vector3().copy(initialPos).multiplyScalar(0.9)
+                    currentTarget.y += Math.sin(state.clock.elapsedTime * 2 + nodeIndex) * 0.2
+                    currentTarget.x += Math.cos(state.clock.elapsedTime * 1.5 + nodeIndex) * 0.2
+                }
+            } else {
+                // Idle: move slowly around initial pos
+                currentTarget = new THREE.Vector3().copy(initialPos)
+                currentTarget.y += Math.sin(state.clock.elapsedTime + nodeIndex) * 0.1
             }
 
-            nodeRef.current.position.lerp(currentTarget, 0.05)
+            nodeRef.current.position.lerp(currentTarget, isActive ? 0.1 : 0.03)
+        }
+
+        if (materialRef.current) {
+            materialRef.current.emissiveIntensity = THREE.MathUtils.lerp(
+                materialRef.current.emissiveIntensity,
+                isActive ? 2.5 : (calculating ? 0.5 : 0.2),
+                0.1
+            )
         }
     })
 
     return (
         <group ref={nodeRef}>
-            <Float speed={calculating ? 5 : 2} rotationIntensity={calculating ? 2 : 0.5} floatIntensity={calculating ? 3 : 1}>
-                <Sphere args={[0.3, 32, 32]}>
-                    <meshStandardMaterial color={baseColor} emissive={baseColor} emissiveIntensity={calculating ? 1.5 : 0.5} roughness={0.2} metalness={0.8} />
+            <Float speed={isActive ? 8 : (calculating ? 2 : 1)} rotationIntensity={isActive ? 2 : 0.5} floatIntensity={isActive ? 3 : 1}>
+                <Sphere args={[isActive ? 0.4 : 0.3, 32, 32]}>
+                    <meshStandardMaterial ref={materialRef} color={baseColor} emissive={baseColor} emissiveIntensity={0.2} roughness={0.2} metalness={0.8} />
                 </Sphere>
             </Float>
             <Line points={[[0, 0, 0], [0, 0, 0]]} color={baseColor} opacity={0} transparent lineWidth={1} />
@@ -148,8 +169,8 @@ function CoreAI({ calculating, activeStep }: { calculating: boolean, activeStep:
             </Icosahedron>
             <Icosahedron ref={innerRef} args={[0.8, 1]} position={[0, 0, 0]}>
                 <meshStandardMaterial
-                    color="#1e293b"
-                    emissive="#020817"
+                    color="#0a0a0a"
+                    emissive="#000000"
                     roughness={0.1}
                     metalness={1}
                 />
@@ -160,7 +181,7 @@ function CoreAI({ calculating, activeStep }: { calculating: boolean, activeStep:
 
 export function Pipeline3D({ calculating, activeStep }: { calculating: boolean, activeStep: number | null }) {
     return (
-        <div className="w-full h-[400px] rounded-3xl overflow-hidden bg-umain-surface/50 border border-umain-border/50 relative">
+        <div className="w-full h-[400px] rounded-3xl overflow-hidden bg-black/40 border border-umain-border/50 relative">
             <div className="absolute top-4 left-6 z-10 pointer-events-none">
                 <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted mb-1">WebGL Interactive Core</p>
                 <p className="text-sm font-semibold text-umain-text">Data Ingestion Engine</p>
@@ -169,15 +190,15 @@ export function Pipeline3D({ calculating, activeStep }: { calculating: boolean, 
             <Canvas camera={{ position: [0, 2, 7], fov: 45 }}>
                 <ambientLight intensity={0.5} />
                 <AdaptiveLights activeStep={activeStep} calculating={calculating} />
-                <pointLight position={[-10, -10, -10]} intensity={0.5} color="#3b82f6" />
+                <pointLight position={[-10, -10, -10]} intensity={0.5} color="#c2410c" />
 
                 <CoreAI calculating={calculating} activeStep={activeStep} />
 
                 {/* Data Sources */}
-                <DataNode position={[-3, 1, -1]} color="#38bdf8" label="ERP" calculating={calculating} activeStep={activeStep} nodeIndex={0} />
-                <DataNode position={[3, 1.5, -2]} color="#fbbf24" label="SAS" calculating={calculating} activeStep={activeStep} nodeIndex={1} />
-                <DataNode position={[-2, -1.5, 1]} color="#a78bfa" label="Moodle" calculating={calculating} activeStep={activeStep} nodeIndex={2} />
-                <DataNode position={[2.5, -1, 2]} color="#fb7185" label="Summaries" calculating={calculating} activeStep={activeStep} nodeIndex={3} />
+                <DataNode position={[-3, 1, -1]} color="#fdba74" calculating={calculating} activeStep={activeStep} nodeIndex={0} />
+                <DataNode position={[3, 1.5, -2]} color="#f97316" calculating={calculating} activeStep={activeStep} nodeIndex={1} />
+                <DataNode position={[-2, -1.5, 1]} color="#c2410c" calculating={calculating} activeStep={activeStep} nodeIndex={2} />
+                <DataNode position={[2.5, -1, 2]} color="#7c2d12" calculating={calculating} activeStep={activeStep} nodeIndex={3} />
 
                 <Sparkles
                     count={calculating ? (activeStep === 1 ? 400 : 200) : 50}
@@ -185,14 +206,14 @@ export function Pipeline3D({ calculating, activeStep }: { calculating: boolean, 
                     size={calculating ? 4 : 2}
                     speed={calculating ? 2 : 0.2}
                     opacity={activeStep !== null ? 0.6 : 0.4}
-                    color="#ffffff"
+                    color="#ea580c"
                 />
 
                 <OrbitControls
                     enableZoom={false}
                     enablePan={false}
-                    autoRotate={!calculating}
-                    autoRotateSpeed={0.5}
+                    autoRotate={true}
+                    autoRotateSpeed={0.8}
                     maxPolarAngle={Math.PI / 1.5}
                     minPolarAngle={Math.PI / 3}
                 />

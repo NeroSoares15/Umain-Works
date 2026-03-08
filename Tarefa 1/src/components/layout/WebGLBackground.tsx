@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Sphere, Sparkles, Float } from '@react-three/drei'
 import * as THREE from 'three'
+import { useAppContext } from '../../contexts/AppContext'
 
 function BackgroundOrbs() {
     const mouse = useRef({ x: 0, y: 0 })
@@ -25,13 +26,13 @@ function BackgroundOrbs() {
             <Float speed={1} rotationIntensity={0.5} floatIntensity={1}>
                 <Sphere args={[2, 64, 64]} position={[-3, 2, -5]}>
                     <meshStandardMaterial
-                        color="#1e3a8a" // deep blue
-                        emissive="#1e40af"
+                        color="#171717" // dark grey/black
+                        emissive="#262626"
                         emissiveIntensity={0.5}
                         roughness={0.4}
                         metalness={0.8}
                         transparent
-                        opacity={0.6}
+                        opacity={0.8}
                     />
                 </Sphere>
             </Float>
@@ -53,28 +54,34 @@ function BackgroundOrbs() {
             <Float speed={0.8} rotationIntensity={0.3} floatIntensity={0.8}>
                 <Sphere args={[1.5, 64, 64]} position={[1, 3, -4]}>
                     <meshStandardMaterial
-                        color="#4c1d95" // deep violet
-                        emissive="#5b21b6"
+                        color="#9a3412" // deep copper
+                        emissive="#7c2d12"
                         emissiveIntensity={0.4}
                         roughness={0.5}
                         metalness={0.7}
                         transparent
-                        opacity={0.5}
+                        opacity={0.6}
                     />
                 </Sphere>
             </Float>
 
-            <Sparkles count={400} scale={15} size={2} speed={0.2} opacity={0.2} color="#ffffff" />
+            <Sparkles count={400} scale={15} size={2} speed={0.2} opacity={0.3} color="#ea580c" />
         </group>
     )
 }
 
 export function WebGLBackground() {
+    const { settings } = useAppContext()
+
+    if (!settings.enableEffects) {
+        return <div className="absolute inset-0 z-0 bg-umain-background pointer-events-none" />
+    }
+
     return (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-[#020817]">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-[#050505]">
             <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]}>
                 <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1} color="#ffffff" />
+                <directionalLight position={[10, 10, 5]} intensity={1} color="#ffedd5" />
                 <BackgroundOrbs />
             </Canvas>
             {/* Noise Overlay */}
