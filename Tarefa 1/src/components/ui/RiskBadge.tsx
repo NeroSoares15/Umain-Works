@@ -1,6 +1,6 @@
 import { cn } from '../../lib/utils'
 import { riskConfig, scoreToLevel } from '../../lib/riskUtils'
-import { useAppContext } from '../../contexts/AppContext'
+import { useAppContext } from '../../contexts/useAppContext'
 
 export function RiskBadge({ score }: { score: number }) {
   const { settings } = useAppContext()

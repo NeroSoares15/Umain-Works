@@ -1,15 +1,22 @@
 import { useState } from 'react'
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
+import { ChartFrame } from '../components/ui/ChartFrame'
 import { KpiCard } from '../components/ui/KpiCard'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { Calculator, TrendingUp, ShieldCheck, DollarSign } from 'lucide-react'
+import { students } from '../data/students'
+import { getStudentRiskSnapshot } from '../lib/studentRisk'
+import { useAppContext } from '../contexts/useAppContext'
+
+type TuitionTier = 'ctesp' | 'licenciatura' | 'mestrado' | 'internacional'
 
 function Label({ children }: { children: string }) {
   return <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">{children}</p>
 }
 
 export function ROI() {
+  const { settings } = useAppContext()
   const [successRate, setSuccessRate] = useState(40)
   const [tuition, setTuition] = useState({
     ctesp: 697,
@@ -18,13 +25,32 @@ export function ROI() {
     internacional: 3500
   })
 
-  // Mock data for student distribution in High Risk
-  const riskCounts = {
-    ctesp: 45,
-    licenciatura: 120,
-    mestrado: 35,
-    internacional: 25
-  }
+  const riskCounts = students.reduce<Record<TuitionTier, number>>((acc, student) => {
+    const snapshot = getStudentRiskSnapshot(student, settings)
+
+    if (snapshot.level === 'none' || snapshot.level === 'low') {
+      return acc
+    }
+
+    const tier: TuitionTier =
+      student.indicators.socioeconomic.entryProfile === 'CTeSP'
+        ? 'ctesp'
+        : student.indicators.socioeconomic.entryProfile === 'Internacional' ||
+            student.indicators.socioeconomic.residence === 'Internacional' ||
+            student.statuses.some((status) => status.toLowerCase().includes('internacional'))
+          ? 'internacional'
+          : student.indicators.financial.monthlyFee >= 1000
+            ? 'mestrado'
+            : 'licenciatura'
+
+    acc[tier] += 1
+    return acc
+  }, {
+    ctesp: 0,
+    licenciatura: 0,
+    mestrado: 0,
+    internacional: 0,
+  })
 
   // Derived calculations based on interactive inputs
   const calculateValorEmRisco = (count: number, fee: number) => count * fee
@@ -151,7 +177,7 @@ export function ROI() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-umain-text-muted/70 tracking-widest">Internancional</span>
+                      <span className="text-[10px] uppercase font-bold text-umain-text-muted/70 tracking-widest">Internacional</span>
                       <input 
                         type="number" 
                         value={tuition.internacional} 
@@ -171,9 +197,9 @@ export function ROI() {
             <Label>Retenção vs Risco Bruto (Euros)</Label>
             <Card className="flex-1 flex flex-col h-full bg-umain-surface/30">
               <CardContent className="flex-1 p-6 lg:p-8">
-                <div style={{ width: '100%', height: '400px' }}>
-                  <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={chartData} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
+                <ChartFrame className="h-[400px]">
+                  {({ height, width }) => (
+                  <BarChart width={width} height={height} data={chartData} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="roiRed" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#ef4444" stopOpacity={1} />
@@ -206,7 +232,7 @@ export function ROI() {
                       contentStyle={{ backgroundColor: 'rgba(2, 8, 23, 0.7)', backdropFilter: 'blur(16px)', borderColor: 'rgba(30, 41, 59, 0.5)', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', padding: '16px' }} 
                       itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }} 
                       labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontWeight: 'bold' }}
-                      formatter={(value: any) => [`€${Number(value).toLocaleString()}`, '']}
+                      formatter={(value?: number | string) => [`€${Number(value ?? 0).toLocaleString()}`, '']}
                     />
                     <Legend 
                       wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 'bold', color: '#94a3b8' }} 
@@ -215,8 +241,8 @@ export function ROI() {
                     <Bar dataKey="emRisco" name="Receita em Risco" fill="url(#roiRed)" radius={[4, 4, 0, 0]} barSize={40} />
                     <Bar dataKey="retido" name="Receita Preservada" fill="url(#roiGreen)" radius={[4, 4, 0, 0]} barSize={40} />
                   </BarChart>
-                </ResponsiveContainer>
-                </div>
+                  )}
+                </ChartFrame>
               </CardContent>
             </Card>
           </div>

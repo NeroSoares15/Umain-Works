@@ -3,7 +3,7 @@ import { CheckCircle2, RefreshCw, Database, Zap, BarChart3, Bell } from 'lucide-
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { Pipeline3D } from '../components/ui/Pipeline3D'
-import { useAppContext } from '../contexts/AppContext'
+import { useAppContext } from '../contexts/useAppContext'
 import { cn } from '../lib/utils'
 
 const dataSources = [

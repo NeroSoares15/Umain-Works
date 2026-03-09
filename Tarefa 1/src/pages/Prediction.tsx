@@ -1,6 +1,7 @@
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { ChartFrame } from '../components/ui/ChartFrame'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { BrainCircuit, TrendingUp } from 'lucide-react'
 import { KpiCard } from '../components/ui/KpiCard'
 
@@ -49,9 +50,12 @@ export function Prediction() {
         <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 fill-mode-both">
           <Label>Curva de Abandono (Histórico vs. Otimizado com RiskRadar)</Label>
           <Card className="flex-1 min-h-[500px] flex flex-col justify-center p-6 bg-umain-surface/50 border border-umain-border/50">
-            <CardContent className="h-[450px] w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
+            <CardContent className="w-full pt-4">
+              <ChartFrame className="h-[450px]">
+                {({ height, width }) => (
                 <AreaChart
+                  width={width}
+                  height={height}
                   data={mockData}
                   margin={{ top: 20, right: 30, left: -20, bottom: 0 }}
                 >
@@ -112,7 +116,8 @@ export function Prediction() {
                     fill="url(#colorHistorico)" 
                   />
                 </AreaChart>
-              </ResponsiveContainer>
+                )}
+              </ChartFrame>
             </CardContent>
           </Card>
         </div>

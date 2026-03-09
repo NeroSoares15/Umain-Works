@@ -1,22 +1,29 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, BookOpen, DollarSign, Monitor, Heart } from 'lucide-react'
-import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts'
+import { RadarChart, PolarGrid, PolarAngleAxis, Radar, Tooltip } from 'recharts'
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
+import { ChartFrame } from '../components/ui/ChartFrame'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { Badge } from '../components/ui/Badge'
 import { students } from '../data/students'
-import { scoreToLevel, riskConfig } from '../lib/riskUtils'
+import { riskConfig } from '../lib/riskUtils'
 import { cn } from '../lib/utils'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { useAppContext } from '../contexts/AppContext'
-
-function obfuscateName(name: string, isObs: boolean) {
-  if (!isObs) return name
-  const parts = name.split(' ')
-  return `Estudante Anónimo #${parts[0].length}${parts[1]?.length || '0'}`
-}
+import {
+  canViewFinancialDetails,
+  canViewSocioeconomicDetails,
+} from '../lib/accessControl'
+import {
+  getRadarData,
+  getRiskNarrative,
+  getStudentRiskSnapshot,
+  getVisibleInterventionAuthor,
+  getVisibleInterventionDescription,
+  getVisibleStatuses,
+} from '../lib/studentRisk'
+import { useAppContext } from '../contexts/useAppContext'
 
 function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
   const [displayText, setDisplayText] = useState('')
@@ -82,8 +89,9 @@ export function StudentProfile() {
   const { activeProfileId, settings } = useAppContext()
   const student = students.find(s => s.id === id)
 
-  const isObs = activeProfileId === 'obs'
   const isDiretor = activeProfileId === 'diretor'
+  const canSeeFinancial = canViewFinancialDetails(activeProfileId)
+  const canSeeSocioeconomic = canViewSocioeconomicDetails(activeProfileId)
 
   if (!student) {
     return (
@@ -96,25 +104,20 @@ export function StudentProfile() {
     )
   }
 
-  const level = scoreToLevel(student.riskScore, settings.riskThresholds)
+  const snapshot = getStudentRiskSnapshot(student, settings)
+  const level = snapshot.level
   const config = riskConfig[level]
   const TrendIcon = student.scoreTrend === 'up' ? TrendingUp : student.scoreTrend === 'down' ? TrendingDown : Minus
   const trendColor = student.scoreTrend === 'up' ? 'text-red-400' : student.scoreTrend === 'down' ? 'text-emerald-400' : 'text-umain-text-muted'
   const { indicators: ind } = student
 
-  const radarData = [
-    { subject: 'Académico', value: Math.min(100, (100 - ind.academic.attendancePercent) + ind.academic.ucFailures * 10) },
-    { subject: 'Financeiro', value: Math.min(100, ind.financial.tuitionArrearsMonths * 20 + (ind.financial.scholarshipStatus === 'Não Bolseiro' ? 10 : 0)) },
-    { subject: 'Moodle', value: Math.min(100, Math.max(0, 100 - ind.behavioral.moodleLoginsLast30Days * 3)) },
-    { subject: 'Social', value: ind.socioeconomic.residence === 'Deslocado' ? 40 : ind.socioeconomic.residence === 'Internacional' ? 50 : 10 },
-    { subject: 'Entrada', value: ind.socioeconomic.entryProfile === 'Geral' ? 10 : ind.socioeconomic.entryProfile === 'Internacional' ? 60 : 40 },
-  ]
+  const radarData = getRadarData(student, activeProfileId)
 
   return (
     <>
       <TopBar
-        title={obfuscateName(student.name, isObs)}
-        subtitle={`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}
+        title={student.name}
+        subtitle={`${student.course} · ${student.year}º Ano · Nº ${student.number}`}
       />
       <main className="flex-1 p-4 md:p-8 space-y-4 md:space-y-6 overflow-auto">
         <button
@@ -135,12 +138,12 @@ export function StudentProfile() {
                       className="text-5xl font-black text-umain-text leading-none drop-shadow-sm"
                       style={{ fontVariantNumeric: 'tabular-nums' }}
                     >
-                      {student.riskScore}
+                      {snapshot.score}
                     </p>
                     <p className="text-xs text-umain-text-muted mt-1 font-medium">/ 100</p>
                   </div>
                 </div>
-                <RiskBadge score={student.riskScore} />
+                <RiskBadge score={snapshot.score} />
                 <div className={cn('flex items-center gap-1.5 text-sm font-semibold', trendColor)}>
                   <TrendIcon className="w-4 h-4" />
                   {student.scoreTrend === 'up' ? 'A agravar' : student.scoreTrend === 'down' ? 'A melhorar' : 'Estável'}
@@ -156,7 +159,7 @@ export function StudentProfile() {
                 <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Perfil do Estudante</p>
               </CardHeader>
               <CardContent className="space-y-0">
-                <IndicatorRow label="Número" value={isObs ? 'Oculto' : student.number} status="ok" />
+                <IndicatorRow label="Número" value={student.number} status="ok" />
                 <IndicatorRow label="Curso" value={student.course} status="ok" />
                 <IndicatorRow label="Ano Curricular" value={`${student.year}º Ano`} status="ok" />
                 <IndicatorRow
@@ -165,7 +168,7 @@ export function StudentProfile() {
                   status={isDiretor ? 'ok' : ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'}
                 />
                 <div className="pt-3 flex flex-wrap gap-1.5">
-                  {student.statuses.map((s: string) => (
+                  {getVisibleStatuses(student, activeProfileId).map((s) => (
                     <Badge key={s} className="bg-umain-muted text-umain-text text-[10px] font-bold border border-umain-border">{s}</Badge>
                   ))}
                 </div>
@@ -177,17 +180,21 @@ export function StudentProfile() {
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="h-full">
             <Card className="h-full">
               <CardHeader>
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Análise Multidimensional</p>
+                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">
+                  {canSeeFinancial && canSeeSocioeconomic ? 'Análise Multidimensional' : 'Análise Operacional'}
+                </p>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={220}>
-                  <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                <ChartFrame className="h-[220px]">
+                  {({ height, width }) => (
+                  <RadarChart width={width} height={height} data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                     <PolarGrid stroke="#1e293b" />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 500 }} />
                     <Radar name="Risco" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} strokeWidth={2} />
                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
                   </RadarChart>
-                </ResponsiveContainer>
+                  )}
+                </ChartFrame>
               </CardContent>
             </Card>
           </motion.div>
@@ -208,22 +215,22 @@ export function StudentProfile() {
 
           <Card>
             <CardHeader>
-              <SectionLabel icon={DollarSign} iconColor={isDiretor ? "text-umain-text-muted" : "text-amber-400"}>Indicadores Financeiros</SectionLabel>
+              <SectionLabel icon={DollarSign} iconColor={canSeeFinancial ? "text-amber-400" : "text-umain-text-muted"}>Indicadores Financeiros</SectionLabel>
             </CardHeader>
             <CardContent>
-              {isDiretor ? (
-                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
-                  <DollarSign className="w-5 h-5 text-umain-text-muted/50 mb-2" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
-                  <p className="text-xs text-umain-text-muted/70">Dados financeiros são da exclusiva competência dos Serviços de Ação Social (SAS).</p>
-                </div>
-              ) : (
+              {canSeeFinancial ? (
                 <>
                   <IndicatorRow label="Impacto Mensal (ROI)" value={ind.financial.monthlyFee > 0 ? `€${ind.financial.monthlyFee}` : 'Funded'} status="ok" />
                   <IndicatorRow label="Propinas em Atraso" value={ind.financial.tuitionArrearsMonths === 0 ? 'Regularizado' : `${ind.financial.tuitionArrearsMonths} meses`} status={ind.financial.tuitionArrearsMonths === 0 ? 'ok' : ind.financial.tuitionArrearsMonths <= 1 ? 'warning' : 'critical'} />
                   <IndicatorRow label="Bolsa de Estudo" value={ind.financial.scholarshipStatus} status={ind.financial.scholarshipStatus === 'Bolseiro' ? 'ok' : 'warning'} />
                   <IndicatorRow label="Acordo de Pagamento" value={ind.financial.paymentAgreement ? 'Sim' : 'Não'} status={ind.financial.paymentAgreement ? 'warning' : 'ok'} />
                 </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
+                  <DollarSign className="w-5 h-5 text-umain-text-muted/50 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
+                  <p className="text-xs text-umain-text-muted/70">Dados financeiros são da exclusiva competência dos Serviços de Ação Social (SAS).</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -241,21 +248,21 @@ export function StudentProfile() {
 
           <Card>
             <CardHeader>
-              <SectionLabel icon={Heart} iconColor={isDiretor ? "text-umain-text-muted" : "text-rose-400"}>Contexto Socioeconómico</SectionLabel>
+              <SectionLabel icon={Heart} iconColor={canSeeSocioeconomic ? "text-rose-400" : "text-umain-text-muted"}>Contexto Socioeconómico</SectionLabel>
             </CardHeader>
             <CardContent>
-              {isDiretor ? (
-                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
-                  <Heart className="w-5 h-5 text-umain-text-muted/50 mb-2" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
-                  <p className="text-xs text-umain-text-muted/70">Dados de saúde e contexto socioeconómico reservados aos SAS.</p>
-                </div>
-              ) : (
+              {canSeeSocioeconomic ? (
                 <>
                   <IndicatorRow label="Perfil de Entrada" value={ind.socioeconomic.entryProfile} status="ok" />
                   <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Local' ? 'ok' : 'warning'} />
                   <IndicatorRow label="NEE" value={ind.socioeconomic.nee ? 'Sim' : 'Não'} status={ind.socioeconomic.nee ? 'warning' : 'ok'} />
                 </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
+                  <Heart className="w-5 h-5 text-umain-text-muted/50 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
+                  <p className="text-xs text-umain-text-muted/70">Dados de saúde e contexto socioeconómico reservados aos SAS.</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -277,12 +284,10 @@ export function StudentProfile() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Badge className="bg-umain-accent/10 text-umain-accent text-[10px] font-bold border border-umain-accent/20">{intervention.type}</Badge>
-                          <span className="text-xs text-umain-text-muted">{isObs ? 'Técnico(a)' : intervention.author}</span>
+                          <span className="text-xs text-umain-text-muted">{getVisibleInterventionAuthor(intervention, activeProfileId)}</span>
                         </div>
                         <p className="text-sm text-umain-text leading-relaxed">
-                          {isDiretor && (intervention.description.toLowerCase().includes('financeir') || intervention.description.toLowerCase().includes('apoio') || intervention.description.toLowerCase().includes('psico'))
-                            ? 'Detalhes da intervenção de natureza confidencial mantidos em segredo (apenas SAS).'
-                            : intervention.description}
+                          {getVisibleInterventionDescription(intervention, activeProfileId)}
                         </p>
                       </div>
                       <span className="text-xs text-umain-text-muted shrink-0 font-medium">{intervention.date}</span>
@@ -307,10 +312,7 @@ export function StudentProfile() {
               </div>
               <p className={cn("text-sm leading-relaxed font-mono", level === 'high' ? 'text-red-300' : 'text-umain-text-muted')}>
                 <TypewriterText
-                  text={level === 'high'
-                    ? `> DETETADO PADRÃO DE CHURN: O score de risco atingiu ${student.riskScore} pontos, ultrapassando o limiar crítico. Observa-se uma quebra de ${ind.academic.attendancePercent}% na assiduidade combinada com ${ind.behavioral.daysSinceLastAccess} dias de ausência na plataforma Moodle. A situação agrava-se com os ${ind.financial.tuitionArrearsMonths} meses de propinas em atraso. Recomenda-se acionamento do protocolo SAS imediatamente.`
-                    : `> ANÁLISE ESTÁVEL: O estudante apresenta um score de ${student.riskScore} pontos. Os indicadores de assiduidade (${ind.academic.attendancePercent}%) e engajamento Moodle (último acesso há ${ind.behavioral.daysSinceLastAccess} dias) estão dentro dos limites operacionais seguros.`
-                  }
+                  text={getRiskNarrative(student, settings, activeProfileId)}
                   delay={1000}
                 />
               </p>

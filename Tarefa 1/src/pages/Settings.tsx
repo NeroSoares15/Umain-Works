@@ -1,29 +1,28 @@
 import { Sliders, Save, Info, AlertTriangle, BookOpen, CreditCard, Users } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
-import { useAppContext } from '../contexts/AppContext'
 import { useState } from 'react'
+import { canAdjustSettings } from '../lib/accessControl'
+import type { AppSettings } from '../lib/appSettings'
+import { useAppContext } from '../contexts/useAppContext'
 
 export function Settings() {
     const { settings, updateSettings, activeProfileId } = useAppContext()
-    const [localSettings, setLocalSettings] = useState({
-        ...settings.riskThresholds,
-        assiduidade: 15,
-        negativas: 2,
-        trabalhosAtraso: 1,
-        propinasAtraso: 2,
-        multiplicador1Ano: 1.2,
-        multiplicadorBolseiro: 1.15,
-        multiplicadorIntl: 1.10
-    })
+    const [localSettings, setLocalSettings] = useState<AppSettings>(settings)
     const [savedStatus, setSavedStatus] = useState(false)
 
-    const isSASManager = activeProfileId === 'sas' || activeProfileId === 'diretor'
+    const isSASManager = canAdjustSettings(activeProfileId)
 
     const handleSave = () => {
+        if (!isSASManager) {
+            return
+        }
+
         updateSettings({ 
-            riskThresholds: { none: localSettings.none, low: localSettings.low, medium: localSettings.medium },
-            enableEffects: settings.enableEffects 
+            riskThresholds: localSettings.riskThresholds,
+            riskSignals: localSettings.riskSignals,
+            profileMultipliers: localSettings.profileMultipliers,
+            enableEffects: localSettings.enableEffects,
         })
         setSavedStatus(true)
         setTimeout(() => setSavedStatus(false), 2000)
@@ -56,6 +55,59 @@ export function Settings() {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="flex items-center gap-2 mb-6 border-b border-umain-border/50 pb-4">
+                                    <Sliders className="w-4 h-4 text-umain-text-muted" />
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Patamares de Risco</h3>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <label className="text-xs font-semibold text-umain-text-muted">Sem risco até</label>
+                                            <span className="text-lg font-black text-white">{localSettings.riskThresholds.none}</span>
+                                        </div>
+                                        <input
+                                            type="range" min="5" max="30" value={localSettings.riskThresholds.none} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                riskThresholds: { ...previous.riskThresholds, none: parseInt(e.target.value) },
+                                            }))}
+                                            className="w-full accent-emerald-500 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <label className="text-xs font-semibold text-umain-text-muted">Risco baixo até</label>
+                                            <span className="text-lg font-black text-white">{localSettings.riskThresholds.low}</span>
+                                        </div>
+                                        <input
+                                            type="range" min="20" max="60" value={localSettings.riskThresholds.low} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                riskThresholds: { ...previous.riskThresholds, low: parseInt(e.target.value) },
+                                            }))}
+                                            className="w-full accent-blue-500 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <label className="text-xs font-semibold text-umain-text-muted">Risco médio até</label>
+                                            <span className="text-lg font-black text-white">{localSettings.riskThresholds.medium}</span>
+                                        </div>
+                                        <input
+                                            type="range" min="40" max="85" value={localSettings.riskThresholds.medium} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                riskThresholds: { ...previous.riskThresholds, medium: parseInt(e.target.value) },
+                                            }))}
+                                            className="w-full accent-amber-500 cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                         
                         {/* Assiduidade */}
                         <Card>
@@ -67,11 +119,14 @@ export function Settings() {
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-end">
                                         <label className="text-xs font-semibold text-umain-text-muted">Faltas Injustificadas Toleradas (%)</label>
-                                        <span className="text-lg font-black text-white">{localSettings.assiduidade}%</span>
+                                        <span className="text-lg font-black text-white">{localSettings.riskSignals.attendanceTolerancePercent}%</span>
                                     </div>
                                     <input
-                                        type="range" min="0" max="30" value={localSettings.assiduidade} disabled={!isSASManager}
-                                        onChange={(e) => setLocalSettings(p => ({ ...p, assiduidade: parseInt(e.target.value) }))}
+                                        type="range" min="0" max="30" value={localSettings.riskSignals.attendanceTolerancePercent} disabled={!isSASManager}
+                                        onChange={(e) => setLocalSettings((previous) => ({
+                                            ...previous,
+                                            riskSignals: { ...previous.riskSignals, attendanceTolerancePercent: parseInt(e.target.value) },
+                                        }))}
                                         className="w-full accent-umain-accent cursor-pointer"
                                     />
                                 </div>
@@ -89,22 +144,28 @@ export function Settings() {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <label className="text-xs font-semibold text-umain-text-muted">Nº Negativas Toleradas</label>
-                                            <span className="text-lg font-black text-white">{localSettings.negativas}</span>
+                                            <span className="text-lg font-black text-white">{localSettings.riskSignals.toleratedNegativeGrades}</span>
                                         </div>
                                         <input
-                                            type="range" min="0" max="5" value={localSettings.negativas} disabled={!isSASManager}
-                                            onChange={(e) => setLocalSettings(p => ({ ...p, negativas: parseInt(e.target.value) }))}
+                                            type="range" min="0" max="5" value={localSettings.riskSignals.toleratedNegativeGrades} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                riskSignals: { ...previous.riskSignals, toleratedNegativeGrades: parseInt(e.target.value) },
+                                            }))}
                                             className="w-full accent-umain-accent cursor-pointer"
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
-                                            <label className="text-xs font-semibold text-umain-text-muted">Trabalhos em Atraso Tolerados</label>
-                                            <span className="text-lg font-black text-white">{localSettings.trabalhosAtraso}</span>
+                                            <label className="text-xs font-semibold text-umain-text-muted">Dias sem Moodle Tolerados</label>
+                                            <span className="text-lg font-black text-white">{localSettings.riskSignals.maxDaysSinceLastAccess}</span>
                                         </div>
                                         <input
-                                            type="range" min="0" max="5" value={localSettings.trabalhosAtraso} disabled={!isSASManager}
-                                            onChange={(e) => setLocalSettings(p => ({ ...p, trabalhosAtraso: parseInt(e.target.value) }))}
+                                            type="range" min="1" max="21" value={localSettings.riskSignals.maxDaysSinceLastAccess} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                riskSignals: { ...previous.riskSignals, maxDaysSinceLastAccess: parseInt(e.target.value) },
+                                            }))}
                                             className="w-full accent-umain-accent cursor-pointer"
                                         />
                                     </div>
@@ -122,11 +183,14 @@ export function Settings() {
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-end">
                                         <label className="text-xs font-semibold text-umain-text-muted">Meses de Propinas em Atraso Tolerados</label>
-                                        <span className="text-lg font-black text-white">{localSettings.propinasAtraso}</span>
+                                        <span className="text-lg font-black text-white">{localSettings.riskSignals.toleratedTuitionArrearsMonths}</span>
                                     </div>
                                     <input
-                                        type="range" min="0" max="4" value={localSettings.propinasAtraso} disabled={!isSASManager}
-                                        onChange={(e) => setLocalSettings(p => ({ ...p, propinasAtraso: parseInt(e.target.value) }))}
+                                        type="range" min="0" max="4" value={localSettings.riskSignals.toleratedTuitionArrearsMonths} disabled={!isSASManager}
+                                        onChange={(e) => setLocalSettings((previous) => ({
+                                            ...previous,
+                                            riskSignals: { ...previous.riskSignals, toleratedTuitionArrearsMonths: parseInt(e.target.value) },
+                                        }))}
                                         className="w-full accent-umain-accent cursor-pointer"
                                     />
                                     <p className="text-[10px] text-umain-text-muted/60 leading-tight">Um valor de 0 significa tolerância zero (alerta gerado ao primeiro dia de atraso).</p>
@@ -145,33 +209,42 @@ export function Settings() {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <label className="text-xs font-semibold text-umain-text-muted">Estudante 1º Ano</label>
-                                            <span className="text-sm font-black text-emerald-400">+{Math.round((localSettings.multiplicador1Ano - 1) * 100)}% gravidade</span>
+                                            <span className="text-sm font-black text-emerald-400">+{Math.round((localSettings.profileMultipliers.firstYear - 1) * 100)}% gravidade</span>
                                         </div>
                                         <input
-                                            type="range" min="100" max="150" value={Math.round(localSettings.multiplicador1Ano * 100)} disabled={!isSASManager}
-                                            onChange={(e) => setLocalSettings(p => ({ ...p, multiplicador1Ano: parseInt(e.target.value) / 100 }))}
+                                            type="range" min="100" max="150" value={Math.round(localSettings.profileMultipliers.firstYear * 100)} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                profileMultipliers: { ...previous.profileMultipliers, firstYear: parseInt(e.target.value) / 100 },
+                                            }))}
                                             className="w-full accent-emerald-500 cursor-pointer"
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
-                                            <label className="text-xs font-semibold text-umain-text-muted">Estudante Bolseiro</label>
-                                            <span className="text-sm font-black text-blue-400">+{Math.round((localSettings.multiplicadorBolseiro - 1) * 100)}% gravidade</span>
+                                            <label className="text-xs font-semibold text-umain-text-muted">Estudante com Bolsa / Candidatura</label>
+                                            <span className="text-sm font-black text-blue-400">+{Math.round((localSettings.profileMultipliers.scholarship - 1) * 100)}% gravidade</span>
                                         </div>
                                         <input
-                                            type="range" min="100" max="150" value={Math.round(localSettings.multiplicadorBolseiro * 100)} disabled={!isSASManager}
-                                            onChange={(e) => setLocalSettings(p => ({ ...p, multiplicadorBolseiro: parseInt(e.target.value) / 100 }))}
+                                            type="range" min="100" max="150" value={Math.round(localSettings.profileMultipliers.scholarship * 100)} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                profileMultipliers: { ...previous.profileMultipliers, scholarship: parseInt(e.target.value) / 100 },
+                                            }))}
                                             className="w-full accent-blue-500 cursor-pointer"
                                         />
                                     </div>
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <label className="text-xs font-semibold text-umain-text-muted">Estudante Internacional</label>
-                                            <span className="text-sm font-black text-purple-400">+{Math.round((localSettings.multiplicadorIntl - 1) * 100)}% gravidade</span>
+                                            <span className="text-sm font-black text-purple-400">+{Math.round((localSettings.profileMultipliers.international - 1) * 100)}% gravidade</span>
                                         </div>
                                         <input
-                                            type="range" min="100" max="150" value={Math.round(localSettings.multiplicadorIntl * 100)} disabled={!isSASManager}
-                                            onChange={(e) => setLocalSettings(p => ({ ...p, multiplicadorIntl: parseInt(e.target.value) / 100 }))}
+                                            type="range" min="100" max="150" value={Math.round(localSettings.profileMultipliers.international * 100)} disabled={!isSASManager}
+                                            onChange={(e) => setLocalSettings((previous) => ({
+                                                ...previous,
+                                                profileMultipliers: { ...previous.profileMultipliers, international: parseInt(e.target.value) / 100 },
+                                            }))}
                                             className="w-full accent-purple-500 cursor-pointer"
                                         />
                                     </div>
@@ -202,8 +275,8 @@ export function Settings() {
                                     <input 
                                         type="checkbox" 
                                         className="sr-only peer" 
-                                        checked={settings.enableEffects}
-                                        onChange={(e) => updateSettings({ enableEffects: e.target.checked })}
+                                        checked={localSettings.enableEffects}
+                                        onChange={(e) => setLocalSettings((previous) => ({ ...previous, enableEffects: e.target.checked }))}
                                     />
                                     <div className="w-14 h-7 bg-umain-surface border border-umain-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-umain-accent shadow-inner"></div>
                                 </label>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, X, UserSearch } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../../contexts/useAppContext'
 
 export function CommandBar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -9,47 +10,99 @@ export function CommandBar() {
     const [isThinking, setIsThinking] = useState(false)
     const [showResult, setShowResult] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
+    const focusTimeoutRef = useRef<number | null>(null)
+    const resultTimeoutRef = useRef<number | null>(null)
     const navigate = useNavigate()
+    const { activeProfileId } = useAppContext()
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault()
-                setIsOpen((prev) => !prev)
-            }
-            if (e.key === 'Escape') setIsOpen(false)
+    const clearTimers = () => {
+        if (focusTimeoutRef.current) {
+            window.clearTimeout(focusTimeoutRef.current)
+            focusTimeoutRef.current = null
         }
-        window.addEventListener('keydown', handleKeyDown)
-        return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [])
+        if (resultTimeoutRef.current) {
+            window.clearTimeout(resultTimeoutRef.current)
+            resultTimeoutRef.current = null
+        }
+    }
+
+    const closeCommandBar = () => {
+        clearTimers()
+        setIsOpen(false)
+        setQuery('')
+        setShowResult(false)
+        setIsThinking(false)
+    }
 
     useEffect(() => {
-        if (isOpen) {
-            setTimeout(() => inputRef.current?.focus(), 100)
-        } else {
+        const resetCommandBar = () => {
+            clearTimers()
+            setIsOpen(false)
             setQuery('')
             setShowResult(false)
             setIsThinking(false)
         }
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault()
+                if (isOpen) {
+                    resetCommandBar()
+                    return
+                }
+
+                clearTimers()
+                setIsOpen(true)
+                setShowResult(false)
+                setIsThinking(false)
+            }
+            if (e.key === 'Escape') resetCommandBar()
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
     }, [isOpen])
+
+    useEffect(() => {
+        if (!isOpen) {
+            return
+        }
+
+        focusTimeoutRef.current = window.setTimeout(() => inputRef.current?.focus(), 100)
+
+        return () => {
+            clearTimers()
+        }
+    }, [isOpen])
+
+    const resultCopy = activeProfileId === 'sas'
+        ? {
+            description: 'Encontrei 2 estudantes em risco prioritário. O caso mais urgente é o de Pedro Santos, com score de risco elevado, baixa assiduidade e atraso financeiro continuado.',
+            route: '/students/4',
+            title: 'Investigação Prioritária',
+        }
+        : {
+            description: 'Identifiquei 2 estudantes prioritários com sinais combinados de assiduidade crítica e desengajamento digital. O caso mais urgente exige articulação com os SAS para validar fatores sensíveis.',
+            route: '/students/4',
+            title: 'Caso Prioritário',
+        }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (!query.trim()) return
 
+        clearTimers()
         setIsThinking(true)
         setShowResult(false)
 
-        // Simulate AI thinking time
-        setTimeout(() => {
+        resultTimeoutRef.current = window.setTimeout(() => {
             setIsThinking(false)
             setShowResult(true)
         }, 1500)
     }
 
     const navigateToAlert = () => {
-        setIsOpen(false)
-        navigate('/students/1') // Pedro Santos
+        closeCommandBar()
+        navigate(resultCopy.route)
     }
 
     return (
@@ -61,7 +114,7 @@ export function CommandBar() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 bg-umain-background/80 backdrop-blur-sm"
-                        onClick={() => setIsOpen(false)}
+                        onClick={closeCommandBar}
                     />
 
                     <motion.div
@@ -84,7 +137,7 @@ export function CommandBar() {
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="w-full bg-transparent border-0 text-white placeholder:text-umain-text-muted px-12 py-5 focus:outline-none focus:ring-0 text-lg"
                             />
-                            <button type="button" onClick={() => setIsOpen(false)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-umain-text-muted hover:text-white transition-colors">
+                            <button type="button" onClick={closeCommandBar} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-umain-text-muted hover:text-white transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </form>
@@ -140,15 +193,15 @@ export function CommandBar() {
                                                 <Sparkles className="w-5 h-5 text-umain-accent" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="text-sm text-white font-medium mb-1">Análise Concluída</p>
+                                                <p className="text-sm text-white font-medium mb-1">{resultCopy.title}</p>
                                                 <p className="text-sm text-umain-text-muted leading-relaxed mb-4">
-                                                    Encontrei 3 estudantes em risco crítico relacionados com propinas. O caso mais urgente é o de **Pedro Santos**, que apresenta um score de risco de **88/100** e faltas de pagamento há 4 meses consecutivos.
+                                                    {resultCopy.description}
                                                 </p>
                                                 <button
                                                     onClick={navigateToAlert}
                                                     className="w-full sm:w-auto px-4 py-2 bg-umain-accent text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-umain-accent/90 transition-colors flex items-center justify-center gap-2"
                                                 >
-                                                    <UserSearch className="w-4 h-4" /> Investigar Perfil (Pedro Santos)
+                                                    <UserSearch className="w-4 h-4" /> Abrir Caso Prioritário
                                                 </button>
                                             </div>
                                         </div>

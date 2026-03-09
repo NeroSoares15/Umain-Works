@@ -1,6 +1,6 @@
 import { scoreToBarColor } from '../../lib/riskUtils'
 import { cn } from '../../lib/utils'
-import { useAppContext } from '../../contexts/AppContext'
+import { useAppContext } from '../../contexts/useAppContext'
 
 export function ScoreBar({ score }: { score: number }) {
   const { settings } = useAppContext()

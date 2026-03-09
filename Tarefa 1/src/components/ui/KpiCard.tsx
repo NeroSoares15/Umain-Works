@@ -13,30 +13,34 @@ interface KpiCardProps {
 }
 
 export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-umain-accent', iconBg = 'bg-umain-accent/10' }: KpiCardProps) {
-  const [displayValue, setDisplayValue] = useState<string | number>(0)
+  const [displayNumber, setDisplayNumber] = useState(typeof value === 'number' ? 0 : null)
 
   useEffect(() => {
     if (typeof value !== 'number') {
-      setDisplayValue(value)
       return
     }
 
     let startTimestamp: number | null = null
-    const duration = 1500 // 1.5s
+    let frameId = 0
+    const duration = 1500
 
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp
       const progress = Math.min((timestamp - startTimestamp) / duration, 1)
 
       const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
-      setDisplayValue(Math.floor(easeProgress * value))
+      setDisplayNumber(Math.floor(easeProgress * value))
 
       if (progress < 1) {
-        window.requestAnimationFrame(step)
+        frameId = window.requestAnimationFrame(step)
       }
     }
 
-    window.requestAnimationFrame(step)
+    frameId = window.requestAnimationFrame(step)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+    }
   }, [value])
 
   return (
@@ -53,7 +57,7 @@ export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-
             className="text-[3rem] font-black text-white leading-none tracking-tight drop-shadow-sm transition-all"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {typeof displayValue === 'number' ? displayValue.toLocaleString('pt-PT') : displayValue}
+            {typeof value === 'number' ? (displayNumber ?? value).toLocaleString('pt-PT') : value}
           </p>
           <p className="text-sm font-bold text-umain-text mt-3">{title}</p>
           {subtitle && <p className="text-[11px] font-bold tracking-wide uppercase text-umain-muted/80 mt-1">{subtitle}</p>}

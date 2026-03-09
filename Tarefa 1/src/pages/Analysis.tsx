@@ -1,9 +1,18 @@
 import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { ChartFrame } from '../components/ui/ChartFrame'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { students } from '../data/students'
-import { scoreToLevel } from '../lib/riskUtils'
-import { useAppContext } from '../contexts/AppContext'
+import { getStudentRiskSnapshot } from '../lib/studentRisk'
+import { useAppContext } from '../contexts/useAppContext'
+
+interface CourseDistribution {
+  name: string
+  high: number
+  medium: number
+  low: number
+  none: number
+}
 
 function Label({ children }: { children: string }) {
   return <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">{children}</p>
@@ -17,14 +26,14 @@ export function Analysis() {
   // Aggregate student data by course
   const courseData = students.reduce((acc, student) => {
     const course = student.course
-    const level = scoreToLevel(student.riskScore, settings.riskThresholds)
+    const { level } = getStudentRiskSnapshot(student, settings)
     
     if (!acc[course]) {
       acc[course] = { name: course, high: 0, medium: 0, low: 0, none: 0 }
     }
     acc[course][level] += 1
     return acc
-  }, {} as Record<string, any>)
+  }, {} as Record<string, CourseDistribution>)
 
   const chartData = Object.values(courseData)
 
@@ -35,9 +44,12 @@ export function Analysis() {
         <div className="flex flex-col gap-3">
           <Label>Heatmap de Risco por Curso</Label>
           <Card className="flex-1 min-h-[500px] flex flex-col justify-center p-6">
-            <CardContent className="h-[450px] w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
+            <CardContent className="w-full pt-4">
+              <ChartFrame className="h-[450px]">
+                {({ height, width }) => (
                 <BarChart
+                  width={width}
+                  height={height}
                   data={chartData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                 >
@@ -89,7 +101,8 @@ export function Analysis() {
                   <Bar dataKey="low" name="Risco Baixo" stackId="a" fill="url(#barLow)" />
                   <Bar dataKey="none" name="Sem Risco" stackId="a" fill="url(#barNone)" radius={[4, 4, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
+                )}
+              </ChartFrame>
             </CardContent>
           </Card>
         </div>

@@ -1,32 +1,50 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, BarChart2, TrendingDown, Settings as SettingsIcon, DollarSign, Command, Shield, Heart, X, Code, PlaySquare, Check } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import {
+  LayoutDashboard,
+  BarChart2,
+  TrendingDown,
+  Settings as SettingsIcon,
+  DollarSign,
+  Command,
+  Shield,
+  Heart,
+  X,
+  Code,
+  PlaySquare,
+  Check,
+} from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { useAppContext } from '../../contexts/AppContext'
-import type { ProfileId } from '../../contexts/AppContext'
-
-type RoutePermission = 'all' | ('diretor' | 'sas' | 'obs')[]
+import {
+  canAccessRoute,
+  PROFILE_OPTIONS,
+  ROUTE_ACCESS,
+  type AppRouteKey,
+  type ProfileId,
+} from '../../lib/accessControl'
+import { useAppContext } from '../../contexts/useAppContext'
 
 interface NavItem {
-  to: string
-  icon: any
+  icon: LucideIcon
   label: string
-  roles: RoutePermission
+  routeKey: Exclude<AppRouteKey, 'studentProfile'>
 }
 
 const navItems: NavItem[] = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Escola', roles: 'all' },
-  { to: '/analysis', icon: BarChart2, label: 'Análise por Curso', roles: 'all' },
-  { to: '/prediction', icon: TrendingDown, label: 'Predição', roles: ['diretor', 'obs'] },
-  { to: '/settings', icon: SettingsIcon, label: 'Config. Gatilhos', roles: ['diretor', 'sas'] },
-  { to: '/roi', icon: DollarSign, label: 'Gestão de ROI', roles: ['diretor', 'sas'] },
+  { routeKey: 'dashboard', icon: LayoutDashboard, label: 'Dashboard Escola' },
+  { routeKey: 'analysis', icon: BarChart2, label: 'Análise por Curso' },
+  { routeKey: 'prediction', icon: TrendingDown, label: 'Predição' },
+  { routeKey: 'settings', icon: SettingsIcon, label: 'Config. Gatilhos' },
+  { routeKey: 'roi', icon: DollarSign, label: 'Gestão de ROI' },
+  { routeKey: 'pipeline', icon: PlaySquare, label: 'Motor BMAD (Core)' },
 ]
 
-const PROFILES: { id: ProfileId; name: string; icon: any }[] = [
-  { id: 'diretor', name: 'Diretor de Curso', icon: Shield },
-  { id: 'sas', name: 'Técnico SAS', icon: Heart },
-  { id: 'obs', name: 'Observatório', icon: BarChart2 }
-]
+const profileIcons: Record<ProfileId, LucideIcon> = {
+  diretor: Shield,
+  sas: Heart,
+  obs: BarChart2,
+}
 
 export function Sidebar() {
   const { isOpen, setIsOpen, activeProfileId, setActiveProfileId, settings, updateSettings } = useAppContext()
@@ -58,8 +76,8 @@ export function Sidebar() {
   }
 
   // Filter navigation items based on current role
-  const filteredNavItems = navItems.filter(item => 
-    item.roles === 'all' || item.roles.includes(activeProfileId)
+  const filteredNavItems = navItems.filter((item) =>
+    canAccessRoute(activeProfileId, item.routeKey, { bmadUnlocked: settings.bmadUnlocked }),
   )
 
   return (
@@ -110,10 +128,10 @@ export function Sidebar() {
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden pt-4 pb-20 custom-scrollbar">
           <div className="mb-6 px-3">
-            <p className="px-3 text-[9px] font-bold tracking-widest text-umain-text-muted mb-2 uppercase">Perfil Ativo</p>
+            <p className="px-3 text-[9px] font-bold tracking-widest text-umain-text-muted mb-2 uppercase">Modo de Visualização</p>
             <div className="space-y-0.5">
-              {PROFILES.map((profile) => {
-                const Icon = profile.icon
+              {PROFILE_OPTIONS.map((profile) => {
+                const Icon = profileIcons[profile.id]
                 const isActive = activeProfileId === profile.id
                 return (
                   <button
@@ -130,44 +148,58 @@ export function Sidebar() {
                 )
               })}
             </div>
+            <p className="px-3 pt-3 text-[10px] leading-relaxed text-umain-text-muted/70">
+              Perfis são simulados localmente para fins de demonstração.
+            </p>
           </div>
 
           <div className="px-3">
             <p className="px-3 text-[9px] font-bold tracking-widest text-umain-text-muted mb-2 uppercase">Navegação</p>
             <nav className="space-y-0.5">
-              {filteredNavItems.map(({ to, icon: Icon, label }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  onClick={handleNavClick}
-                  className={({ isActive }) => cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
-                    isActive
-                      ? 'bg-umain-muted/30 text-white font-medium border border-umain-border/50'
-                      : 'text-umain-text-muted hover:text-white hover:bg-white/5'
-                  )}
-                >
-                  <Icon className={cn("w-4 h-4", window.location.pathname === to ? "text-umain-accent" : "")} />
-                  {label}
-                </NavLink>
-              ))}
+              {filteredNavItems.map(({ routeKey, icon: Icon, label }) => {
+                const route = ROUTE_ACCESS[routeKey]
+                const isPipelineLink = routeKey === 'pipeline'
 
-              {/* Secret BMAD Route */}
-              {settings.bmadUnlocked && (
-                <NavLink
-                  to="/pipeline"
-                  onClick={handleNavClick}
-                  className={({ isActive }) => cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mt-4 border border-orange-500/20 bg-orange-500/5',
-                    isActive
-                      ? 'bg-orange-500/20 text-orange-400 font-medium border-orange-500/50'
-                      : 'text-orange-400/60 hover:text-orange-400 hover:bg-orange-500/10'
-                  )}
-                >
-                  <PlaySquare className={cn("w-4 h-4", window.location.pathname === '/pipeline' ? "text-orange-400" : "")} />
-                  Motor BMAD (Core)
-                </NavLink>
-              )}
+                return (
+                  <NavLink
+                    key={routeKey}
+                    to={route.path}
+                    onClick={handleNavClick}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
+                        isPipelineLink && 'mt-4 border border-orange-500/20 bg-orange-500/5',
+                        isActive
+                          ? isPipelineLink
+                            ? 'bg-orange-500/20 text-orange-400 font-medium border-orange-500/50'
+                            : 'bg-umain-muted/30 text-white font-medium border border-umain-border/50'
+                          : isPipelineLink
+                            ? 'text-orange-400/70 hover:text-orange-400 hover:bg-orange-500/10'
+                            : 'text-umain-text-muted hover:text-white hover:bg-white/5',
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon
+                          className={cn(
+                            'w-4 h-4',
+                            isPipelineLink
+                              ? isActive
+                                ? 'text-orange-400'
+                                : 'text-orange-400/70'
+                              : isActive
+                                ? 'text-umain-accent'
+                                : 'text-umain-text-muted',
+                          )}
+                        />
+                        {label}
+                      </>
+                    )}
+                  </NavLink>
+                )
+              })}
+
             </nav>
           </div>
         </div>
