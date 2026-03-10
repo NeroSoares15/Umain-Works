@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/layout/TopBar'
-import { Card, CardContent } from '../components/ui/Card'
+import { Card } from '../components/ui/Card'
 import { KpiCard } from '../components/ui/KpiCard'
-import { ScoreBar } from '../components/ui/ScoreBar'
 import { RiskBadge } from '../components/ui/RiskBadge'
-import { Activity, AlertTriangle, AlertCircle, CheckCircle2, ChevronRight, Download, FileText } from 'lucide-react'
+import { Activity, AlertTriangle, CheckCircle2, ChevronRight, FileText } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { students } from '../data/students'
 import { alerts } from '../data/alerts'
@@ -76,7 +74,6 @@ export function Dashboard() {
 
   return (
     <>
-      <TopBar title="Dashboard Operacional" subtitle="IPTomar — 2025/2026" />
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto">
 
         {/* Bento Grid Container */}
@@ -101,13 +98,13 @@ export function Dashboard() {
 
             {/* Table Section */}
             <div className="mt-4 md:mt-2 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-both">
-              <Card className="overflow-hidden border-umain-border/50 bg-umain-surface/80 backdrop-blur-xl">
-                <div className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-umain-border/50">
+              <Card className="overflow-hidden bg-white border-[#e5e7eb] shadow-sm">
+                <div className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e5e7eb]">
                   <Label>Tabela de Risco dos Alunos</Label>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex items-center gap-2 bg-umain-muted/20 px-3 py-1.5 rounded-lg border border-umain-border/50">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                      <span className="text-xs font-bold text-white tracking-widest uppercase">Anonimizado</span>
+                    <div className="flex items-center gap-2 bg-[#f4eee3] px-3 py-1.5 rounded-lg border border-[#e5e7eb]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
+                      <span className="text-xs font-bold text-[#111827] tracking-widest uppercase">Anonimizado</span>
                     </div>
                     <select 
                       value={courseFilter}
@@ -127,7 +124,7 @@ export function Dashboard() {
                   </div>
                 </div>
                 <div className="overflow-x-auto custom-scrollbar">
-                  <div className="min-w-[1000px] px-6 py-4 grid grid-cols-[80px_1.5fr_1.5fr_60px_100px_1.5fr_1.5fr_100px_40px] gap-4 border-b border-umain-border/50 bg-transparent">
+                  <div className="min-w-[1000px] px-6 py-4 grid grid-cols-[80px_1.5fr_1.5fr_60px_100px_1.5fr_1.5fr_100px_40px] gap-4 border-b border-umain-border bg-white">
                     <Label>N. Aluno</Label>
                     <Label>Aluno</Label>
                     <Label>Curso</Label>
@@ -138,7 +135,7 @@ export function Dashboard() {
                     <Label>Status</Label>
                     <span />
                   </div>
-                  <div className="divide-y divide-umain-border/30">
+                  <div className="divide-y divide-[#e5e7eb]">
                     {filtered.sort((a, b) => b.riskScore - a.riskScore).slice(0, 10).map((student, i) => {
                       const level = scoreToLevel(student.riskScore, settings.riskThresholds)
                       return (
@@ -146,17 +143,17 @@ export function Dashboard() {
                           key={student.id}
                           className={cn(
                             'px-6 py-4 grid grid-cols-[80px_1.5fr_1.5fr_60px_100px_1.5fr_1.5fr_100px_40px] gap-4 items-center group/row',
-                            'border-l-2 hover:bg-umain-muted/10 transition-all duration-300 cursor-pointer',
+                            'border-l-2 hover:bg-[#f9fafb] bg-white transition-all duration-300 cursor-pointer',
                             'animate-in fade-in slide-in-from-bottom-2 fill-mode-both',
                             ROW_BORDER[level]
                           )}
                           style={{ animationDelay: `${i * 50}ms` }}
                           onClick={() => navigate(`/students/${student.id}`)}
                         >
-                          <span className="text-xs font-mono text-umain-text-muted">{isObs ? '***' : student.number}</span>
-                          <span className="text-sm font-semibold text-umain-text group-hover/row:text-white truncate transition-colors">{isObs ? obfuscateName(student.name, isObs) : student.name}</span>
-                          <span className="text-xs text-umain-text-muted truncate mt-0.5">{student.course}</span>
-                          <span className="text-[10px] uppercase font-bold text-umain-text-muted tracking-wide">LIC.</span>
+                          <span className="text-xs font-mono text-[#6b7280]">{isObs ? '***' : student.number}</span>
+                          <span className="text-sm font-semibold text-[#111827] group-hover/row:text-[#c15b38] truncate transition-colors">{isObs ? obfuscateName(student.name, isObs) : student.name}</span>
+                          <span className="text-xs text-[#6b7280] truncate mt-0.5">{student.course}</span>
+                          <span className="text-[10px] uppercase font-bold text-[#6b7280] tracking-wide">LIC.</span>
                           <RiskBadge score={student.riskScore} />
                           <span className="text-xs text-umain-text-muted truncate">
                            {student.indicators.academic.negativeGrades > 0 ? 'Baixo Desempenho' : 'Faltas / Motivacional'}
@@ -183,7 +180,7 @@ export function Dashboard() {
 
           {/* Right Column (Side Panel) */}
           <div className="col-span-1 flex flex-col gap-6">
-            <Card className="flex-1 bg-umain-surface/80 backdrop-blur-xl border-umain-border/50 flex flex-col p-6 items-center justify-center">
+            <Card className="flex-1 bg-white border-[#e5e7eb] shadow-sm flex flex-col p-6 items-center justify-center">
               <div className="w-full flex justify-between items-center mb-6">
                 <Label>Distribuição de Risco</Label>
               </div>
@@ -195,7 +192,7 @@ export function Dashboard() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'rgba(2, 8, 23, 0.8)', borderColor: 'rgba(30, 41, 59, 0.5)', borderRadius: '12px', backdropFilter: 'blur(16px)', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }} itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} itemStyle={{ color: '#111827', fontWeight: 'bold' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -203,7 +200,7 @@ export function Dashboard() {
                 {pieData.map((d) => (
                   <div key={d.name} className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
-                    <span className="text-xs text-umain-text-muted truncate">{d.name}</span>
+                    <span className="text-xs text-[#6b7280] font-medium truncate">{d.name}</span>
                   </div>
                 ))}
               </div>
@@ -216,13 +213,13 @@ export function Dashboard() {
                    const student = students.find(s => s.id === alert.studentId)
                    if (!student) return null
                    return (
-                     <div key={alert.id} className="p-4 bg-umain-surface/80 backdrop-blur-xl border border-umain-border/50 rounded-xl hover:border-red-500/50 transition-colors cursor-pointer" onClick={() => navigate(`/students/${student.id}`)}>
+                     <div key={alert.id} className="p-4 bg-white border border-[#e5e7eb] shadow-sm rounded-xl hover:border-[#c15b38] transition-colors cursor-pointer" onClick={() => navigate(`/students/${student.id}`)}>
                         <div className="flex justify-between items-start mb-2">
-                          <p className="font-semibold text-sm text-white">{isObs ? obfuscateName(student.name, isObs) : student.name}</p>
-                          <span className="text-[9px] uppercase font-bold tracking-widest text-red-500 px-2 py-0.5 rounded border border-red-500/20 bg-red-500/10">Risco Alto</span>
+                          <p className="font-semibold text-sm text-[#111827]">{isObs ? obfuscateName(student.name, isObs) : student.name}</p>
+                          <span className="text-[9px] uppercase font-bold tracking-widest text-[#ef4444] px-2 py-0.5 rounded border border-[#ef4444]/20 bg-[#ef4444]/10">Risco Alto</span>
                         </div>
-                        <p className="text-xs text-umain-text-muted line-clamp-2">{alert.reason}</p>
-                        <p className="text-[10px] text-umain-text-muted/50 uppercase tracking-widest mt-2">{student.course}</p>
+                        <p className="text-xs text-[#6b7280] font-medium line-clamp-2">{alert.reason}</p>
+                        <p className="text-[10px] text-[#9ca3af] uppercase tracking-widest mt-2">{student.course}</p>
                      </div>
                    )
                 })}

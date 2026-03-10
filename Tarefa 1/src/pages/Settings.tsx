@@ -1,5 +1,4 @@
 import { Sliders, Save, Info, AlertTriangle, BookOpen, CreditCard, Users } from 'lucide-react'
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { useAppContext } from '../contexts/AppContext'
 import { useState } from 'react'
@@ -22,8 +21,7 @@ export function Settings() {
 
     const handleSave = () => {
         updateSettings({ 
-            riskThresholds: { none: localSettings.none, low: localSettings.low, medium: localSettings.medium },
-            enableEffects: settings.enableEffects 
+            riskThresholds: { none: localSettings.none, low: localSettings.low, medium: localSettings.medium }
         })
         setSavedStatus(true)
         setTimeout(() => setSavedStatus(false), 2000)
@@ -31,7 +29,6 @@ export function Settings() {
 
     return (
         <>
-            <TopBar title="Parametrização de Gatilhos de Risco" subtitle="Configurações Globais do Modelo de Machine Learning" />
             <main className="flex-1 p-4 md:p-8 space-y-6 overflow-auto">
                 <div className="max-w-5xl mx-auto space-y-6">
 
@@ -40,7 +37,7 @@ export function Settings() {
                             <Sliders className="w-5 h-5 text-umain-accent" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white tracking-tight">Regras de Negócio & Pesos</h2>
+                            <h2 className="text-xl font-bold text-umain-text tracking-tight">Regras de Negócio & Pesos</h2>
                             <p className="text-sm text-umain-text-muted">Ajuste os limiares de tolerância que determinam a geração automática de alertas.</p>
                         </div>
                     </div>
@@ -62,12 +59,12 @@ export function Settings() {
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-6 border-b border-umain-border/50 pb-4">
                                     <AlertTriangle className="w-4 h-4 text-umain-text-muted" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Assiduidade</h3>
+                                    <h3 className="text-sm font-bold text-umain-text uppercase tracking-widest">Assiduidade</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-end">
                                         <label className="text-xs font-semibold text-umain-text-muted">Faltas Injustificadas Toleradas (%)</label>
-                                        <span className="text-lg font-black text-white">{localSettings.assiduidade}%</span>
+                                        <span className="text-lg font-black text-umain-text">{localSettings.assiduidade}%</span>
                                     </div>
                                     <input
                                         type="range" min="0" max="30" value={localSettings.assiduidade} disabled={!isSASManager}
@@ -83,13 +80,13 @@ export function Settings() {
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-6 border-b border-umain-border/50 pb-4">
                                     <BookOpen className="w-4 h-4 text-umain-text-muted" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Desempenho Académico</h3>
+                                    <h3 className="text-sm font-bold text-umain-text uppercase tracking-widest">Desempenho Académico</h3>
                                 </div>
                                 <div className="space-y-6">
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <label className="text-xs font-semibold text-umain-text-muted">Nº Negativas Toleradas</label>
-                                            <span className="text-lg font-black text-white">{localSettings.negativas}</span>
+                                            <span className="text-lg font-black text-umain-text">{localSettings.negativas}</span>
                                         </div>
                                         <input
                                             type="range" min="0" max="5" value={localSettings.negativas} disabled={!isSASManager}
@@ -100,7 +97,7 @@ export function Settings() {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end">
                                             <label className="text-xs font-semibold text-umain-text-muted">Trabalhos em Atraso Tolerados</label>
-                                            <span className="text-lg font-black text-white">{localSettings.trabalhosAtraso}</span>
+                                            <span className="text-lg font-black text-umain-text">{localSettings.trabalhosAtraso}</span>
                                         </div>
                                         <input
                                             type="range" min="0" max="5" value={localSettings.trabalhosAtraso} disabled={!isSASManager}
@@ -117,12 +114,12 @@ export function Settings() {
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-6 border-b border-umain-border/50 pb-4">
                                     <CreditCard className="w-4 h-4 text-umain-text-muted" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Financeiro</h3>
+                                    <h3 className="text-sm font-bold text-umain-text uppercase tracking-widest">Financeiro</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-end">
                                         <label className="text-xs font-semibold text-umain-text-muted">Meses de Propinas em Atraso Tolerados</label>
-                                        <span className="text-lg font-black text-white">{localSettings.propinasAtraso}</span>
+                                        <span className="text-lg font-black text-umain-text">{localSettings.propinasAtraso}</span>
                                     </div>
                                     <input
                                         type="range" min="0" max="4" value={localSettings.propinasAtraso} disabled={!isSASManager}
@@ -139,7 +136,7 @@ export function Settings() {
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-6 border-b border-umain-border/50 pb-4">
                                     <Users className="w-4 h-4 text-umain-text-muted" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Multiplicadores de Risco por Perfil</h3>
+                                    <h3 className="text-sm font-bold text-umain-text uppercase tracking-widest">Multiplicadores de Risco por Perfil</h3>
                                 </div>
                                 <div className="space-y-6">
                                     <div className="space-y-4">
@@ -180,36 +177,6 @@ export function Settings() {
                         </Card>
 
                     </div>
-
-                    <div className="flex items-center gap-3 mt-10 mb-6 border-t border-umain-border/30 pt-10">
-                        <div className="w-10 h-10 rounded-xl bg-umain-surface border border-umain-border flex items-center justify-center shadow-inner">
-                            <Sliders className="w-5 h-5 text-umain-accent" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-white tracking-tight">Sistema & Desempenho</h2>
-                            <p className="text-sm text-umain-text-muted">Opções globais da interface e aceleração de hardware.</p>
-                        </div>
-                    </div>
-
-                    <Card>
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-widest">Efeitos Visuais e WebGL</h3>
-                                    <p className="text-xs text-umain-text-muted mt-1">Desative para melhorar o desempenho em máquinas com recursos limitados. Desliga modelos 3D, partículas e transições pesadas.</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        className="sr-only peer" 
-                                        checked={settings.enableEffects}
-                                        onChange={(e) => updateSettings({ enableEffects: e.target.checked })}
-                                    />
-                                    <div className="w-14 h-7 bg-umain-surface border border-umain-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-umain-accent shadow-inner"></div>
-                                </label>
-                            </div>
-                        </CardContent>
-                    </Card>
 
                     {isSASManager && (
                         <div className="mt-8 flex justify-end">

@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { CheckCircle2, RefreshCw, Database, Zap, BarChart3, Bell } from 'lucide-react'
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
-import { Pipeline3D } from '../components/ui/Pipeline3D'
-import { useAppContext } from '../contexts/AppContext'
 import { cn } from '../lib/utils'
 
 const dataSources = [
@@ -21,7 +18,6 @@ const bmadSteps = [
 ]
 
 export function Pipeline() {
-  const { settings } = useAppContext()
   const [calculating, setCalculating] = useState(false)
   const [activeStep, setActiveStep] = useState<number | null>(null)
   const [done, setDone] = useState(false)
@@ -43,10 +39,7 @@ export function Pipeline() {
 
   return (
     <>
-      <TopBar title="Pipeline de Dados" subtitle="Fluxo de ingestão e cálculo — IPTomar Core" />
       <main className="flex-1 p-4 md:p-8 space-y-6 md:space-y-8 overflow-auto">
-
-        {settings.enableEffects && <Pipeline3D calculating={calculating} activeStep={activeStep} />}
 
         {/* BMAD steps */}
         <div>

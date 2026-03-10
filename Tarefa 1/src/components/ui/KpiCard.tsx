@@ -12,8 +12,17 @@ interface KpiCardProps {
   iconBg?: string
 }
 
-export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-umain-accent', iconBg = 'bg-umain-accent/10' }: KpiCardProps) {
+export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-[#C15B38]', iconBg = 'bg-[#f4eee3]' }: KpiCardProps) {
   const [displayValue, setDisplayValue] = useState<string | number>(0)
+
+  // Determine border color based on typical KPI intent in the mockup
+  let leftBorderColor = "border-l-[#C15B38]" // Default Umain Orange
+  if (subtitle?.includes('face à semana anterior')) {
+    if (subtitle.includes('↑')) leftBorderColor = "border-l-[#10b981]" // Green
+    if (subtitle.includes('↓')) leftBorderColor = "border-l-[#ef4444]" // Red
+  } else if (title.includes('Sucesso') || title.includes('ROI')) {
+      leftBorderColor = "border-l-[#C15B38]"
+  }
 
   useEffect(() => {
     if (typeof value !== 'number') {
@@ -40,23 +49,33 @@ export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-
   }, [value])
 
   return (
-    <Card className="h-full flex flex-col justify-center">
-      <div className="p-6 flex flex-col gap-5 h-full relative z-10">
-        <div className="flex items-start justify-between">
-          <div className={cn('w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border border-umain-border/50 shadow-inner', iconBg)}>
-            <Icon className={cn('w-6 h-6', iconColor)} />
+    <Card className={cn("h-full flex flex-col justify-center bg-white border border-[#e5e7eb] shadow-sm overflow-hidden", leftBorderColor, "border-l-[3px]")}>
+      <div className="p-5 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-4">
+           {/* Title Top Left */}
+           <p className="text-[13px] font-semibold text-[#6b7280]">{title}</p>
+           
+           {/* Icon Top Right */}
+          <div className={cn('w-8 h-8 rounded-md flex items-center justify-center shrink-0', iconBg)}>
+            <Icon className={cn('w-4 h-4', iconColor)} />
           </div>
         </div>
 
         <div className="mt-auto">
+          {/* Main Value */}
           <p
-            className="text-[3rem] font-black text-white leading-none tracking-tight drop-shadow-sm transition-all"
+            className="text-[32px] font-bold text-[#111827] leading-none tracking-tight"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {typeof displayValue === 'number' ? displayValue.toLocaleString('pt-PT') : displayValue}
           </p>
-          <p className="text-sm font-bold text-umain-text mt-3">{title}</p>
-          {subtitle && <p className="text-[11px] font-bold tracking-wide uppercase text-umain-muted/80 mt-1">{subtitle}</p>}
+          
+          {/* Subtitle / Trend */}
+          {subtitle && (
+            <p className={cn("text-[11px] font-bold mt-2", subtitle.includes('↑') ? "text-[#10b981]" : subtitle.includes('↓') ? "text-[#ef4444]" : "text-[#6b7280]")}>
+              {subtitle}
+            </p>
+          )}
         </div>
       </div>
     </Card>

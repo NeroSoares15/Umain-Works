@@ -4,24 +4,24 @@
 
 @theme {
   --font-sans: 'Manrope', system-ui, sans-serif;
-  --color-umain-primary: #181b1f; /* Dark background */
-  --color-umain-secondary: #22262b; /* Slightly lighter background */
-  --color-umain-accent: #f97316; /* Orange 500 */
-  --color-umain-background: #181b1f; 
-  --color-umain-surface: #26292e; /* Card background */
-  --color-umain-border: #353940; /* Subtle borders */
-  --color-umain-text: #f8fafc; /* Slate 50 */
-  --color-umain-text-muted: #94a3b8; /* Slate 400 */
-  --color-umain-muted: #333942; /* Subdued backgrounds */
+  --color-umain-primary: #C15B38; /* UMAIN Terracotta Orange */
+  --color-umain-secondary: #f4eee3; /* Warm secondary accent */
+  --color-umain-accent: #C15B38; /* Orange branding */
+  --color-umain-background: #FCFCF7; /* Light cream base */
+  --color-umain-surface: #ffffff; /* Pure white cards */
+  --color-umain-border: #f0f0f0; /* Very soft borders */
+  --color-umain-text: #111827; /* Dark charcoal text */
+  --color-umain-text-muted: #6b7280; /* Neutral gray */
+  --color-umain-muted: #f3f4f6; /* Subtle backgrounds for hovers/badges */
   
   --color-risk-low: #10b981; 
   --color-risk-medium: #f59e0b; 
   --color-risk-high: #ef4444; 
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 * { box-sizing: border-box; }
@@ -41,9 +41,9 @@ body {
 
 /* Custom utilities for Enterprise SaaS feel */
 .glass-panel {
-  background: rgba(23, 23, 23, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--color-umain-border);
 }
 

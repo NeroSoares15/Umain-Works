@@ -8,14 +8,14 @@ export default {
         extend: {
             colors: {
                 umain: {
-                    primary: '#181b1f',
-                    secondary: '#22262b',
-                    accent: '#f97316',
-                    background: '#181b1f',
-                    surface: '#26292e',
-                    border: '#353940',
-                    text: '#f8fafc',
-                    muted: '#94a3b8',
+                    primary: '#C15B38',
+                    secondary: '#f4eee3',
+                    accent: '#C15B38',
+                    background: '#FCFCF7',
+                    surface: '#ffffff',
+                    border: '#e5e7eb',
+                    text: '#111827',
+                    muted: '#6b7280',
                 },
                 risk: {
                     low: '#10b981', // Emerald 500

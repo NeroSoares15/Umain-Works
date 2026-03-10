@@ -1,4 +1,3 @@
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { BrainCircuit, TrendingUp } from 'lucide-react'
@@ -24,7 +23,6 @@ const mockData = [
 export function Prediction() {
   return (
     <div className="flex-1 flex flex-col h-full min-h-screen">
-      <TopBar title="Predição de Abandono" subtitle="Modelos preditivos watsonx.ai" />
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -82,6 +80,7 @@ export function Prediction() {
                     tickLine={false}
                     tickFormatter={(value) => `${value}%`}
                     domain={[60, 100]}
+                    width={45}
                   />
                   <Tooltip 
                     contentStyle={{ backgroundColor: 'rgba(2, 8, 23, 0.7)', backdropFilter: 'blur(16px)', borderColor: 'rgba(30, 41, 59, 0.5)', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', padding: '16px' }} 

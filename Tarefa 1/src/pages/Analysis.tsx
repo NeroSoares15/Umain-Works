@@ -1,4 +1,3 @@
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { students } from '../data/students'
@@ -30,7 +29,6 @@ export function Analysis() {
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-screen">
-      <TopBar title="Análise por Curso" subtitle="Distribuição de risco entre os departamentos" />
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <Label>Heatmap de Risco por Curso</Label>
@@ -65,8 +63,10 @@ export function Analysis() {
                     stroke="#94a3b8" 
                     tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
                     tickMargin={15}
-                    angle={-25}
+                    angle={-35}
                     textAnchor="end"
+                    height={80}
+                    interval={0}
                   />
                   <YAxis 
                     stroke="#94a3b8" 

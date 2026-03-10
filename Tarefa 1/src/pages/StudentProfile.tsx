@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, BookOpen, DollarSign, Monitor, Heart } from 'lucide-react'
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts'
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { RiskBadge } from '../components/ui/RiskBadge'
 import { Badge } from '../components/ui/Badge'
@@ -112,11 +111,13 @@ export function StudentProfile() {
 
   return (
     <>
-      <TopBar
-        title={obfuscateName(student.name, isObs)}
-        subtitle={`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}
-      />
       <main className="flex-1 p-4 md:p-8 space-y-4 md:space-y-6 overflow-auto">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-2xl font-bold text-umain-text tracking-tight">{obfuscateName(student.name, isObs)}</h1>
+            <p className="text-sm font-medium text-umain-text-muted mt-0.5">{`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}</p>
+          </div>
+        </div>
         <button
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-umain-text-muted hover:text-umain-accent transition-colors"

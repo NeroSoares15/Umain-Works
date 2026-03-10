@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { TopBar } from '../components/layout/TopBar'
 import { Card, CardContent } from '../components/ui/Card'
 import { KpiCard } from '../components/ui/KpiCard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
@@ -58,7 +57,6 @@ export function ROI() {
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-screen">
-      <TopBar title="Gestão de ROI" subtitle="Simulador de Impacto Financeiro" />
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
 
         {/* Dynamic KPIs */}
@@ -101,7 +99,7 @@ export function ROI() {
                     <Calculator className="w-4 h-4 text-umain-accent" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white leading-tight">Variáveis de Simulação</h3>
+                    <h3 className="font-bold text-umain-text leading-tight">Variáveis de Simulação</h3>
                     <p className="text-[10px] text-umain-text-muted mt-0.5">Defina taxas e valores base anuais.</p>
                   </div>
                 </div>
@@ -109,7 +107,7 @@ export function ROI() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
                     <label className="text-xs font-semibold text-umain-text-muted">Eficácia da Intervenção (%)</label>
-                    <span className="text-lg font-black text-white">{successRate}%</span>
+                    <span className="text-lg font-black text-umain-text">{successRate}%</span>
                   </div>
                   <input
                     type="range" min="10" max="90" value={successRate}
@@ -129,7 +127,7 @@ export function ROI() {
                         type="number" 
                         value={tuition.ctesp} 
                         onChange={e => setTuition(p => ({ ...p, ctesp: parseInt(e.target.value) || 0 }))}
-                        className="w-full bg-umain-surface border border-umain-border rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-umain-accent" 
+                        className="w-full bg-umain-background border border-umain-border rounded-lg px-3 py-2 text-sm text-umain-text font-mono focus:outline-none focus:border-umain-accent" 
                       />
                     </div>
                     <div className="space-y-1">
@@ -138,7 +136,7 @@ export function ROI() {
                         type="number" 
                         value={tuition.licenciatura} 
                         onChange={e => setTuition(p => ({ ...p, licenciatura: parseInt(e.target.value) || 0 }))}
-                        className="w-full bg-umain-surface border border-umain-border rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-umain-accent" 
+                        className="w-full bg-umain-background border border-umain-border rounded-lg px-3 py-2 text-sm text-umain-text font-mono focus:outline-none focus:border-umain-accent" 
                       />
                     </div>
                     <div className="space-y-1">
@@ -147,7 +145,7 @@ export function ROI() {
                         type="number" 
                         value={tuition.mestrado} 
                         onChange={e => setTuition(p => ({ ...p, mestrado: parseInt(e.target.value) || 0 }))}
-                        className="w-full bg-umain-surface border border-umain-border rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-umain-accent" 
+                        className="w-full bg-umain-background border border-umain-border rounded-lg px-3 py-2 text-sm text-umain-text font-mono focus:outline-none focus:border-umain-accent" 
                       />
                     </div>
                     <div className="space-y-1">
@@ -156,7 +154,7 @@ export function ROI() {
                         type="number" 
                         value={tuition.internacional} 
                         onChange={e => setTuition(p => ({ ...p, internacional: parseInt(e.target.value) || 0 }))}
-                        className="w-full bg-umain-surface border border-umain-border rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-umain-accent" 
+                        className="w-full bg-umain-background border border-umain-border rounded-lg px-3 py-2 text-sm text-umain-text font-mono focus:outline-none focus:border-umain-accent" 
                       />
                     </div>
                   </div>

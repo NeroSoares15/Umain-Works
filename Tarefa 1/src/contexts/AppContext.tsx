@@ -9,13 +9,11 @@ interface AppSettings {
         low: number
         medium: number
     }
-    enableEffects: boolean
     bmadUnlocked: boolean
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
     riskThresholds: { none: 20, low: 40, medium: 60 },
-    enableEffects: true,
     bmadUnlocked: false
 }
 
