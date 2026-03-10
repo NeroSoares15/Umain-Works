@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { KpiCard } from '../components/ui/KpiCard'
 import { RiskBadge } from '../components/ui/RiskBadge'
-import { Activity, AlertTriangle, CheckCircle2, ChevronRight, FileText } from 'lucide-react'
+import { Activity, AlertTriangle, CheckCircle2, ChevronRight, FileText, Download } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { students } from '../data/students'
 import { alerts } from '../data/alerts'
@@ -74,7 +74,7 @@ export function Dashboard() {
 
   return (
     <>
-      <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto">
+      <main className="flex-1 px-4 pb-4 md:px-6 md:pb-6 lg:px-10 lg:pb-10 pt-4 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto">
 
         {/* Bento Grid Container */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-min animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both">
@@ -121,6 +121,10 @@ export function Dashboard() {
                     >
                       {RISK_FILTERS.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
+                    <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-white bg-umain-text rounded-lg hover:bg-umain-text/90 transition-colors shadow-sm md:ml-2">
+                       <Download className="w-3.5 h-3.5" />
+                       Relatório Completo
+                    </button>
                   </div>
                 </div>
                 <div className="overflow-x-auto custom-scrollbar">
@@ -173,6 +177,15 @@ export function Dashboard() {
                       )
                     })}
                   </div>
+                </div>
+                
+                {/* Pagination Footer */}
+                <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[#e5e7eb] bg-umain-surface">
+                   <p className="text-xs text-umain-text-muted">A mostrar <span className="font-bold text-umain-text">1-10</span> de <span className="font-bold text-umain-text">{filtered.length}</span> alunos</p>
+                   <div className="flex items-center gap-2">
+                     <button className="px-3 py-1.5 border border-umain-border rounded-lg text-xs font-semibold text-umain-text bg-white hover:bg-umain-background transition-colors disabled:opacity-50" disabled>Anterior</button>
+                     <button className="px-3 py-1.5 border border-umain-border rounded-lg text-xs font-semibold text-umain-text bg-white hover:bg-umain-background transition-colors hover:border-umain-accent/40">Próxima</button>
+                   </div>
                 </div>
               </Card>
             </div>

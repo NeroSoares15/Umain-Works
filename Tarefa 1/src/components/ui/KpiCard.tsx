@@ -49,7 +49,7 @@ export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-
   }, [value])
 
   return (
-    <Card className={cn("h-full flex flex-col justify-center bg-white border border-[#e5e7eb] shadow-sm overflow-hidden", leftBorderColor, "border-l-[3px]")}>
+    <Card className={cn("h-full flex flex-col justify-center bg-white border border-[#e5e7eb] shadow-sm overflow-hidden", leftBorderColor, "border-l-[6px]")}>
       <div className="p-5 flex flex-col h-full relative z-10">
         <div className="flex items-start justify-between mb-4">
            {/* Title Top Left */}

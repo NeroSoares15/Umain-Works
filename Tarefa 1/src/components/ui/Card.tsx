@@ -25,7 +25,7 @@ export function Card({ children, className, spotlight = true }: CardProps) {
       ref={divRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        'group relative rounded-3xl border border-umain-border bg-umain-surface/70 backdrop-blur-xl overflow-hidden',
+        'group relative rounded-xl border border-umain-border bg-umain-surface/70 backdrop-blur-xl overflow-hidden',
         'shadow-xl transition-transform duration-500 ease-out',
         className
       )}

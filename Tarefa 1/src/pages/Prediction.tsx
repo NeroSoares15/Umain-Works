@@ -23,7 +23,7 @@ const mockData = [
 export function Prediction() {
   return (
     <div className="flex-1 flex flex-col h-full min-h-screen">
-      <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
+      <main className="flex-1 px-4 pb-4 md:px-6 md:pb-6 lg:px-10 lg:pb-10 pt-4 overflow-auto relative z-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <KpiCard 

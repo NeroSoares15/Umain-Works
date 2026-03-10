@@ -29,7 +29,7 @@ export function Settings() {
 
     return (
         <>
-            <main className="flex-1 p-4 md:p-8 space-y-6 overflow-auto">
+            <main className="flex-1 px-4 pb-4 md:px-6 md:pb-6 lg:px-10 lg:pb-10 pt-4 overflow-auto bg-umain-background">
                 <div className="max-w-5xl mx-auto space-y-6">
 
                     <div className="flex items-center gap-3 mb-6">

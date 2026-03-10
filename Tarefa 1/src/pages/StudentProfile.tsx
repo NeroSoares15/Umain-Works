@@ -111,12 +111,22 @@ export function StudentProfile() {
 
   return (
     <>
-      <main className="flex-1 p-4 md:p-8 space-y-4 md:space-y-6 overflow-auto">
-        <div className="flex items-center justify-between mb-2">
+      <main className="flex-1 px-4 pb-4 md:px-6 md:pb-6 lg:px-10 lg:pb-10 pt-4 space-y-4 md:space-y-6 overflow-auto">
+        <div className="flex flex-col md:flex-row md:items-start justify-between mb-2 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-umain-text tracking-tight">{obfuscateName(student.name, isObs)}</h1>
             <p className="text-sm font-medium text-umain-text-muted mt-0.5">{`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}</p>
           </div>
+          {!isObs && (
+            <div className="flex items-center gap-3">
+              <button className="px-4 py-2 border border-umain-border bg-white text-umain-text rounded-lg text-xs font-bold shadow-sm hover:bg-umain-background transition-colors">
+                Nova Intervenção
+              </button>
+              <button className="px-4 py-2 bg-umain-accent text-white rounded-lg text-xs font-bold shadow-sm hover:bg-[#a34b2f] transition-colors">
+                Agendar Reunião
+              </button>
+            </div>
+          )}
         </div>
         <button
           onClick={() => navigate('/dashboard')}

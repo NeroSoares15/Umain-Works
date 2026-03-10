@@ -61,8 +61,9 @@ export function TopBar() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center mr-8">
-           <img src="/logo.png" alt="Umain Works" className="h-4 brightness-0 invert object-contain" />
+        <div className="flex items-center gap-2 mr-8">
+           <span className="text-white font-bold text-xl tracking-tight leading-none">UMAIN</span>
+           <span className="text-white font-semibold text-sm pt-1">WORKS</span>
         </div>
         
         {/* Desktop Top Navigation */}
