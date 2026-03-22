@@ -6,6 +6,7 @@ export interface StudentIndicators {
     gpa: number
   }
   financial: {
+    monthlyFee: number
     tuitionArrearsMonths: number
     scholarshipStatus: 'Bolseiro' | 'Não Bolseiro' | 'Candidato'
     paymentAgreement: boolean
@@ -56,7 +57,7 @@ export const students: Student[] = [
     statuses: ['Trabalhador-Estudante', 'Propinas em Atraso'],
     indicators: {
       academic: { attendancePercent: 42, ucFailures: 3, negativeGrades: 4, gpa: 9.2 },
-      financial: { tuitionArrearsMonths: 3, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 85, tuitionArrearsMonths: 3, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 4, materialsDownloaded: 2, daysSinceLastAccess: 12 },
       socioeconomic: { entryProfile: 'Trabalhador-Estudante', residence: 'Deslocado', nee: false },
     },
@@ -77,7 +78,7 @@ export const students: Student[] = [
     statuses: ['1º Ano'],
     indicators: {
       academic: { attendancePercent: 55, ucFailures: 2, negativeGrades: 3, gpa: 10.5 },
-      financial: { tuitionArrearsMonths: 2, scholarshipStatus: 'Candidato', paymentAgreement: false },
+      financial: { monthlyFee: 65, tuitionArrearsMonths: 2, scholarshipStatus: 'Candidato', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 8, materialsDownloaded: 5, daysSinceLastAccess: 6 },
       socioeconomic: { entryProfile: 'Geral', residence: 'Deslocado', nee: false },
     },
@@ -97,7 +98,7 @@ export const students: Student[] = [
     statuses: ['Bolseira'],
     indicators: {
       academic: { attendancePercent: 68, ucFailures: 1, negativeGrades: 2, gpa: 12.3 },
-      financial: { tuitionArrearsMonths: 0, scholarshipStatus: 'Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 65, tuitionArrearsMonths: 0, scholarshipStatus: 'Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 15, materialsDownloaded: 12, daysSinceLastAccess: 2 },
       socioeconomic: { entryProfile: 'Geral', residence: 'Local', nee: false },
     },
@@ -118,7 +119,7 @@ export const students: Student[] = [
     statuses: ['NEE', 'Propinas em Atraso'],
     indicators: {
       academic: { attendancePercent: 31, ucFailures: 4, negativeGrades: 5, gpa: 7.8 },
-      financial: { tuitionArrearsMonths: 4, scholarshipStatus: 'Não Bolseiro', paymentAgreement: true },
+      financial: { monthlyFee: 85, tuitionArrearsMonths: 4, scholarshipStatus: 'Não Bolseiro', paymentAgreement: true },
       behavioral: { moodleLoginsLast30Days: 2, materialsDownloaded: 1, daysSinceLastAccess: 21 },
       socioeconomic: { entryProfile: 'Geral', residence: 'Deslocado', nee: true },
     },
@@ -140,7 +141,7 @@ export const students: Student[] = [
     statuses: ['Internacional'],
     indicators: {
       academic: { attendancePercent: 72, ucFailures: 1, negativeGrades: 2, gpa: 11.8 },
-      financial: { tuitionArrearsMonths: 1, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 250, tuitionArrearsMonths: 1, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 20, materialsDownloaded: 18, daysSinceLastAccess: 1 },
       socioeconomic: { entryProfile: 'Internacional', residence: 'Internacional', nee: false },
     },
@@ -158,7 +159,7 @@ export const students: Student[] = [
     statuses: ['Bolseiro'],
     indicators: {
       academic: { attendancePercent: 91, ucFailures: 0, negativeGrades: 0, gpa: 15.2 },
-      financial: { tuitionArrearsMonths: 0, scholarshipStatus: 'Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 0, tuitionArrearsMonths: 0, scholarshipStatus: 'Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 28, materialsDownloaded: 35, daysSinceLastAccess: 1 },
       socioeconomic: { entryProfile: 'Geral', residence: 'Local', nee: false },
     },
@@ -176,7 +177,7 @@ export const students: Student[] = [
     statuses: ['Trabalhador-Estudante'],
     indicators: {
       academic: { attendancePercent: 59, ucFailures: 2, negativeGrades: 3, gpa: 11.0 },
-      financial: { tuitionArrearsMonths: 1, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 85, tuitionArrearsMonths: 1, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 11, materialsDownloaded: 8, daysSinceLastAccess: 4 },
       socioeconomic: { entryProfile: 'Trabalhador-Estudante', residence: 'Local', nee: false },
     },
@@ -196,7 +197,7 @@ export const students: Student[] = [
     statuses: ['Maior 23'],
     indicators: {
       academic: { attendancePercent: 78, ucFailures: 0, negativeGrades: 1, gpa: 13.5 },
-      financial: { tuitionArrearsMonths: 0, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
+      financial: { monthlyFee: 65, tuitionArrearsMonths: 0, scholarshipStatus: 'Não Bolseiro', paymentAgreement: false },
       behavioral: { moodleLoginsLast30Days: 22, materialsDownloaded: 19, daysSinceLastAccess: 1 },
       socioeconomic: { entryProfile: 'Maior 23', residence: 'Local', nee: false },
     },

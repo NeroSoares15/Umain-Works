@@ -8,13 +8,14 @@ export default {
         extend: {
             colors: {
                 umain: {
-                    primary: '#0f172a', // Slate 900 - Deep Navy
-                    secondary: '#334155', // Slate 700
-                    accent: '#2563eb', // Blue 600
-                    background: '#f8fafc', // Slate 50
+                    primary: '#C15B38',
+                    secondary: '#f4eee3',
+                    accent: '#C15B38',
+                    background: '#FCFCF7',
                     surface: '#ffffff',
-                    text: '#0f172a',
-                    muted: '#64748b',
+                    border: '#e5e7eb',
+                    text: '#111827',
+                    muted: '#6b7280',
                 },
                 risk: {
                     low: '#10b981', // Emerald 500
@@ -23,9 +24,9 @@ export default {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['Manrope', 'system-ui', 'sans-serif'],
             },
         },
     },
-    plugins: [],
+    plugins: [require("tailwindcss-animate")],
 }
