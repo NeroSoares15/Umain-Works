@@ -2,9 +2,9 @@
 
 @theme {
   --font-sans: 'Manrope', system-ui, sans-serif;
-  --color-umain-primary: #c5663b;
+  --color-umain-primary: #c1633d;
   --color-umain-secondary: #fff8f1;
-  --color-umain-accent: #c5663b;
+  --color-umain-accent: #c1633d;
   --color-umain-background: #fffdf6;
   --color-umain-surface: #ffffff;
   --color-umain-border: #e8e1d3;
@@ -12,9 +12,10 @@
   --color-umain-text-muted: #6f6a63;
   --color-umain-muted: #f5f1e8;
   
-  --color-risk-low: #10b981; 
-  --color-risk-medium: #f59e0b; 
-  --color-risk-high: #ef4444; 
+  --color-risk-low: #c1633d; 
+  --color-risk-medium: #e7a92a; 
+  --color-risk-high: #e72a2a; 
+  --color-risk-safe: #2a9f4b;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);

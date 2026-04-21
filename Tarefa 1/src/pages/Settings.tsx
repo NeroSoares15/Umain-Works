@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BookCopy, Pencil, Save, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
@@ -5,6 +6,13 @@ import { cn } from '../lib/utils'
 import { platformVersion, settingsSections } from '../data/referenceData'
 
 type SettingsTab = 'parameters' | 'credits'
+
+type EditingRowState = {
+  sectionId: string
+  rowId: string
+  maxValue: string
+  severity: string
+}
 
 function SettingsTabButton({
   active,
@@ -21,9 +29,9 @@ function SettingsTabButton({
     <button
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-[4px] border px-3 py-1.5 text-[12px] font-medium transition-colors',
+        'inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors',
         active
-          ? 'border-[#f1d7c6] bg-[#fdf1ea] text-[#c5663b]'
+          ? 'border-[#e8c9b9] bg-[#fdf1ea] text-[#c1633d]'
           : 'border-[#e7e1d6] bg-white text-[#2d2b28]'
       )}
     >
@@ -35,8 +43,9 @@ function SettingsTabButton({
 
 export function Settings() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [sectionsState, setSectionsState] = useState(settingsSections)
+  const [editingRow, setEditingRow] = useState<EditingRowState | null>(null)
   const activeTab: SettingsTab = searchParams.get('tab') === 'credits' ? 'credits' : 'parameters'
-  const isEditing = activeTab === 'parameters' && searchParams.get('edit') === '1'
 
   function updateRoute(nextTab: SettingsTab, nextEditing = false) {
     const nextParams = new URLSearchParams()
@@ -52,42 +61,70 @@ export function Settings() {
     setSearchParams(nextParams)
   }
 
+  function handleTabChange(nextTab: SettingsTab) {
+    setEditingRow(null)
+    updateRoute(nextTab)
+  }
+
+  function startRowEdit(sectionId: string, row: { id: string; maxValue: string; severity?: string }) {
+    setEditingRow({
+      sectionId,
+      rowId: row.id,
+      maxValue: row.maxValue,
+      severity: row.severity ?? '',
+    })
+    updateRoute('parameters', true)
+  }
+
+  function cancelRowEdit() {
+    setEditingRow(null)
+    updateRoute('parameters')
+  }
+
+  function saveRowEdit() {
+    if (!editingRow) return
+
+    setSectionsState((previousSections) =>
+      previousSections.map((section) => {
+        if (section.id !== editingRow.sectionId) return section
+
+        return {
+          ...section,
+          rows: section.rows.map((row) => {
+            if (row.id !== editingRow.rowId) return row
+
+            return {
+              ...row,
+              maxValue: editingRow.maxValue.trim() || row.maxValue,
+              severity: row.severity !== undefined ? editingRow.severity.trim() || row.severity : row.severity,
+            }
+          }),
+        }
+      })
+    )
+
+    setEditingRow(null)
+    updateRoute('parameters')
+  }
+
   return (
     <div className="flex min-h-full flex-col bg-[#fffdf6]">
       <div className="border-b border-[#ede5d7] bg-white px-5 py-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex items-center gap-5">
-            <h1 className="text-[16px] font-semibold text-[#2e2d2a]">Configurações</h1>
+            <h1 className="text-[17px] font-semibold text-[#2e2d2a]">Configurações</h1>
             <div className="flex flex-wrap items-center gap-2">
-              <SettingsTabButton active={activeTab === 'parameters'} icon={X} label="Parâmetros" onClick={() => updateRoute('parameters')} />
-              <SettingsTabButton active={activeTab === 'credits'} icon={BookCopy} label="Créditos" onClick={() => updateRoute('credits')} />
+              <SettingsTabButton active={activeTab === 'parameters'} icon={X} label="Parâmetros" onClick={() => handleTabChange('parameters')} />
+              <SettingsTabButton active={activeTab === 'credits'} icon={BookCopy} label="Créditos" onClick={() => handleTabChange('credits')} />
             </div>
           </div>
-
-          {activeTab === 'parameters' && isEditing ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => updateRoute('parameters')}
-                className="rounded-[4px] border border-[#e3d8c8] bg-white px-3 py-1.5 text-[12px] font-medium text-[#4b4742]"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => updateRoute('parameters')}
-                className="inline-flex items-center gap-1.5 rounded-[4px] bg-[#c5663b] px-3 py-1.5 text-[12px] font-semibold text-white"
-              >
-                <Save className="h-3.5 w-3.5" />
-                Guardar
-              </button>
-            </div>
-          ) : null}
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col px-4 py-4">
+      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col px-5 py-4">
         {activeTab === 'parameters' ? (
           <div className="space-y-6">
-            {settingsSections.map((section) => (
+            {sectionsState.map((section) => (
               <section key={section.id} className="border-b border-[#e5ddcf] pb-5 last:border-b-0">
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[330px_minmax(0,1fr)] xl:gap-8">
                   <div className="px-1 py-2">
@@ -110,58 +147,89 @@ export function Settings() {
                           </tr>
                         </thead>
                         <tbody>
-                          {section.rows.map((row) => (
-                            <tr
-                              key={row.id}
-                              className={cn(
-                                'border-b border-[#eee7db] text-[#3b3834] last:border-b-0',
-                                isEditing && 'bg-[#fef7f2]'
-                              )}
-                            >
-                              <td className="px-3 py-3">{row.label}</td>
+                          {section.rows.map((row) => {
+                            const isRowEditing =
+                              editingRow?.sectionId === section.id && editingRow.rowId === row.id
 
-                              <td className="px-3 py-3">
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    placeholder={row.maxPlaceholder || 'Number'}
-                                    className="h-8 w-full rounded-[4px] border border-[#d88960] bg-white px-3 text-[12px]"
-                                  />
-                                ) : (
-                                  row.maxValue
+                            return (
+                              <tr
+                                key={row.id}
+                                className={cn(
+                                  'border-b border-[#eee7db] text-[#3b3834] last:border-b-0',
+                                  isRowEditing && 'bg-[#fef7f2]'
                                 )}
-                              </td>
+                              >
+                                <td className="px-3 py-3">{row.label}</td>
 
-                              {section.columns.length === 4 ? (
                                 <td className="px-3 py-3">
-                                  {isEditing ? (
+                                  {isRowEditing ? (
                                     <input
                                       type="text"
-                                      placeholder={row.severityPlaceholder || 'Percentage'}
-                                      className="h-8 w-full rounded-[4px] border border-[#d88960] bg-white px-3 text-[12px]"
+                                      value={editingRow.maxValue}
+                                      onChange={(event) =>
+                                        setEditingRow((previous) =>
+                                          previous ? { ...previous, maxValue: event.target.value } : previous
+                                        )
+                                      }
+                                      placeholder={row.maxValue}
+                                      className="h-8 w-full rounded-[8px] border border-[#d88960] bg-white px-3 text-[12px]"
                                     />
                                   ) : (
-                                    row.severity
+                                    row.maxValue
                                   )}
                                 </td>
-                              ) : null}
 
-                              <td className="px-3 py-3 text-center text-[#c5663b]">
-                                {isEditing ? (
-                                  <button className="inline-flex h-6 w-6 items-center justify-center">
-                                    <X className="h-3.5 w-3.5" />
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => updateRoute('parameters', true)}
-                                    className="inline-flex h-6 w-6 items-center justify-center"
-                                  >
-                                    <Pencil className="h-3.5 w-3.5" />
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                                {section.columns.length === 4 ? (
+                                  <td className="px-3 py-3">
+                                    {isRowEditing ? (
+                                      <input
+                                        type="text"
+                                        value={editingRow.severity}
+                                        onChange={(event) =>
+                                        setEditingRow((previous) =>
+                                          previous ? { ...previous, severity: event.target.value } : previous
+                                        )
+                                      }
+                                      placeholder={row.severity || ''}
+                                        className="h-8 w-full rounded-[8px] border border-[#d88960] bg-white px-3 text-[12px]"
+                                      />
+                                    ) : (
+                                      row.severity
+                                    )}
+                                  </td>
+                                ) : null}
+
+                                <td className="px-3 py-3 text-center text-[#c1633d]">
+                                  {isRowEditing ? (
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <button
+                                        onClick={saveRowEdit}
+                                        className="inline-flex h-6 w-6 items-center justify-center"
+                                        aria-label={`Guardar ${row.label}`}
+                                      >
+                                        <Save className="h-3.5 w-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={cancelRowEdit}
+                                        className="inline-flex h-6 w-6 items-center justify-center"
+                                        aria-label={`Cancelar edição de ${row.label}`}
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => startRowEdit(section.id, row)}
+                                      className="inline-flex h-6 w-6 items-center justify-center"
+                                      aria-label={`Editar ${row.label}`}
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -182,7 +250,7 @@ export function Settings() {
             <h2 className="text-[16px] font-semibold text-[#2f2d2a]">Créditos</h2>
             <div className="mt-4 space-y-3 text-[14px] text-[#4e4b46]">
               <p>RiskRadar demonstrador visual para UMAIN WORKS.</p>
-              <p>Interface construída com React, Vite, Tailwind CSS e Recharts.</p>
+              <p>Interface construída com React, Vite, Tailwind CSS e ApexCharts.</p>
               <p>Versão atual: {platformVersion}</p>
             </div>
           </Card>
