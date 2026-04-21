@@ -1,81 +1,59 @@
 import { Card } from './Card'
 import { cn } from '../../lib/utils'
 import type { LucideIcon } from 'lucide-react'
-import { useState, useEffect } from 'react'
 
 interface KpiCardProps {
   title: string
   value: string | number
   subtitle?: string
   icon: LucideIcon
+  className?: string
   iconColor?: string
   iconBg?: string
+  accentColor?: string
+  subtitleTone?: 'neutral' | 'positive' | 'negative'
 }
 
-export function KpiCard({ title, value, subtitle, icon: Icon, iconColor = 'text-[#C15B38]', iconBg = 'bg-[#f4eee3]' }: KpiCardProps) {
-  const [displayValue, setDisplayValue] = useState<string | number>(0)
-
-  // Determine border color based on typical KPI intent in the mockup
-  let leftBorderColor = "border-l-[#C15B38]" // Default Umain Orange
-  if (subtitle?.includes('face à semana anterior')) {
-    if (subtitle.includes('↑')) leftBorderColor = "border-l-[#10b981]" // Green
-    if (subtitle.includes('↓')) leftBorderColor = "border-l-[#ef4444]" // Red
-  } else if (title.includes('Sucesso') || title.includes('ROI')) {
-      leftBorderColor = "border-l-[#C15B38]"
-  }
-
-  useEffect(() => {
-    if (typeof value !== 'number') {
-      setDisplayValue(value)
-      return
-    }
-
-    let startTimestamp: number | null = null
-    const duration = 1500 // 1.5s
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1)
-
-      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
-      setDisplayValue(Math.floor(easeProgress * value))
-
-      if (progress < 1) {
-        window.requestAnimationFrame(step)
-      }
-    }
-
-    window.requestAnimationFrame(step)
-  }, [value])
+export function KpiCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  className,
+  iconColor = 'text-[#c5663b]',
+  iconBg = 'bg-[#fbefe8]',
+  accentColor = 'bg-[#c5663b]',
+  subtitleTone = 'neutral',
+}: KpiCardProps) {
+  const formattedValue = typeof value === 'number' ? value.toLocaleString('pt-PT') : value
+  const subtitleClassName =
+    subtitleTone === 'positive'
+      ? 'text-[#2ea44f]'
+      : subtitleTone === 'negative'
+        ? 'text-[#db3d31]'
+        : 'text-[#4d4a46]'
 
   return (
-    <Card className={cn("h-full flex flex-col justify-center bg-white border border-[#e5e7eb] shadow-sm overflow-hidden", leftBorderColor, "border-l-[6px]")}>
-      <div className="p-5 flex flex-col h-full relative z-10">
-        <div className="flex items-start justify-between mb-4">
-           {/* Title Top Left */}
-           <p className="text-[13px] font-semibold text-[#6b7280]">{title}</p>
-           
-           {/* Icon Top Right */}
-          <div className={cn('w-8 h-8 rounded-md flex items-center justify-center shrink-0', iconBg)}>
-            <Icon className={cn('w-4 h-4', iconColor)} />
+    <Card className={cn('relative h-full overflow-hidden', className)}>
+      <span className={cn('absolute inset-y-0 left-0 w-[3px]', accentColor)} />
+
+      <div className="flex h-full flex-col p-4 pl-5">
+        <div className="mb-3 flex items-start justify-between gap-4">
+          <p className="text-[12.5px] font-medium text-[#4f4b46]">{title}</p>
+          <div className={cn('grid h-8 w-8 place-items-center rounded-sm', iconBg)}>
+            <Icon className={cn('h-4 w-4', iconColor)} />
           </div>
         </div>
 
         <div className="mt-auto">
-          {/* Main Value */}
           <p
-            className="text-[32px] font-bold text-[#111827] leading-none tracking-tight"
+            className="text-[40px] font-semibold leading-none tracking-tight text-[#232321]"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {typeof displayValue === 'number' ? displayValue.toLocaleString('pt-PT') : displayValue}
+            {formattedValue}
           </p>
-          
-          {/* Subtitle / Trend */}
-          {subtitle && (
-            <p className={cn("text-[11px] font-bold mt-2", subtitle.includes('↑') ? "text-[#10b981]" : subtitle.includes('↓') ? "text-[#ef4444]" : "text-[#6b7280]")}>
-              {subtitle}
-            </p>
-          )}
+
+          {subtitle ? <p className={cn('mt-3 text-[11px] font-medium', subtitleClassName)}>{subtitle}</p> : null}
         </div>
       </div>
     </Card>

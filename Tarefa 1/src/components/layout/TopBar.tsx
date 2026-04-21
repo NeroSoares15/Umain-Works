@@ -1,22 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Menu, ChevronDown } from 'lucide-react'
-import { useAppContext } from '../../contexts/AppContext'
+import { useAppContext, type ProfileId } from '../../contexts/AppContext'
 import { cn } from '../../lib/utils'
-
-type RoutePermission = 'all' | ('diretor' | 'sas' | 'obs')[]
-
-interface NavItem {
-  to: string
-  label: string
-  roles: RoutePermission
-}
-
-const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'Dashboard', roles: 'all' },
-  { to: '/analysis', label: 'Análise por Curso', roles: 'all' },
-  { to: '/settings', label: 'Configurações', roles: 'all' },
-]
 
 export function TopBar() {
   const { activeProfileId, setActiveProfileId } = useAppContext()
@@ -24,12 +10,16 @@ export function TopBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Mock data for profiles matching the Context shape
-  const profiles = [
-    { id: 'diretor', name: 'Alvaro Santos', role: 'Diretor de Curso' },
-    { id: 'sas', name: 'Maria Silva', role: 'Técnico SAS' },
-    { id: 'obs', name: 'João Costa', role: 'Observatório' }
-  ] as const
+  const profiles: Array<{ id: ProfileId; name: string; role: string; initials: string }> = [
+    { id: 'diretor', name: 'Alvaro Santos', role: 'Diretor de Curso', initials: 'AS' },
+    { id: 'sas', name: 'Maria Silva', role: 'Técnico SAS', initials: 'MS' },
+    { id: 'obs', name: 'João Costa', role: 'Observatório', initials: 'JC' },
+  ]
+  const navItems = [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/analysis', label: 'Análise por Curso' },
+    { to: '/settings', label: 'Configurações' },
+  ]
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0]
 
   useEffect(() => {
@@ -42,98 +32,104 @@ export function TopBar() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [dropdownRef])
-
-  // Filter navigation items based on current role
-  const filteredNavItems = navItems.filter(item => 
-    item.roles === 'all' || item.roles.includes(activeProfileId)
-  )
+  }, [])
 
   return (
-    <header className="h-[60px] bg-[#C15B38] border-b border-[#a34b2f] px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-20 relative">
-      <div className="flex items-center gap-4">
-        {/* Mobile menu button could stay or be removed if horizontal scrolling is implemented */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2 -ml-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2 mr-8">
-           <span className="text-white font-bold text-xl tracking-tight leading-none">UMAIN</span>
-           <span className="text-white font-semibold text-sm pt-1">WORKS</span>
-        </div>
-        
-        {/* Desktop Top Navigation */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {filteredNavItems.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) => cn(
-                'px-4 py-2 text-sm transition-colors border-b-2',
-                isActive
-                  ? 'text-white font-semibold border-white'
-                  : 'text-white/70 hover:text-white font-medium border-transparent'
-              )}
-            >
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-
-      <div className="flex items-center gap-3 relative" ref={dropdownRef}>
-        <div 
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md cursor-pointer transition-colors border border-white/10"
-        >
-          <div className="w-6 h-6 rounded bg-white/20 flex items-center justify-center text-white text-xs font-bold">
-            {activeProfile.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
+    <header className="sticky top-0 z-20 border-b border-[#b85b36] bg-[#c5663b] text-white shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+      <div className="flex h-[52px] items-stretch justify-between gap-4 px-4 md:px-5">
+        <div className="flex min-w-0 items-stretch gap-5">
+          <div className="flex items-center gap-1 self-stretch">
+            <span className="text-[21px] font-black leading-none tracking-tight">UMAIN</span>
+            <span className="pt-1 text-[10px] font-bold uppercase tracking-tight">WORKS</span>
           </div>
-          <span className="text-white text-sm font-semibold">{activeProfile.name}</span>
-          <ChevronDown className={cn("w-4 h-4 text-white/70 transition-transform", dropdownOpen && "rotate-180")} />
-        </div>
 
-        {dropdownOpen && (
-          <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-[#e5e7eb] py-1 z-50">
-            {profiles.map(p => (
-              <button
-                key={p.id}
-                onClick={() => {
-                  setActiveProfileId(p.id as any);
-                  setDropdownOpen(false);
-                }}
-                className={cn(
-                  "w-full text-left px-4 py-2 text-sm hover:bg-[#f9fafb] transition-colors flex flex-col",
-                  activeProfileId === p.id ? "bg-[#f4eee3] text-[#c15b38] font-semibold" : "text-[#111827]"
-                )}
+          <nav className="hidden items-stretch gap-2 md:flex">
+            {navItems.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center px-3 text-[12.5px] font-medium text-white/80 transition-colors',
+                    'border-b-[3px] border-transparent hover:text-white',
+                    isActive && 'border-white text-white'
+                  )
+                }
               >
-                <span>{p.name}</span>
-                <span className={cn("text-xs", activeProfileId === p.id ? "text-[#c15b38]/70" : "text-[#6b7280]")}>{p.role}</span>
-              </button>
+                {label}
+              </NavLink>
             ))}
+          </nav>
+
+          <div className="flex items-center md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen((previous) => !previous)}
+              className="rounded-md p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
           </div>
-        )}
+        </div>
+
+        <div className="relative flex items-center" ref={dropdownRef}>
+          <button
+            onClick={() => setDropdownOpen((previous) => !previous)}
+            className="flex items-center gap-2 rounded-md border border-white/10 bg-white/10 px-3 py-1.5 text-[12px] font-semibold"
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-[3px] bg-white/15 text-[11px] font-bold">
+              {activeProfile.initials}
+            </span>
+            <span className="hidden sm:inline">{activeProfile.name}</span>
+            <ChevronDown className={cn('h-3.5 w-3.5 text-white/80 transition-transform', dropdownOpen && 'rotate-180')} />
+          </button>
+
+          {dropdownOpen && (
+            <div className="absolute right-0 top-full z-30 mt-2 min-w-[220px] rounded-md border border-[#e3d7c8] bg-white py-1 text-[#2f2d29] shadow-lg">
+              {profiles.map((profile) => (
+                <button
+                  key={profile.id}
+                  onClick={() => {
+                    setActiveProfileId(profile.id)
+                    setDropdownOpen(false)
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-3 px-4 py-2 text-left transition-colors',
+                    activeProfileId === profile.id ? 'bg-[#fbf2ec]' : 'hover:bg-[#faf7f0]'
+                  )}
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-[4px] bg-[#f1e0d4] text-[11px] font-bold text-[#9f552f]">
+                    {profile.initials}
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-[12px] font-semibold">{profile.name}</span>
+                    <span className="text-[11px] text-[#7b756e]">{profile.role}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {mobileMenuOpen && (
-        <div className="absolute top-[60px] left-0 w-full bg-white border-b border-[#e5e7eb] shadow-lg lg:hidden flex flex-col p-4 gap-2 z-40">
-          {filteredNavItems.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }) => cn(
-                'px-4 py-3 rounded-lg text-sm font-bold transition-colors',
-                isActive
-                  ? 'bg-[#f4eee3] text-[#C15B38]'
-                  : 'text-gray-700 hover:bg-gray-50'
-              )}
-            >
-              {label}
-            </NavLink>
-          ))}
+        <div className="border-t border-white/10 bg-[#c5663b] px-4 py-2 md:hidden">
+          <nav className="flex min-w-max items-center gap-4 overflow-x-auto">
+            {navItems.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    'whitespace-nowrap rounded-md px-2 py-1 text-[12px] font-medium text-white/75',
+                    isActive && 'bg-white/10 text-white'
+                  )
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
         </div>
       )}
     </header>

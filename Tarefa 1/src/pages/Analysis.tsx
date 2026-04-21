@@ -1,279 +1,339 @@
 import { useState } from 'react'
-import { Card, CardContent } from '../components/ui/Card'
-import { Treemap, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, AreaChart, Area } from 'recharts'
-import { students } from '../data/students'
-import { scoreToLevel } from '../lib/riskUtils'
-import { useAppContext } from '../contexts/AppContext'
+import {
+  BadgeEuro,
+  LineChart as LineChartIcon,
+  Pencil,
+  Table2,
+  TrendingUp,
+  Wallet,
+  ShieldCheck,
+} from 'lucide-react'
+import {
+  Bar,
+  BarChart,
+  LabelList,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { useSearchParams } from 'react-router-dom'
+import { Card } from '../components/ui/Card'
+import { KpiCard } from '../components/ui/KpiCard'
 import { cn } from '../lib/utils'
+import { courseHeatmapMix, courseSelectionRows, retentionData, roiChartData, roiParameterRows } from '../data/referenceData'
 
-function Label({ children }: { children: string }) {
-  return <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-[#6b7280]">{children}</p>
+type AnalysisView = 'roi' | 'retention' | 'course'
+
+function AnalysisToggle({
+  label,
+  icon: Icon,
+  active,
+  onClick,
+}: {
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-[4px] border px-3 py-1.5 text-[12px] font-medium transition-colors',
+        active
+          ? 'border-[#f1d7c6] bg-[#fdf1ea] text-[#c5663b]'
+          : 'border-[#e7e1d6] bg-white text-[#2d2b28]'
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
+  )
 }
 
-const COLORS = {
-  high: '#ef4444', 
-  medium: '#f59e0b', 
-  low: '#3b82f6', 
-  none: '#10b981'
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[16px] font-semibold text-[#2d2b28]">{children}</h2>
 }
-
-function CustomizedContent(props: any) {
-  const { depth, x, y, width, height, payload, name } = props
-  const safeWidth = Math.max(0, width || 0);
-  const safeHeight = Math.max(0, height || 0);
-
-  if (safeWidth <= 0 || safeHeight <= 0) return null;
-
-  if (depth === 1) {
-    return (
-      <g>
-        <rect x={x} y={y} width={safeWidth} height={safeHeight} fill="rgba(243, 244, 246, 0.4)" stroke="#e5e7eb" strokeWidth={2} />
-        {safeWidth > 60 && safeHeight > 30 && (
-          <text x={x + 6} y={y + 18} fill="#4b5563" fontSize={11} fontWeight={700} style={{ pointerEvents: 'none', textTransform: 'uppercase' }}>
-            {name ? String(name).substring(0, Math.max(0, Math.floor(safeWidth / 7))) : ''}
-            {name && String(name).length > Math.floor(safeWidth / 7) ? '...' : ''}
-          </text>
-        )}
-      </g>
-    )
-  }
-
-  if (depth === 2 || depth === 3) {
-    const risk = props.risk || payload?.risk || 'none'
-    const color = COLORS[risk as keyof typeof COLORS] || '#ccc'
-    const inset = 1
-    return (
-      <g>
-        <rect
-          x={x + inset} y={y + inset} width={Math.max(0, safeWidth - inset * 2)} height={Math.max(0, safeHeight - inset * 2)}
-          style={{ fill: color, fillOpacity: 1, stroke: '#ffffff', strokeWidth: Math.min(safeWidth, safeHeight) > 10 ? 1 : 0, cursor: 'crosshair' }}
-        />
-      </g>
-    )
-  }
-  return <rect x={x} y={y} width={safeWidth} height={safeHeight} fill="transparent" stroke="none" />;
-}
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload
-    if (data.risk) {
-      return (
-        <div className="bg-white border border-[#e5e7eb] p-3 rounded-xl shadow-lg z-50 min-w-[200px]">
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">{data.course}</p>
-          <div className="flex items-center justify-between gap-4">
-             <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[data.risk as keyof typeof COLORS] }} />
-                <p className="text-[13px] font-bold text-gray-900">{data.name}</p>
-             </div>
-             <p className="text-xs font-bold bg-gray-50 px-2 py-1 rounded-md text-gray-900 border border-gray-200">{data.size} {data.size === 1 ? 'aluno' : 'alunos'}</p>
-          </div>
-        </div>
-      )
-    }
-  }
-  return null
-}
-
-const mockPredictionData = [
-  { month: 'Set', historico: 100, otimizado: 100 },
-  { month: 'Out', historico: 98, otimizado: 99 },
-  { month: 'Nov', historico: 95, otimizado: 98 },
-  { month: 'Dez', historico: 92, otimizado: 97 },
-  { month: 'Jan', historico: 88, otimizado: 96 },
-  { month: 'Fev', historico: 85, otimizado: 94 },
-  { month: 'Mar', historico: 80, otimizado: 92 },
-  { month: 'Abr', historico: 78, otimizado: 91 },
-  { month: 'Mai', historico: 75, otimizado: 90 },
-  { month: 'Jun', historico: 71, otimizado: 88 },
-]
 
 export function Analysis() {
-  const { settings } = useAppContext()
-  const [activeTab, setActiveTab] = useState<'por-curso' | 'roi' | 'retencao'>('por-curso')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const viewParam = searchParams.get('view')
+  const activeView: AnalysisView =
+    viewParam === 'retention' || viewParam === 'course' || viewParam === 'roi' ? viewParam : 'roi'
+  const [selectedCourse, setSelectedCourse] = useState('Gestão de Empresas')
 
-  const [successRate, setSuccessRate] = useState(40)
-  const [tuition, setTuition] = useState({
-    ctesp: 697, licenciatura: 697, mestrado: 1250, internacional: 3500
-  })
+  const heatmapMix = courseHeatmapMix[selectedCourse]
+  const topRowTotal = heatmapMix.high + heatmapMix.medium
+  const bottomRowTotal = heatmapMix.none + heatmapMix.low
+  const topRowHeight = 72
+  const bottomRowHeight = 28
+  const highWidth = `${(heatmapMix.high / topRowTotal) * 100}%`
+  const mediumWidth = `${(heatmapMix.medium / topRowTotal) * 100}%`
+  const noneWidth = `${(heatmapMix.none / bottomRowTotal) * 100}%`
+  const lowWidth = `${(heatmapMix.low / bottomRowTotal) * 100}%`
 
-  // Treemap logic
-  const courseData = students.reduce((acc, student) => {
-    const course = student.course
-    const level = scoreToLevel(student.riskScore, settings.riskThresholds)
-    if (!acc[course]) acc[course] = { name: course, counts: { high: 0, medium: 0, low: 0, none: 0 } }
-    acc[course].counts[level] += 1
-    return acc
-  }, {} as Record<string, any>)
+  function handleViewChange(view: AnalysisView) {
+    if (view === 'roi') {
+      setSearchParams({})
+      return
+    }
 
-  const chartDataTreemap = [{
-    name: 'Escola',
-    children: Object.values(courseData).map((course: any) => ({
-      name: course.name,
-      children: [
-        ...(course.counts.high > 0 ? [{ name: 'Risco Alto', size: course.counts.high, risk: 'high', course: course.name }] : []),
-        ...(course.counts.medium > 0 ? [{ name: 'Risco Médio', size: course.counts.medium, risk: 'medium', course: course.name }] : []),
-        ...(course.counts.low > 0 ? [{ name: 'Risco Baixo', size: course.counts.low, risk: 'low', course: course.name }] : []),
-        ...(course.counts.none > 0 ? [{ name: 'Sem Risco', size: course.counts.none, risk: 'none', course: course.name }] : [])
-      ]
-    }))
-  }]
-
-  // ROI logic
-  const riskCounts = { ctesp: 45, licenciatura: 120, mestrado: 35, internacional: 25 }
-  const chartDataRoi = [
-    { name: 'CTeSP', emRisco: riskCounts.ctesp * tuition.ctesp, retido: Math.round(riskCounts.ctesp * tuition.ctesp * (successRate / 100)) },
-    { name: 'Licenciatura', emRisco: riskCounts.licenciatura * tuition.licenciatura, retido: Math.round(riskCounts.licenciatura * tuition.licenciatura * (successRate / 100)) },
-    { name: 'Mestrado', emRisco: riskCounts.mestrado * tuition.mestrado, retido: Math.round(riskCounts.mestrado * tuition.mestrado * (successRate / 100)) },
-    { name: 'Internacional', emRisco: riskCounts.internacional * tuition.internacional, retido: Math.round(riskCounts.internacional * tuition.internacional * (successRate / 100)) }
-  ]
-
-  const tabs = [
-    { id: 'por-curso', label: 'Análise por Curso' },
-    { id: 'roi', label: 'Gestão de ROI' },
-    { id: 'retencao', label: 'Predição de Retenção' }
-  ]
+    setSearchParams({ view })
+  }
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-screen bg-[#f9fafb]">
-      {/* SubHeader with Tabs */}
-      <div className="bg-white border-b border-[#e5e7eb] px-6 md:px-8 overflow-x-auto custom-scrollbar">
-        <div className="flex gap-2 max-w-[1920px] mx-auto min-w-max py-3">
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as any)}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-bold transition-colors",
-                activeTab === t.id ? "bg-[#C15B38] text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div className="flex min-h-full flex-col bg-[#fffdf6]">
+      <div className="border-b border-[#ede5d7] bg-white px-5 py-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-5">
+            <h1 className="text-[16px] font-semibold text-[#2e2d2a]">Visualização</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <AnalysisToggle label="Gestão de ROI" icon={BadgeEuro} active={activeView === 'roi'} onClick={() => handleViewChange('roi')} />
+              <AnalysisToggle label="Retenção" icon={LineChartIcon} active={activeView === 'retention'} onClick={() => handleViewChange('retention')} />
+              <AnalysisToggle label="Por Curso" icon={Table2} active={activeView === 'course'} onClick={() => handleViewChange('course')} />
+            </div>
+          </div>
         </div>
       </div>
 
-      <main className="flex-1 p-6 md:p-8 lg:p-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
-        
-        {activeTab === 'por-curso' && (
-          <div className="flex flex-col gap-3">
-            <Label>Heatmap de Risco (Visão Micro)</Label>
-            <Card className="flex-1 flex flex-col p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <div className="flex flex-wrap items-center gap-4 mb-4 mt-2 pl-2">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mr-2">Legenda:</span>
-                {Object.entries({ high: 'Risco Alto', medium: 'Risco Médio', low: 'Risco Baixo', none: 'Sem Risco' }).map(([key, label]) => (
-                    <div key={key} className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: COLORS[key as keyof typeof COLORS] }} />
-                        <span className="text-xs font-semibold text-gray-700">{label}</span>
-                    </div>
-                ))}
-              </div>
-              <div className="w-full h-[550px] min-h-[550px] mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <Treemap
-                    data={chartDataTreemap}
-                    dataKey="size"
-                    aspectRatio={4 / 3}
-                    stroke="#fff"
-                    content={<CustomizedContent />}
-                    animationDuration={800}
-                  >
-                    <Tooltip content={<CustomTooltip />} />
-                  </Treemap>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'roi' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 flex flex-col gap-3">
-              <Label>Calculadora de Parâmetros</Label>
-              <Card className="flex-1 h-full shadow-sm border-gray-200 bg-white">
-                <CardContent className="p-6 space-y-6 flex flex-col h-full">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-end">
-                      <label className="text-sm font-bold text-gray-700">Eficácia da Intervenção (%)</label>
-                      <span className="text-lg font-black text-[#C15B38]">{successRate}%</span>
-                    </div>
-                    <input
-                      type="range" min="10" max="90" value={successRate}
-                      onChange={(e) => setSuccessRate(parseInt(e.target.value))}
-                      className="w-full accent-[#C15B38] cursor-pointer"
-                    />
-                  </div>
-                  <div className="space-y-4 pt-4 border-t border-gray-100">
-                    <label className="text-sm font-bold text-gray-700 mb-2 block">Propinas Anuais (€) por Grau</label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {Object.entries(tuition).map(([key, val]) => (
-                        <div key={key} className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">{key}</span>
-                          <input 
-                            type="number" value={val} 
-                            onChange={e => setTuition(p => ({ ...p, [key]: parseInt(e.target.value) || 0 }))}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-[#C15B38]" 
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col gap-4 px-4 py-4">
+        {activeView === 'roi' && (
+          <>
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <KpiCard
+                title="Receita em Risco (Anual)"
+                value="€246,255"
+                subtitle="Acumulado - Propinas de Alunos em Risco Alto"
+                subtitleTone="neutral"
+                icon={Wallet}
+                iconBg="bg-[#fbefe8]"
+                iconColor="text-[#c5663b]"
+              />
+              <KpiCard
+                title="Receita Recuperável (Est.)"
+                value="€98,502"
+                subtitle="Com taxa de eficácia de 40% na intervenção"
+                subtitleTone="neutral"
+                icon={ShieldCheck}
+                iconBg="bg-[#fbefe8]"
+                iconColor="text-[#c5663b]"
+              />
+              <KpiCard
+                title="Multiplicador RiskRadar"
+                value="6.6x"
+                subtitle="ROI estimado sobre o custo do software"
+                subtitleTone="neutral"
+                icon={TrendingUp}
+                iconBg="bg-[#fbefe8]"
+                iconColor="text-[#c5663b]"
+              />
             </div>
-            <div className="lg:col-span-2 flex flex-col gap-3">
-              <Label>Retenção vs Risco Bruto (Euros)</Label>
-              <Card className="flex-1 h-full bg-white border-gray-200 shadow-sm p-6">
-                <div className="w-full h-[400px]">
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[430px_minmax(0,1fr)]">
+              <Card className="overflow-hidden">
+                <div className="px-4 py-4">
+                  <SectionTitle>Parâmetros</SectionTitle>
+                </div>
+
+                <div className="px-4 pb-4">
+                  <table className="w-full border-collapse text-left text-[12px]">
+                    <thead>
+                      <tr className="bg-[#ececec] text-[#2f2d2a]">
+                        <th className="px-3 py-3 font-semibold">Tipo de Estud...</th>
+                        <th className="px-3 py-3 font-semibold">Max. Meses e...</th>
+                        <th className="px-3 py-3 font-semibold">Gravidade</th>
+                        <th className="px-3 py-3 text-center font-semibold">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {roiParameterRows.map((row) => (
+                        <tr key={row.type} className="border-b border-[#eee7db] text-[#3c3935]">
+                          <td className="px-3 py-3">{row.type}</td>
+                          <td className="px-3 py-3">{row.maxDelay}</td>
+                          <td className="px-3 py-3">{row.severity}</td>
+                          <td className="px-3 py-3 text-center text-[#c5663b]">
+                            <Pencil className="mx-auto h-3.5 w-3.5" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+
+              <Card className="overflow-hidden">
+                <div className="px-4 py-4">
+                  <SectionTitle>Retenção vs Risco Bruto (EUROS)</SectionTitle>
+                </div>
+
+                <div className="h-[610px] px-2 pb-4 md:px-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartDataRoi} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-                      <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
-                      <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} cursor={{ fill: '#f9fafb' }} />
-                      <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 'bold' }} iconType="plainline" />
-                      <Bar dataKey="emRisco" name="Receita em Risco" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
-                      <Bar dataKey="retido" name="Receita Preservada" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                    <BarChart data={roiChartData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#4d4a45', fontSize: 13 }}
+                        dy={10}
+                      />
+                      <YAxis hide />
+                      <Legend
+                        verticalAlign="bottom"
+                        align="center"
+                        wrapperStyle={{ fontSize: '12px', color: '#5c5852', paddingTop: '20px' }}
+                        formatter={(value) => <span className="text-[#6a655e]">{value}</span>}
+                      />
+                      <Bar dataKey="recovered" name="Receita Preservada" fill="#2f9d49" radius={[4, 4, 0, 0]} barSize={66} />
+                      <Bar dataKey="risk" name="Receita em Risco" fill="#f12727" radius={[4, 4, 0, 0]} barSize={66} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </Card>
             </div>
-          </div>
+          </>
         )}
 
-        {activeTab === 'retencao' && (
-          <div className="flex flex-col gap-3">
-            <Label>Curva de Abandono (Histórico vs. Otimizado)</Label>
-            <Card className="flex-1 p-6 bg-white border-gray-200 shadow-sm">
-              <div className="w-full h-[400px]">
+        {activeView === 'retention' && (
+          <>
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <KpiCard
+                title="Previsão de Retenção (Sem Intervenção)"
+                value="71%"
+                subtitle="Baseado no histórico dos últimos 5 anos"
+                subtitleTone="neutral"
+                icon={LineChartIcon}
+                iconBg="bg-[#fbefe8]"
+                iconColor="text-[#c5663b]"
+              />
+              <KpiCard
+                title="Previsão de Retenção (Optimizada)"
+                value="88%"
+                subtitle="Com intervenção guiada por Risk Radar"
+                subtitleTone="neutral"
+                icon={TrendingUp}
+                iconBg="bg-[#fbefe8]"
+                iconColor="text-[#c5663b]"
+              />
+            </div>
+
+            <Card className="overflow-hidden">
+              <div className="px-4 py-4">
+                <SectionTitle>Curva de Abandono (Histórico VS. Optimizado com RiskRadar)</SectionTitle>
+              </div>
+
+              <div className="h-[560px] px-2 pb-4 md:px-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={mockPredictionData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorOtimizado" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorHistorico" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[60, 100]} />
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 'bold' }} iconType="plainline" />
-                    <Area type="monotone" dataKey="otimizado" name="Taxa Retenção Otimizada" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorOtimizado)" />
-                    <Area type="monotone" dataKey="historico" name="Taxa Retenção Histórica" stroke="#ef4444" strokeWidth={3} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorHistorico)" />
-                  </AreaChart>
+                  <LineChart data={retentionData} margin={{ top: 15, right: 50, left: 0, bottom: 35 }}>
+                    <XAxis
+                      dataKey="month"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#8f8a83', fontSize: 14 }}
+                      angle={-55}
+                      textAnchor="end"
+                      height={70}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#8f8a83', fontSize: 12 }}
+                      tickFormatter={() => '%'}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      align="center"
+                      wrapperStyle={{ fontSize: '12px', color: '#5c5852', paddingTop: '8px' }}
+                    />
+                    <Line type="monotone" dataKey="historical" name="Taxa de Retenção Histórica" stroke="#e3312d" strokeWidth={4} dot={false}>
+                      <LabelList dataKey="historicalLabel" position="right" fill="#e3312d" fontSize={14} />
+                    </Line>
+                    <Line type="monotone" dataKey="optimized" name="Taxa de Retenção Optimizada" stroke="#2f9d49" strokeWidth={4} dot={false}>
+                      <LabelList dataKey="optimizedLabel" position="right" fill="#2f9d49" fontSize={14} />
+                    </Line>
+                  </LineChart>
                 </ResponsiveContainer>
+              </div>
+            </Card>
+          </>
+        )}
+
+        {activeView === 'course' && (
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[375px_minmax(0,1fr)]">
+            <Card className="overflow-hidden">
+              <div className="border-b border-[#ede5d7] bg-[#fffef9] px-4 py-4">
+                <SectionTitle>Heatmap de Risco</SectionTitle>
+              </div>
+
+              <div className="px-4 py-4">
+                <div className="mb-4 text-[14px] font-medium text-[#2d2b28]">Seleção de Cursos</div>
+
+                <table className="w-full border-collapse text-left text-[12px]">
+                  <thead>
+                    <tr className="bg-[#ececec] text-[#2f2d2a]">
+                      <th className="w-[58px] px-4 py-3 font-semibold">Ações</th>
+                      <th className="px-3 py-3 font-semibold">Curso</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {courseSelectionRows.map((course) => {
+                      const checked = course === selectedCourse
+                      return (
+                        <tr key={course} className="border-b border-[#eee7db] text-[#47433f]">
+                          <td className="px-4 py-3">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setSelectedCourse(course)}
+                              className="h-4 w-4 accent-[#c5663b]"
+                            />
+                          </td>
+                          <td className="px-3 py-3">{course}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            <Card className="overflow-hidden p-2">
+              <div className="flex flex-wrap items-center gap-8 px-2 py-2 text-[12px] font-medium text-[#2f2d2a]">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full bg-[#df2222]" />
+                  Risco Alto
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full bg-[#d8a127]" />
+                  Risco Médio
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full bg-[#bf623b]" />
+                  Risco Baixo
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full bg-[#2f9d49]" />
+                  Sem Risco
+                </span>
+              </div>
+
+              <div className="mt-2 h-[690px] overflow-hidden rounded-[6px] border border-[#efe8db] bg-white p-[3px]">
+                <div className="flex h-full flex-col gap-[3px] bg-white">
+                  <div className="flex gap-[3px]" style={{ height: `${topRowHeight}%` }}>
+                    <div style={{ width: highWidth }} className="bg-[#df2222]" />
+                    <div style={{ width: mediumWidth }} className="bg-[#d8a127]" />
+                  </div>
+                  <div className="flex gap-[3px]" style={{ height: `${bottomRowHeight}%` }}>
+                    <div style={{ width: noneWidth }} className="bg-[#2f9d49]" />
+                    <div style={{ width: lowWidth }} className="bg-[#bf623b]" />
+                  </div>
+                </div>
               </div>
             </Card>
           </div>
         )}
-
       </main>
     </div>
   )

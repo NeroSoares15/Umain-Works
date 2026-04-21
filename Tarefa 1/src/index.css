@@ -1,18 +1,16 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 @theme {
   --font-sans: 'Manrope', system-ui, sans-serif;
-  --color-umain-primary: #C15B38; /* UMAIN Terracotta Orange */
-  --color-umain-secondary: #f4eee3; /* Warm secondary accent */
-  --color-umain-accent: #C15B38; /* Orange branding */
-  --color-umain-background: #FCFCF7; /* Light cream base */
-  --color-umain-surface: #ffffff; /* Pure white cards */
-  --color-umain-border: #f0f0f0; /* Very soft borders */
-  --color-umain-text: #111827; /* Dark charcoal text */
-  --color-umain-text-muted: #6b7280; /* Neutral gray */
-  --color-umain-muted: #f3f4f6; /* Subtle backgrounds for hovers/badges */
+  --color-umain-primary: #c5663b;
+  --color-umain-secondary: #fff8f1;
+  --color-umain-accent: #c5663b;
+  --color-umain-background: #fffdf6;
+  --color-umain-surface: #ffffff;
+  --color-umain-border: #e8e1d3;
+  --color-umain-text: #2e2d2a;
+  --color-umain-text-muted: #6f6a63;
+  --color-umain-muted: #f5f1e8;
   
   --color-risk-low: #10b981; 
   --color-risk-medium: #f59e0b; 
@@ -25,6 +23,10 @@
 }
 
 * { box-sizing: border-box; }
+html, body, #root {
+  min-height: 100%;
+}
+
 body {
   font-family: var(--font-sans);
   margin: 0;
@@ -45,6 +47,12 @@ body {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--color-umain-border);
+}
+
+button,
+input,
+select {
+  outline: none;
 }
 
 .anim-fade-in {
