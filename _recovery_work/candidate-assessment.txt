@@ -1,0 +1,8 @@
+
+candidate        lastWrite            score hasDashboard hasStudentProfile hasSettings hasAnalysis pageCount
+---------        ---------            ----- ------------ ----------------- ----------- ----------- ---------
+adoring-allen    4/2/2026 11:53:16 AM   100         True              True        True        True         7
+admiring-saha    2/22/2026 2:19:53 AM    64         True              True       False       False         3
+determined-cohen 4/15/2026 2:02:04 PM    64         True              True       False       False         3
+
+

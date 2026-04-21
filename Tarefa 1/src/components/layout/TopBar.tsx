@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Menu, ChevronDown, LayoutDashboard, BarChart2, TrendingDown, Settings as SettingsIcon, DollarSign } from 'lucide-react'
+import { Menu, ChevronDown } from 'lucide-react'
 import { useAppContext } from '../../contexts/AppContext'
 import { cn } from '../../lib/utils'
 
@@ -8,22 +8,20 @@ type RoutePermission = 'all' | ('diretor' | 'sas' | 'obs')[]
 
 interface NavItem {
   to: string
-  icon: any
   label: string
   roles: RoutePermission
 }
 
 const navItems: NavItem[] = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Escola', roles: 'all' },
-  { to: '/analysis', icon: BarChart2, label: 'Análise por Curso', roles: 'all' },
-  { to: '/prediction', icon: TrendingDown, label: 'Predição', roles: ['diretor', 'obs'] },
-  { to: '/settings', icon: SettingsIcon, label: 'Config. Gatilhos', roles: ['diretor', 'sas'] },
-  { to: '/roi', icon: DollarSign, label: 'Gestão de ROI', roles: ['diretor', 'sas'] },
+  { to: '/dashboard', label: 'Dashboard', roles: 'all' },
+  { to: '/analysis', label: 'Análise por Curso', roles: 'all' },
+  { to: '/settings', label: 'Configurações', roles: 'all' },
 ]
 
 export function TopBar() {
-  const { setIsOpen, activeProfileId, setActiveProfileId } = useAppContext()
+  const { activeProfileId, setActiveProfileId } = useAppContext()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Mock data for profiles matching the Context shape
@@ -56,7 +54,7 @@ export function TopBar() {
       <div className="flex items-center gap-4">
         {/* Mobile menu button could stay or be removed if horizontal scrolling is implemented */}
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="lg:hidden p-2 -ml-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
         >
           <Menu className="w-5 h-5" />
@@ -68,18 +66,17 @@ export function TopBar() {
         
         {/* Desktop Top Navigation */}
         <nav className="hidden lg:flex items-center gap-1">
-          {filteredNavItems.map(({ to, icon: Icon, label }) => (
+          {filteredNavItems.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) => cn(
-                'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+                'px-4 py-2 text-sm transition-colors border-b-2',
                 isActive
-                  ? 'bg-white/15 text-white font-semibold shadow-inner'
-                  : 'text-white/70 hover:text-white hover:bg-white/10 font-medium'
+                  ? 'text-white font-semibold border-white'
+                  : 'text-white/70 hover:text-white font-medium border-transparent'
               )}
             >
-              <Icon className="w-4 h-4" />
               {label}
             </NavLink>
           ))}
@@ -119,6 +116,26 @@ export function TopBar() {
           </div>
         )}
       </div>
+
+      {mobileMenuOpen && (
+        <div className="absolute top-[60px] left-0 w-full bg-white border-b border-[#e5e7eb] shadow-lg lg:hidden flex flex-col p-4 gap-2 z-40">
+          {filteredNavItems.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={() => setMobileMenuOpen(false)}
+              className={({ isActive }) => cn(
+                'px-4 py-3 rounded-lg text-sm font-bold transition-colors',
+                isActive
+                  ? 'bg-[#f4eee3] text-[#C15B38]'
+                  : 'text-gray-700 hover:bg-gray-50'
+              )}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </header>
   )
 }

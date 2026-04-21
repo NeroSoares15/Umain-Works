@@ -3,11 +3,8 @@ import { Layout } from './components/layout/Layout'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { StudentProfile } from './pages/StudentProfile'
-import { Pipeline } from './pages/Pipeline'
 import { Settings } from './pages/Settings'
 import { Analysis } from './pages/Analysis'
-import { Prediction } from './pages/Prediction'
-import { ROI } from './pages/ROI'
 
 function App() {
   return (
@@ -18,11 +15,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="students/:id" element={<StudentProfile />} />
-          <Route path="pipeline" element={<Pipeline />} />
           <Route path="analysis" element={<Analysis />} />
-          <Route path="prediction" element={<Prediction />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="roi" element={<ROI />} />
         </Route>
       </Routes>
     </BrowserRouter>

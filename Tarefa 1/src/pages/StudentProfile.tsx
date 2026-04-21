@@ -1,13 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, BookOpen, DollarSign, Monitor, Heart } from 'lucide-react'
-import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts'
-import { Card, CardContent, CardHeader } from '../components/ui/Card'
-import { RiskBadge } from '../components/ui/RiskBadge'
-import { Badge } from '../components/ui/Badge'
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, Monitor, ShieldAlert } from 'lucide-react'
 import { students } from '../data/students'
-import { scoreToLevel, riskConfig } from '../lib/riskUtils'
+import { scoreToLevel } from '../lib/riskUtils'
 import { cn } from '../lib/utils'
-import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useAppContext } from '../contexts/AppContext'
 
@@ -37,7 +32,7 @@ function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
           setIsTyping(false)
           clearInterval(timeout)
         }
-      }, 15) // writing speed
+      }, 15)
     }
 
     const initialDelay = setTimeout(startTyping, delay)
@@ -52,25 +47,24 @@ function TypewriterText({ text, delay = 0 }: { text: string, delay?: number }) {
   )
 }
 
-function IndicatorRow({ label, value, status }: { label: string; value: string; status: 'ok' | 'warning' | 'critical' }) {
+function ProfileCard({ title, children, className }: { title: string, children: React.ReactNode, className?: string }) {
   return (
-    <div className="flex items-center justify-between py-2.5 gap-4 border-b border-umain-border last:border-0">
-      <span className="text-xs font-medium text-umain-text-muted truncate">{label}</span>
-      <span className={cn(
-        'text-sm font-semibold whitespace-nowrap text-right',
-        status === 'ok' && 'text-emerald-400',
-        status === 'warning' && 'text-amber-400',
-        status === 'critical' && 'text-red-400',
-      )}>{value}</span>
+    <div className={cn("bg-white border border-[#e5e7eb] shadow-sm flex flex-col items-stretch overflow-hidden rounded-xl h-full", className)}>
+      <div className="bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-3">
+        <h3 className="text-[13px] font-bold text-gray-800">{title}</h3>
+      </div>
+      <div className="p-5 flex-1 flex flex-col">
+        {children}
+      </div>
     </div>
   )
 }
 
-function SectionLabel({ icon: Icon, iconColor, children }: { icon: React.ComponentType<{ className?: string }>; iconColor: string; children: string }) {
+function IndicatorListItem({ label, value, valueClass }: { label: string, value: string | number, valueClass?: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className={cn('w-3.5 h-3.5', iconColor)} />
-      <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">{children}</p>
+    <div className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
+      <span className="text-[13px] font-semibold text-gray-600 truncate mr-4">{label}</span>
+      <span className={cn("text-[13px] font-bold text-right", valueClass || "text-gray-900")}>{value}</span>
     </div>
   )
 }
@@ -87,248 +81,192 @@ export function StudentProfile() {
   if (!student) {
     return (
       <div className="p-8">
-        <button onClick={() => navigate('/dashboard')} className="text-umain-accent text-sm flex items-center gap-1.5 font-medium">
+        <button onClick={() => navigate('/dashboard')} className="text-[#C15B38] text-sm flex items-center gap-1.5 font-bold">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
-        <p className="mt-4 text-umain-text-muted text-sm">Estudante não encontrado.</p>
+        <p className="mt-4 text-gray-500 font-medium">Estudante não encontrado.</p>
       </div>
     )
   }
 
   const level = scoreToLevel(student.riskScore, settings.riskThresholds)
-  const config = riskConfig[level]
   const TrendIcon = student.scoreTrend === 'up' ? TrendingUp : student.scoreTrend === 'down' ? TrendingDown : Minus
-  const trendColor = student.scoreTrend === 'up' ? 'text-red-400' : student.scoreTrend === 'down' ? 'text-emerald-400' : 'text-umain-text-muted'
+  const trendColor = student.scoreTrend === 'up' ? 'text-red-500' : student.scoreTrend === 'down' ? 'text-emerald-500' : 'text-gray-400'
   const { indicators: ind } = student
 
-  const radarData = [
-    { subject: 'Académico', value: Math.min(100, (100 - ind.academic.attendancePercent) + ind.academic.ucFailures * 10) },
-    { subject: 'Financeiro', value: Math.min(100, ind.financial.tuitionArrearsMonths * 20 + (ind.financial.scholarshipStatus === 'Não Bolseiro' ? 10 : 0)) },
-    { subject: 'Moodle', value: Math.min(100, Math.max(0, 100 - ind.behavioral.moodleLoginsLast30Days * 3)) },
-    { subject: 'Social', value: ind.socioeconomic.residence === 'Deslocado' ? 40 : ind.socioeconomic.residence === 'Internacional' ? 50 : 10 },
-    { subject: 'Entrada', value: ind.socioeconomic.entryProfile === 'Geral' ? 10 : ind.socioeconomic.entryProfile === 'Internacional' ? 60 : 40 },
-  ]
+  // Circular progress math
+  const radius = 64
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (student.riskScore / 100) * circumference
+  
+  const riskColor = level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : level === 'low' ? '#3b82f6' : '#10b981'
+  const riskBgColor = level === 'high' ? 'bg-red-50 text-red-700 border-red-200' : level === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' : level === 'low' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
 
   return (
-    <>
-      <main className="flex-1 px-4 pb-4 md:px-6 md:pb-6 lg:px-10 lg:pb-10 pt-4 space-y-4 md:space-y-6 overflow-auto">
-        <div className="flex flex-col md:flex-row md:items-start justify-between mb-2 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-umain-text tracking-tight">{obfuscateName(student.name, isObs)}</h1>
-            <p className="text-sm font-medium text-umain-text-muted mt-0.5">{`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}</p>
-          </div>
-          {!isObs && (
-            <div className="flex items-center gap-3">
-              <button className="px-4 py-2 border border-umain-border bg-white text-umain-text rounded-lg text-xs font-bold shadow-sm hover:bg-umain-background transition-colors">
-                Nova Intervenção
-              </button>
-              <button className="px-4 py-2 bg-umain-accent text-white rounded-lg text-xs font-bold shadow-sm hover:bg-[#a34b2f] transition-colors">
-                Agendar Reunião
-              </button>
+    <div className="flex-1 flex flex-col h-full bg-[#f9fafb]">
+      {/* Header Layout */}
+      <div className="bg-white border-b border-[#e5e7eb] px-6 py-6 lg:px-10">
+        <div className="max-w-[1920px] mx-auto">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-gray-400 hover:text-[#C15B38] transition-colors mb-4"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Dashboard
+          </button>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight">{obfuscateName(student.name, isObs)}</h1>
+              <p className="text-sm font-semibold text-gray-500 mt-1">{`${student.course} · ${student.year}º Ano · ${isObs ? 'Nº Oculto' : 'Nº ' + student.number}`}</p>
             </div>
-          )}
+            {/* Buttons were removed per request */}
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-umain-text-muted hover:text-umain-accent transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Dashboard
-        </button>
+      </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
-          {/* Score */}
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="h-full">
-            <Card className="flex flex-col items-center justify-center py-10 h-full">
-              <CardContent className="flex flex-col items-center gap-4">
-                <div className={cn('w-36 h-36 rounded-full border-[10px] flex items-center justify-center', config.border, 'bg-umain-background shadow-inner')}>
-                  <div className="text-center">
-                    <p
-                      className="text-5xl font-black text-umain-text leading-none drop-shadow-sm"
-                      style={{ fontVariantNumeric: 'tabular-nums' }}
-                    >
-                      {student.riskScore}
-                    </p>
-                    <p className="text-xs text-umain-text-muted mt-1 font-medium">/ 100</p>
+      <main className="flex-1 p-6 lg:p-10 w-full max-w-[1920px] mx-auto flex flex-col gap-6">
+        
+        {/* Top Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="order-2 md:order-1 col-span-1 md:col-span-1">
+            <ProfileCard title="Nível de Risco">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8 h-full py-2">
+                <div className="relative w-36 h-36 shrink-0">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="72" cy="72" r="64" stroke="#f3f4f6" strokeWidth="12" fill="transparent" />
+                    <circle 
+                      cx="72" cy="72" r="64" stroke={riskColor} strokeWidth="12" fill="transparent" 
+                      strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-black text-gray-900 leading-none">{student.riskScore}</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">/ 100</span>
                   </div>
                 </div>
-                <RiskBadge score={student.riskScore} />
-                <div className={cn('flex items-center gap-1.5 text-sm font-semibold', trendColor)}>
-                  <TrendIcon className="w-4 h-4" />
-                  {student.scoreTrend === 'up' ? 'A agravar' : student.scoreTrend === 'down' ? 'A melhorar' : 'Estável'}
+                <div className="flex flex-col items-center md:items-start gap-3">
+                  <span className={cn("px-3 py-1.5 rounded-full text-xs font-bold border", riskBgColor)}>
+                    {level === 'high' ? 'Risco Alto' : level === 'medium' ? 'Risco Médio' : level === 'low' ? 'Risco Baixo' : 'Sem Risco'}
+                  </span>
+                  <div className={cn('flex items-center gap-1.5 text-[13px] font-bold', trendColor)}>
+                    <TrendIcon className="w-4 h-4" />
+                    {student.scoreTrend === 'up' ? 'A agravar' : student.scoreTrend === 'down' ? 'A melhorar' : 'Estável'}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </div>
+            </ProfileCard>
+          </div>
 
-          {/* Profile */}
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="h-full">
-            <Card className="h-full">
-              <CardHeader>
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Perfil do Estudante</p>
-              </CardHeader>
-              <CardContent className="space-y-0">
-                <IndicatorRow label="Número" value={isObs ? 'Oculto' : student.number} status="ok" />
-                <IndicatorRow label="Curso" value={student.course} status="ok" />
-                <IndicatorRow label="Ano Curricular" value={`${student.year}º Ano`} status="ok" />
-                <IndicatorRow
-                  label="Residência"
-                  value={isDiretor ? 'Acesso Restrito' : ind.socioeconomic.residence}
-                  status={isDiretor ? 'ok' : ind.socioeconomic.residence === 'Deslocado' ? 'warning' : 'ok'}
-                />
-                <div className="pt-3 flex flex-wrap gap-1.5">
-                  {student.statuses.map((s: string) => (
-                    <Badge key={s} className="bg-umain-muted text-umain-text text-[10px] font-bold border border-umain-border">{s}</Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Radar */}
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="h-full">
-            <Card className="h-full">
-              <CardHeader>
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Análise Multidimensional</p>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={220}>
-                  <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                    <PolarGrid stroke="#1e293b" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 500 }} />
-                    <Radar name="Risco" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} strokeWidth={2} />
-                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <div className="order-1 md:order-2 col-span-1 md:col-span-2">
+            <ProfileCard title="Informações do Aluno">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 mt-2">
+                <IndicatorListItem label="Número" value={isObs ? 'Oculto' : student.number} />
+                <IndicatorListItem label="Curso" value={student.course} />
+                <IndicatorListItem label="Ano Curricular" value={`${student.year}º Ano`} />
+                <IndicatorListItem label="Residência" value={isDiretor ? 'Acesso Restrito' : ind.socioeconomic.residence} />
+                <IndicatorListItem label="Estatutos" value={student.statuses.length ? student.statuses.join(', ') : 'Nenhum'} />
+              </div>
+            </ProfileCard>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <SectionLabel icon={BookOpen} iconColor="text-umain-accent">Indicadores Académicos</SectionLabel>
-            </CardHeader>
-            <CardContent>
-              <IndicatorRow label="Assiduidade" value={`${ind.academic.attendancePercent}%`} status={ind.academic.attendancePercent >= 75 ? 'ok' : ind.academic.attendancePercent >= 50 ? 'warning' : 'critical'} />
-              <IndicatorRow label="UCs com Negativa" value={`${ind.academic.ucFailures}`} status={ind.academic.ucFailures === 0 ? 'ok' : ind.academic.ucFailures <= 2 ? 'warning' : 'critical'} />
-              <IndicatorRow label="Notas Negativas" value={`${ind.academic.negativeGrades}`} status={ind.academic.negativeGrades === 0 ? 'ok' : ind.academic.negativeGrades <= 2 ? 'warning' : 'critical'} />
-              <IndicatorRow label="Média Global" value={`${ind.academic.gpa.toFixed(1)} valores`} status={ind.academic.gpa >= 13 ? 'ok' : ind.academic.gpa >= 10 ? 'warning' : 'critical'} />
-            </CardContent>
-          </Card>
+        {/* Indicators Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <ProfileCard title="Académicos">
+            <div className="flex flex-col mt-2">
+              <IndicatorListItem label="Assiduidade" value={`${ind.academic.attendancePercent}%`} valueClass={ind.academic.attendancePercent >= 75 ? 'text-emerald-600' : ind.academic.attendancePercent >= 50 ? 'text-amber-600' : 'text-red-600'} />
+              <IndicatorListItem label="UCs com Negativa" value={`${ind.academic.ucFailures}`} valueClass={ind.academic.ucFailures === 0 ? 'text-emerald-600' : ind.academic.ucFailures <= 2 ? 'text-amber-600' : 'text-red-600'} />
+              <IndicatorListItem label="Notas Negativas" value={`${ind.academic.negativeGrades}`} valueClass={ind.academic.negativeGrades === 0 ? 'text-emerald-600' : ind.academic.negativeGrades <= 2 ? 'text-amber-600' : 'text-red-600'} />
+              <IndicatorListItem label="Média Global" value={`${ind.academic.gpa.toFixed(1)} val`} valueClass={ind.academic.gpa >= 13 ? 'text-emerald-600' : ind.academic.gpa >= 10 ? 'text-amber-600' : 'text-red-600'} />
+            </div>
+          </ProfileCard>
 
-          <Card>
-            <CardHeader>
-              <SectionLabel icon={DollarSign} iconColor={isDiretor ? "text-umain-text-muted" : "text-amber-400"}>Indicadores Financeiros</SectionLabel>
-            </CardHeader>
-            <CardContent>
+          <ProfileCard title="Financeiros">
+            <div className="flex flex-col mt-2">
               {isDiretor ? (
-                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
-                  <DollarSign className="w-5 h-5 text-umain-text-muted/50 mb-2" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
-                  <p className="text-xs text-umain-text-muted/70">Dados financeiros são da exclusiva competência dos Serviços de Ação Social (SAS).</p>
+                <div className="py-8 text-center flex flex-col items-center">
+                   <ShieldAlert className="w-6 h-6 text-gray-300 mb-2" />
+                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">Acesso Restrito (SAS)</p>
                 </div>
               ) : (
                 <>
-                  <IndicatorRow label="Impacto Mensal (ROI)" value={ind.financial.monthlyFee > 0 ? `€${ind.financial.monthlyFee}` : 'Funded'} status="ok" />
-                  <IndicatorRow label="Propinas em Atraso" value={ind.financial.tuitionArrearsMonths === 0 ? 'Regularizado' : `${ind.financial.tuitionArrearsMonths} meses`} status={ind.financial.tuitionArrearsMonths === 0 ? 'ok' : ind.financial.tuitionArrearsMonths <= 1 ? 'warning' : 'critical'} />
-                  <IndicatorRow label="Bolsa de Estudo" value={ind.financial.scholarshipStatus} status={ind.financial.scholarshipStatus === 'Bolseiro' ? 'ok' : 'warning'} />
-                  <IndicatorRow label="Acordo de Pagamento" value={ind.financial.paymentAgreement ? 'Sim' : 'Não'} status={ind.financial.paymentAgreement ? 'warning' : 'ok'} />
+                  <IndicatorListItem label="Impacto Mensal" value={ind.financial.monthlyFee > 0 ? `€${ind.financial.monthlyFee}` : 'Financiado'} />
+                  <IndicatorListItem label="Propinas em Atraso" value={ind.financial.tuitionArrearsMonths === 0 ? 'Regularizado' : `${ind.financial.tuitionArrearsMonths} meses`} valueClass={ind.financial.tuitionArrearsMonths === 0 ? 'text-emerald-600' : ind.financial.tuitionArrearsMonths <= 1 ? 'text-amber-600' : 'text-red-600'} />
+                  <IndicatorListItem label="Bolsa de Estudo" value={ind.financial.scholarshipStatus} />
+                  <IndicatorListItem label="Acordo de Pagamento" value={ind.financial.paymentAgreement ? 'Sim' : 'Não'} />
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </ProfileCard>
 
-          <Card>
-            <CardHeader>
-              <SectionLabel icon={Monitor} iconColor="text-blue-500">Atividade Moodle</SectionLabel>
-            </CardHeader>
-            <CardContent>
-              <IndicatorRow label="Acessos (últimos 30 dias)" value={`${ind.behavioral.moodleLoginsLast30Days} sessões`} status={ind.behavioral.moodleLoginsLast30Days >= 15 ? 'ok' : ind.behavioral.moodleLoginsLast30Days >= 5 ? 'warning' : 'critical'} />
-              <IndicatorRow label="Materiais Descarregados" value={`${ind.behavioral.materialsDownloaded}`} status={ind.behavioral.materialsDownloaded >= 10 ? 'ok' : ind.behavioral.materialsDownloaded >= 3 ? 'warning' : 'critical'} />
-              <IndicatorRow label="Último Acesso" value={`Há ${ind.behavioral.daysSinceLastAccess} dias`} status={ind.behavioral.daysSinceLastAccess <= 3 ? 'ok' : ind.behavioral.daysSinceLastAccess <= 7 ? 'warning' : 'critical'} />
-            </CardContent>
-          </Card>
+          <ProfileCard title="Atividade Moodle">
+            <div className="flex flex-col mt-2">
+              <IndicatorListItem label="Acessos (30 dias)" value={`${ind.behavioral.moodleLoginsLast30Days}`} valueClass={ind.behavioral.moodleLoginsLast30Days >= 15 ? 'text-emerald-600' : ind.behavioral.moodleLoginsLast30Days >= 5 ? 'text-amber-600' : 'text-red-600'} />
+              <IndicatorListItem label="Downloads" value={`${ind.behavioral.materialsDownloaded}`} valueClass={ind.behavioral.materialsDownloaded >= 10 ? 'text-emerald-600' : ind.behavioral.materialsDownloaded >= 3 ? 'text-amber-600' : 'text-red-600'} />
+              <IndicatorListItem label="Último Acesso" value={`Há ${ind.behavioral.daysSinceLastAccess} dias`} valueClass={ind.behavioral.daysSinceLastAccess <= 3 ? 'text-emerald-600' : ind.behavioral.daysSinceLastAccess <= 7 ? 'text-amber-600' : 'text-red-600'} />
+            </div>
+          </ProfileCard>
 
-          <Card>
-            <CardHeader>
-              <SectionLabel icon={Heart} iconColor={isDiretor ? "text-umain-text-muted" : "text-rose-400"}>Contexto Socioeconómico</SectionLabel>
-            </CardHeader>
-            <CardContent>
+          <ProfileCard title="Socioeconómico">
+            <div className="flex flex-col mt-2">
               {isDiretor ? (
-                <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-dashed border-umain-border rounded-xl bg-umain-surface/30">
-                  <Heart className="w-5 h-5 text-umain-text-muted/50 mb-2" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-umain-text-muted mb-1">Acesso Restrito</p>
-                  <p className="text-xs text-umain-text-muted/70">Dados de saúde e contexto socioeconómico reservados aos SAS.</p>
+                <div className="py-8 text-center flex flex-col items-center">
+                   <ShieldAlert className="w-6 h-6 text-gray-300 mb-2" />
+                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">Acesso Restrito (SAS)</p>
                 </div>
               ) : (
                 <>
-                  <IndicatorRow label="Perfil de Entrada" value={ind.socioeconomic.entryProfile} status="ok" />
-                  <IndicatorRow label="Residência" value={ind.socioeconomic.residence} status={ind.socioeconomic.residence === 'Local' ? 'ok' : 'warning'} />
-                  <IndicatorRow label="NEE" value={ind.socioeconomic.nee ? 'Sim' : 'Não'} status={ind.socioeconomic.nee ? 'warning' : 'ok'} />
+                  <IndicatorListItem label="Perfil de Entrada" value={ind.socioeconomic.entryProfile} />
+                  <IndicatorListItem label="Residência" value={ind.socioeconomic.residence} />
+                  <IndicatorListItem label="NEE" value={ind.socioeconomic.nee ? 'Sim' : 'Não'} />
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </ProfileCard>
         </div>
 
-        <Card>
-          <CardHeader>
-            <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-umain-text-muted">Histórico de Intervenções / Decisão</p>
-          </CardHeader>
-          <CardContent>
+        {/* History and AI Narrative */}
+        <ProfileCard title="Histórico e IA">
             {student.interventions.length === 0 ? (
-              <p className="text-sm text-umain-text-muted">Sem intervenções registadas.</p>
+              <p className="text-[13px] text-gray-500 font-medium">Sem intervenções registadas.</p>
             ) : (
-              <div className="relative space-y-5 pl-5 border-l-2 border-umain-border">
+              <div className="space-y-4">
                 {student.interventions.map((intervention, i: number) => (
-                  <div key={i} className="relative anim-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                    <div className="absolute -left-[23px] w-3 h-3 rounded-full bg-umain-accent border-2 border-umain-surface shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge className="bg-umain-accent/10 text-umain-accent text-[10px] font-bold border border-umain-accent/20">{intervention.type}</Badge>
-                          <span className="text-xs text-umain-text-muted">{isObs ? 'Técnico(a)' : intervention.author}</span>
-                        </div>
-                        <p className="text-sm text-umain-text leading-relaxed">
-                          {isDiretor && (intervention.description.toLowerCase().includes('financeir') || intervention.description.toLowerCase().includes('apoio') || intervention.description.toLowerCase().includes('psico'))
-                            ? 'Detalhes da intervenção de natureza confidencial mantidos em segredo (apenas SAS).'
-                            : intervention.description}
-                        </p>
-                      </div>
-                      <span className="text-xs text-umain-text-muted shrink-0 font-medium">{intervention.date}</span>
+                  <div key={i} className="flex flex-col pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold text-[#C15B38] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded">{intervention.type}</span>
+                      <span className="text-xs font-semibold text-gray-400">{intervention.date} · {isObs ? 'Técnico(a)' : intervention.author}</span>
                     </div>
+                    <p className="text-[13px] font-medium text-gray-700 leading-relaxed">
+                      {isDiretor && (intervention.description.toLowerCase().includes('financeir') || intervention.description.toLowerCase().includes('apoio') || intervention.description.toLowerCase().includes('psico'))
+                        ? 'Detalhes da intervenção de natureza confidencial mantidos em segredo (apenas SAS).'
+                        : intervention.description}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              className={cn("mt-6 p-5 rounded-xl border relative overflow-hidden", level === 'high' ? 'bg-red-950/20 border-red-900/50' : 'bg-umain-muted/10 border-umain-border')}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-              <div className="flex items-center gap-2 mb-3">
-                <Monitor className={cn("w-4 h-4", level === 'high' ? 'text-red-400' : 'text-umain-text')} />
-                <p className={cn("text-xs font-bold tracking-widest uppercase", level === 'high' ? 'text-red-400' : 'text-umain-text')}>
-                  AI Risk Narrative
+            <div className={cn("mt-6 p-4 rounded-xl border relative overflow-hidden", level === 'high' ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200')}>
+              <div className="flex items-center gap-2 mb-2">
+                <Monitor className={cn("w-4 h-4", level === 'high' ? 'text-red-500' : 'text-gray-700')} />
+                <p className={cn("text-xs font-bold tracking-widest uppercase", level === 'high' ? 'text-red-600' : 'text-gray-700')}>
+                  RiskRadar AI Narrative
                 </p>
               </div>
-              <p className={cn("text-sm leading-relaxed font-mono", level === 'high' ? 'text-red-300' : 'text-umain-text-muted')}>
+              <p className={cn("text-[13px] leading-relaxed font-mono font-semibold", level === 'high' ? 'text-red-800' : 'text-gray-600')}>
                 <TypewriterText
                   text={level === 'high'
-                    ? `> DETETADO PADRÃO DE CHURN: O score de risco atingiu ${student.riskScore} pontos, ultrapassando o limiar crítico. Observa-se uma quebra de ${ind.academic.attendancePercent}% na assiduidade combinada com ${ind.behavioral.daysSinceLastAccess} dias de ausência na plataforma Moodle. A situação agrava-se com os ${ind.financial.tuitionArrearsMonths} meses de propinas em atraso. Recomenda-se acionamento do protocolo SAS imediatamente.`
-                    : `> ANÁLISE ESTÁVEL: O estudante apresenta um score de ${student.riskScore} pontos. Os indicadores de assiduidade (${ind.academic.attendancePercent}%) e engajamento Moodle (último acesso há ${ind.behavioral.daysSinceLastAccess} dias) estão dentro dos limites operacionais seguros.`
+                    ? `> DETETADO PADRÃO DE CHURN: O score de risco atingiu ${student.riskScore} pontos. Observa-se uma quebra de ${ind.academic.attendancePercent}% na assiduidade combinada com ${ind.behavioral.daysSinceLastAccess} dias de ausência no Moodle. A situação agrava-se com os ${ind.financial.tuitionArrearsMonths} meses de propinas em atraso. Recomenda-se acionamento do protocolo SAS.`
+                    : `> ANÁLISE ESTÁVEL: Score de ${student.riskScore} pontos. Os indicadores de assiduidade (${ind.academic.attendancePercent}%) e engajamento Moodle (último acesso há ${ind.behavioral.daysSinceLastAccess} dias) estão dentro dos limites.`
                   }
-                  delay={1000}
+                  delay={500}
                 />
               </p>
-            </motion.div>
-          </CardContent>
-        </Card>
-      </main >
-    </>
+            </div>
+        </ProfileCard>
+
+      </main>
+    </div>
   )
 }

@@ -1,0 +1,62 @@
+[
+  {
+    "candidate": "admiring-saha",
+    "base": "C:\\Users\\NeroS\\OneDrive - ESTGV\\Documentos\\Umain Works\\Tarefa 1\\.claude\\worktrees\\admiring-saha\\Tarefa 1",
+    "lastWrite": "2026-02-22T02:19:53.58117+00:00",
+    "hasDashboard": true,
+    "hasStudentProfile": true,
+    "hasSettings": false,
+    "hasAnalysis": false,
+    "pageCount": 3,
+    "rootEntries": ".claude, docs, public, src, task files, .gitignore, eslint.config.js, extract_pdfs.js, extract_pdfs.py, index.html, package-lock.json, package.json, README.md, tailwind.config.js, tsconfig.app.json, tsconfig.json, tsconfig.node.json, vite.config.ts",
+    "pages": "Dashboard.tsx, Pipeline.tsx, StudentProfile.tsx",
+    "score": 64,
+    "markers": {
+      "Distribuição de Risco": true,
+      "Histórico de Intervenções": true,
+      "Parametrização de Gatilhos": false,
+      "TopBar title=\"Dashboard Operacional\"": true,
+      "Heatmap de Risco por Curso": false
+    }
+  },
+  {
+    "candidate": "adoring-allen",
+    "base": "C:\\Users\\NeroS\\OneDrive - ESTGV\\Documentos\\Umain Works\\Tarefa 1\\.claude\\worktrees\\adoring-allen\\Tarefa 1",
+    "lastWrite": "2026-04-02T11:53:16.557938+01:00",
+    "hasDashboard": true,
+    "hasStudentProfile": true,
+    "hasSettings": true,
+    "hasAnalysis": true,
+    "pageCount": 7,
+    "rootEntries": ".claude, docs, public, src, task files, .gitignore, eslint.config.js, extract_pdfs.js, extract_pdfs.py, index.html, package-lock.json, package.json, README.md, tailwind.config.js, tsconfig.app.json, tsconfig.json, tsconfig.node.json, vite.config.ts",
+    "pages": "Analysis.tsx, Dashboard.tsx, Pipeline.tsx, Prediction.tsx, ROI.tsx, Settings.tsx, StudentProfile.tsx",
+    "score": 100,
+    "markers": {
+      "Distribuição de Risco": true,
+      "Histórico de Intervenções": true,
+      "Parametrização de Gatilhos": true,
+      "TopBar title=\"Dashboard Operacional\"": true,
+      "Heatmap de Risco por Curso": true
+    }
+  },
+  {
+    "candidate": "determined-cohen",
+    "base": "C:\\Users\\NeroS\\OneDrive - ESTGV\\Documentos\\Umain Works\\Tarefa 1\\.claude\\worktrees\\determined-cohen\\Tarefa 1",
+    "lastWrite": "2026-04-15T14:02:04.7744766+01:00",
+    "hasDashboard": true,
+    "hasStudentProfile": true,
+    "hasSettings": false,
+    "hasAnalysis": false,
+    "pageCount": 3,
+    "rootEntries": ".claude, docs, public, src, task files, .gitignore, eslint.config.js, extract_pdfs.js, extract_pdfs.py, index.html, package-lock.json, package.json, README.md, tailwind.config.js, tsconfig.app.json, tsconfig.json, tsconfig.node.json, vite.config.ts",
+    "pages": "Dashboard.tsx, Pipeline.tsx, StudentProfile.tsx",
+    "score": 64,
+    "markers": {
+      "Distribuição de Risco": true,
+      "Histórico de Intervenções": true,
+      "Parametrização de Gatilhos": false,
+      "TopBar title=\"Dashboard Operacional\"": true,
+      "Heatmap de Risco por Curso": false
+    }
+  }
+]

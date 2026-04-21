@@ -1,0 +1,7 @@
+Workspace: C:\Users\NeroS\OneDrive - ESTGV\Documentos\Umain Works\Tarefa 1
+BaselineGeneratedAt: 2026-04-16T18:30:52.3031535+01:00
+FileCount: 15992
+DirCount: 1138
+GitStatusFile: C:\Users\NeroS\OneDrive - ESTGV\Documentos\Umain Works\_recovery_work\baseline\git-status.txt
+RootListingFile: C:\Users\NeroS\OneDrive - ESTGV\Documentos\Umain Works\_recovery_work\baseline\root-listing.csv
+WorkspaceInventoryFile: C:\Users\NeroS\OneDrive - ESTGV\Documentos\Umain Works\_recovery_work\baseline\workspace-inventory.csv

@@ -1,0 +1,21 @@
+D  .claude/launch.json
+D  PERMISSOES_ACESSOS.md
+AM figma-remake/index.html
+AD figma-remake/package.json
+AD figma-remake/src/App.tsx
+AM figma-remake/src/components/Charts.tsx
+AM figma-remake/src/components/Layout.tsx
+AD figma-remake/src/data.ts
+AD figma-remake/src/main.tsx
+AD figma-remake/tsconfig.json
+AD figma-remake/vite.config.ts
+M  public/logo.png
+D  src/assets/logo.png
+D  "src/assets/umain logo.png"
+?? .claude/launch.json
+?? .claude/worktrees/
+?? PERMISSOES_ACESSOS.md
+?? figma-remake/src/styles.css
+?? src/assets/logo.png
+?? "src/assets/umain logo.png"
+?? ../_recovery_work/
