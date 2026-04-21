@@ -9,7 +9,8 @@ export function RiskBadge({ score }: { score: number }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-[8px] px-2.5 py-1 text-[11px] font-medium whitespace-nowrap',
+        'inline-flex items-center rounded-[2px] px-2.5 py-1 text-[11px] font-medium whitespace-nowrap',
+        'transition-colors duration-150',
         config.color,
         config.bg
       )}

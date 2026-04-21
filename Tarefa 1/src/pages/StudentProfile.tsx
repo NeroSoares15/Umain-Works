@@ -1,10 +1,12 @@
 import type { ApexOptions } from 'apexcharts'
+import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ApexChart } from '../components/charts/ApexChart'
 import { Card } from '../components/ui/Card'
 import { useAppContext } from '../contexts/AppContext'
 import { students, type Student } from '../data/students'
+import { useAppMotion } from '../lib/appMotion'
 import { scoreToLevel } from '../lib/riskUtils'
 import { cn } from '../lib/utils'
 
@@ -77,12 +79,14 @@ function buildStudentRadarData(student: Student) {
 }
 
 function StudentSpiderChart({ student, color }: { student: Student; color: string }) {
+  const { createChartAnimation } = useAppMotion()
+
   const chartOptions: ApexOptions = {
     chart: {
       type: 'radar',
       toolbar: { show: false },
       parentHeightOffset: 0,
-      animations: { enabled: false },
+      animations: createChartAnimation(760, 70),
       fontFamily: 'Manrope, Arial, sans-serif',
     },
     legend: { show: false },
@@ -97,36 +101,36 @@ function StudentSpiderChart({ student, color }: { student: Student; color: strin
       show: false,
       min: 0,
       max: 100,
-      tickAmount: 5,
+      tickAmount: 4,
     },
     plotOptions: {
       radar: {
-        size: 86,
+        size: 84,
         polygons: {
-          strokeColors: '#252320',
+          strokeColors: '#a59d92',
           strokeWidth: '1',
-          connectorColors: '#252320',
+          connectorColors: '#d9d2c7',
           fill: {
-            colors: ['transparent', 'transparent'],
+            colors: ['rgba(249,245,239,0.72)', 'rgba(255,255,255,0.96)'],
           },
         },
       },
     },
     stroke: {
-      width: 2.5,
+      width: 2.75,
       colors: [color],
     },
     fill: {
-      opacity: 0.18,
+      opacity: 0.14,
       colors: [color],
     },
     markers: {
-      size: 3.5,
+      size: 4.5,
       colors: [color],
       strokeColors: '#ffffff',
       strokeWidth: 2,
       hover: {
-        size: 4,
+        size: 5,
       },
     },
     dataLabels: {
@@ -139,23 +143,27 @@ function StudentSpiderChart({ student, color }: { student: Student; color: strin
   }
 
   return (
-    <ApexChart
-      type="radar"
-      series={[{ name: 'Risco', data: buildStudentRadarData(student) }]}
-      options={chartOptions}
-      height={190}
-      className="mx-auto max-w-[210px]"
-    />
+    <div className="mx-auto flex w-full max-w-[260px] items-center justify-center">
+      <ApexChart
+        type="radar"
+        series={[{ name: 'Risco', data: buildStudentRadarData(student) }]}
+        options={chartOptions}
+        height={176}
+        className="w-full"
+      />
+    </div>
   )
 }
 
 function RiskRing({ score, color }: { score: number; color: string }) {
+  const { createChartAnimation } = useAppMotion()
+
   const chartOptions: ApexOptions = {
     chart: {
       type: 'radialBar',
       sparkline: { enabled: true },
       toolbar: { show: false },
-      animations: { enabled: false },
+      animations: createChartAnimation(820, 80),
       fontFamily: 'Manrope, Arial, sans-serif',
     },
     colors: [color],
@@ -165,12 +173,12 @@ function RiskRing({ score, color }: { score: number; color: string }) {
         endAngle: 270,
         hollow: {
           margin: 0,
-          size: '68%',
+          size: '69%',
           background: 'transparent',
         },
         track: {
-          background: '#f4ede4',
-          strokeWidth: '98%',
+          background: '#f2e9dc',
+          strokeWidth: '100%',
           margin: 0,
         },
         dataLabels: {
@@ -189,11 +197,12 @@ function RiskRing({ score, color }: { score: number; color: string }) {
   }
 
   return (
-    <div className="relative h-[118px] w-[118px]">
-      <ApexChart type="radialBar" series={[score]} options={chartOptions} height={118} width={118} />
+    <div className="relative h-[132px] w-[132px]">
+      <ApexChart type="radialBar" series={[score]} options={chartOptions} height={132} width={132} />
+      <div className="pointer-events-none absolute inset-[19px] rounded-full border border-[#efe6db] bg-white shadow-[0_10px_24px_rgba(88,70,50,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]" />
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[38px] font-semibold leading-none text-[#161513]">{score}</span>
-        <span className="mt-1 text-[16px] font-semibold text-[#2d2b28]">/100</span>
+        <span className="text-[40px] font-semibold leading-none text-[#161513]">{score}</span>
+        <span className="mt-1 text-[15px] font-semibold text-[#2d2b28]">/100</span>
       </div>
     </div>
   )
@@ -250,6 +259,7 @@ export function StudentProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { activeProfileId, settings } = useAppContext()
+  const { createRevealVariants, createStaggerVariants } = useAppMotion()
   const student = students.find((candidate) => candidate.id === id)
   const isObservatoryView = activeProfileId === 'obs'
 
@@ -286,7 +296,7 @@ export function StudentProfile() {
       <div className="border-b border-[#ece4d8] bg-white px-5 py-5">
         <button
           onClick={() => navigate('/dashboard')}
-          className="inline-flex items-center gap-4 text-[17px] font-medium text-[#6b6761]"
+          className="inline-flex items-center gap-4 rounded-[8px] px-1 py-1 text-[17px] font-medium text-[#6b6761] transition-[background-color,color,transform] duration-200 hover:bg-[#fbf5ec] hover:text-[#2d2b28] motion-safe:hover:-translate-y-[1px]"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="font-semibold text-[#6b6761]">Dashboard</span>
@@ -295,82 +305,119 @@ export function StudentProfile() {
         </button>
       </div>
 
-      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col px-5 py-5">
-        <Card className="bg-white p-4">
-          <div className="grid grid-cols-1 gap-3 xl:grid-cols-[336px_minmax(0,1fr)_334px]">
-            <ProfilePanel title="Nível de Risco" bodyClassName="p-4">
-              <div className="flex h-full items-center justify-center gap-5 py-1">
-                <RiskRing score={student.riskScore} color={riskColor} />
+      <motion.main
+        className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col px-5 py-5"
+        variants={createStaggerVariants({ staggerChildren: 0.1 })}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={createRevealVariants({ distance: 12 })}>
+          <Card className="bg-white p-4">
+            <motion.div
+              className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]"
+              variants={createStaggerVariants({ staggerChildren: 0.08 })}
+            >
+              <motion.div
+                className="grid grid-cols-1 gap-4 lg:grid-cols-[318px_minmax(0,1fr)]"
+                variants={createStaggerVariants({ staggerChildren: 0.07 })}
+              >
+                <motion.div variants={createRevealVariants({ distance: 10 })}>
+                  <ProfilePanel title="Nível de Risco" className="h-full" bodyClassName="flex h-[176px] items-center justify-center p-4">
+                    <div className="flex items-center justify-center gap-5">
+                      <RiskRing score={student.riskScore} color={riskColor} />
 
-                <div className="flex min-w-[128px] flex-col items-start gap-3">
-                  <span
-                    className={cn(
-                      'inline-flex rounded-[8px] border px-4 py-2 text-[15px] font-semibold shadow-[0_1px_0_rgba(0,0,0,0.02)]',
-                      riskBadgeClassName
-                    )}
-                  >
-                    {riskLabel}
-                  </span>
-                  <span className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-[#e72a2a]">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] bg-[#fde7e5] text-[12px] leading-none text-[#e72a2a]">
-                      {trendIndicator}
-                    </span>
-                    {trendLabel}
-                  </span>
-                </div>
-              </div>
-            </ProfilePanel>
+                      <div className="flex min-w-[128px] flex-col items-start gap-3">
+                        <span
+                          className={cn(
+                            'inline-flex rounded-[2px] border px-4 py-2 text-[15px] font-semibold shadow-[0_1px_0_rgba(0,0,0,0.02)]',
+                            'transition-[box-shadow,background-color] duration-150',
+                            riskBadgeClassName
+                          )}
+                        >
+                          {riskLabel}
+                        </span>
+                        <span className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-[#e72a2a] transition-transform duration-200 motion-safe:hover:translate-x-[1px]">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] bg-[#fde7e5] text-[12px] leading-none text-[#e72a2a] shadow-[0_1px_0_rgba(0,0,0,0.03)]">
+                            {trendIndicator}
+                          </span>
+                          {trendLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </ProfilePanel>
+                </motion.div>
 
-            <ProfilePanel title="Informações do Aluno" bodyClassName="p-4">
-              <div className="space-y-0.5 pt-0.5">
-                <ProfileField label="Nome" value={obfuscateName(student.name, isObservatoryView)} tone="accent" compact />
-                <ProfileField label="Número" value={isObservatoryView ? '***' : student.number} tone="accent" compact />
-                <ProfileField label="Curso" value={student.course} tone="accent" compact />
-                <ProfileField label="Ano Curricular" value={`${student.year}º Ano`} tone="accent" compact />
-              </div>
-            </ProfilePanel>
+                <motion.div variants={createRevealVariants({ distance: 10 })}>
+                  <ProfilePanel title="Informações do Aluno" className="h-full" bodyClassName="flex h-[176px] flex-col justify-center p-4">
+                    <div className="space-y-0.5">
+                      <ProfileField label="Nome" value={obfuscateName(student.name, isObservatoryView)} tone="accent" compact />
+                      <ProfileField label="Número" value={isObservatoryView ? '***' : student.number} tone="accent" compact />
+                      <ProfileField label="Curso" value={student.course} tone="accent" compact />
+                      <ProfileField label="Ano Curricular" value={`${student.year}º Ano`} tone="accent" compact />
+                    </div>
+                  </ProfilePanel>
+                </motion.div>
+              </motion.div>
 
-            <ProfilePanel title="Análise Multidimensional" bodyClassName="p-4 pb-3">
-              <StudentSpiderChart student={student} color={riskColor} />
-            </ProfilePanel>
-          </div>
+              <motion.div variants={createRevealVariants({ distance: 10 })}>
+                <ProfilePanel
+                  title="Análise Multidimensional"
+                  className="h-full"
+                  bodyClassName="flex h-[176px] items-center justify-center p-4"
+                >
+                  <StudentSpiderChart student={student} color={riskColor} />
+                </ProfilePanel>
+              </motion.div>
+            </motion.div>
 
-          <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <ProfilePanel title="Indicadores Académicos">
-              <ProfileField label="Assiduidade" value={`${student.indicators.academic.attendancePercent}%`} tone="danger" />
-              <ProfileField label="UCs com Negativa" value={`${student.indicators.academic.ucFailures}`} tone="danger" />
-              <ProfileField label="Notas Negativas" value={`${student.indicators.academic.negativeGrades}`} tone="danger" />
-              <ProfileField label="Média Global" value={`${student.indicators.academic.gpa.toFixed(1)} valores`} tone="danger" />
-            </ProfilePanel>
+            <motion.div
+              className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2"
+              variants={createStaggerVariants({ staggerChildren: 0.07, delayChildren: 0.08 })}
+            >
+              <motion.div variants={createRevealVariants({ distance: 10 })}>
+                <ProfilePanel title="Indicadores Académicos" className="h-full" bodyClassName="min-h-[150px] p-4">
+                  <ProfileField label="Assiduidade" value={`${student.indicators.academic.attendancePercent}%`} tone="danger" />
+                  <ProfileField label="UCs com Negativa" value={`${student.indicators.academic.ucFailures}`} tone="danger" />
+                  <ProfileField label="Notas Negativas" value={`${student.indicators.academic.negativeGrades}`} tone="danger" />
+                  <ProfileField label="Média Global" value={`${student.indicators.academic.gpa.toFixed(1)} valores`} tone="danger" />
+                </ProfilePanel>
+              </motion.div>
 
-            <ProfilePanel title="Indicadores Financeiros">
-              <ProfileField label="Impacto Mensal (ROI)" value={`€${student.indicators.financial.monthlyFee}`} tone="accent" />
-              <ProfileField
-                label="Propinas em Atraso"
-                value={`${student.indicators.financial.tuitionArrearsMonths} meses`}
-                tone="danger"
-              />
-              <ProfileField
-                label="Bolsa de Estudo"
-                value={student.indicators.financial.scholarshipStatus === 'Nao Bolseiro' ? 'Não Bolseiro' : student.indicators.financial.scholarshipStatus}
-                tone="muted"
-              />
-              <ProfileField label="Acordo de Pagamento" value={student.indicators.financial.paymentAgreement ? 'Sim' : 'Não'} tone="muted" />
-            </ProfilePanel>
+              <motion.div variants={createRevealVariants({ distance: 10 })}>
+                <ProfilePanel title="Indicadores Financeiros" className="h-full" bodyClassName="min-h-[150px] p-4">
+                  <ProfileField label="Impacto Mensal (ROI)" value={`€${student.indicators.financial.monthlyFee}`} tone="accent" />
+                  <ProfileField
+                    label="Propinas em Atraso"
+                    value={`${student.indicators.financial.tuitionArrearsMonths} meses`}
+                    tone="danger"
+                  />
+                  <ProfileField
+                    label="Bolsa de Estudo"
+                    value={student.indicators.financial.scholarshipStatus === 'Nao Bolseiro' ? 'Não Bolseiro' : student.indicators.financial.scholarshipStatus}
+                    tone="muted"
+                  />
+                  <ProfileField label="Acordo de Pagamento" value={student.indicators.financial.paymentAgreement ? 'Sim' : 'Não'} tone="muted" />
+                </ProfilePanel>
+              </motion.div>
 
-            <ProfilePanel title="Atividade Moodle">
-              <ProfileField label="Primeiro Acesso" value={student.indicators.behavioral.firstAccessLabel} tone="danger" />
-              <ProfileField label="Último Acesso" value={`Há ${student.indicators.behavioral.daysSinceLastAccess} dias`} tone="danger" />
-            </ProfilePanel>
+              <motion.div variants={createRevealVariants({ distance: 10 })}>
+                <ProfilePanel title="Atividade Moodle" className="h-full" bodyClassName="min-h-[116px] p-4">
+                  <ProfileField label="Primeiro Acesso" value={student.indicators.behavioral.firstAccessLabel} tone="danger" />
+                  <ProfileField label="Último Acesso" value={`Há ${student.indicators.behavioral.daysSinceLastAccess} dias`} tone="danger" />
+                </ProfilePanel>
+              </motion.div>
 
-            <ProfilePanel title="Contexto Socioeconómico">
-              <ProfileField label="Perfil de Entrada" value={student.indicators.socioeconomic.entryProfile} tone="accent" />
-              <ProfileField label="Residência" value={student.indicators.socioeconomic.residence} tone="muted" />
-              <ProfileField label="NEE" value={student.indicators.socioeconomic.nee ? 'Sim' : 'Não'} tone="muted" />
-            </ProfilePanel>
-          </div>
-        </Card>
-      </main>
+              <motion.div variants={createRevealVariants({ distance: 10 })}>
+                <ProfilePanel title="Contexto Socioeconómico" className="h-full" bodyClassName="min-h-[116px] p-4">
+                  <ProfileField label="Perfil de Entrada" value={student.indicators.socioeconomic.entryProfile} tone="accent" />
+                  <ProfileField label="Residência" value={student.indicators.socioeconomic.residence} tone="muted" />
+                  <ProfileField label="NEE" value={student.indicators.socioeconomic.nee ? 'Sim' : 'Não'} tone="muted" />
+                </ProfilePanel>
+              </motion.div>
+            </motion.div>
+          </Card>
+        </motion.div>
+      </motion.main>
     </div>
   )
 }

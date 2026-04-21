@@ -34,14 +34,14 @@ export function KpiCard({
         : 'text-[#4d4a46]'
 
   return (
-    <Card className={cn('relative h-full overflow-hidden', className)}>
-      <span className={cn('absolute inset-y-0 left-0 w-[2px]', accentColor)} />
+    <Card className={cn('group relative h-full overflow-hidden', className)}>
+      <span className={cn('absolute inset-y-0 left-0 w-[2px] transition-[opacity,height] duration-200 group-hover:opacity-90', accentColor)} />
 
       <div className="flex h-full flex-col px-4 py-3.5 pl-[15px]">
         <div className="mb-2.5 flex items-start justify-between gap-4">
-          <p className="text-[12.5px] font-medium text-[#4f4b46]">{title}</p>
+          <p className="text-[12.5px] font-medium text-[#4f4b46] transition-colors duration-200 group-hover:text-[#2b2926]">{title}</p>
           {Icon ? (
-            <div className={cn('grid h-[30px] w-[30px] place-items-center rounded-[8px]', iconBg)}>
+            <div className={cn('grid h-[30px] w-[30px] place-items-center rounded-[8px] transition-[background-color] duration-150', iconBg)}>
               <Icon className={cn('h-[15px] w-[15px]', iconColor)} />
             </div>
           ) : null}
@@ -49,7 +49,7 @@ export function KpiCard({
 
         <div className="mt-auto">
           <p
-            className="text-[28px] font-semibold leading-none tracking-tight text-[#232321]"
+            className="text-[28px] font-semibold leading-none tracking-tight text-[#232321] transition-colors duration-200 group-hover:text-[#171614]"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {formattedValue}
