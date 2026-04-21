@@ -16,7 +16,7 @@ export function Layout() {
           <div className="min-h-[calc(100vh-52px)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={`${location.pathname}${location.search}`}
+                key={location.pathname}
                 variants={pageVariants}
                 initial="hidden"
                 animate="show"

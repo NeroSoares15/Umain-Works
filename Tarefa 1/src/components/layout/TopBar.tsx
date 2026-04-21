@@ -1,17 +1,17 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Menu, ChevronDown } from 'lucide-react'
+import { BarChart3, ChevronDown, LayoutDashboard, Settings } from 'lucide-react'
 import { useAppContext, type ProfileId } from '../../contexts/AppContext'
 import { useAppMotion } from '../../lib/appMotion'
 import { cn } from '../../lib/utils'
 import logoUrl from '../../assets/logo.png'
+import smallLogoUrl from '../../assets/Logo Small.png'
 
 export function TopBar() {
   const { activeProfileId, setActiveProfileId } = useAppContext()
   const { reduceMotion } = useAppMotion()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const profiles: Array<{ id: ProfileId; name: string; role: string; initials: string }> = [
@@ -24,6 +24,11 @@ export function TopBar() {
     { to: '/analysis', label: 'Análise por Curso' },
     { to: '/settings', label: 'Configurações' },
   ]
+  const mobileNavItems = [
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/analysis', label: 'Análise por Curso', icon: BarChart3 },
+    { to: '/settings', label: 'Configurações', icon: Settings },
+  ]
   const activeProfile = profiles.find((p) => p.id === activeProfileId) || profiles[0]
 
   useEffect(() => {
@@ -32,6 +37,7 @@ export function TopBar() {
         setDropdownOpen(false)
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
@@ -40,9 +46,44 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-[#b65d37] bg-[#c1633d] text-white">
-      <div className="flex h-[52px] items-stretch justify-between gap-4 px-5">
-        <div className="flex min-w-0 items-stretch gap-6">
-          <div className="flex items-center self-stretch">
+      <div className="flex h-[38px] items-stretch justify-between gap-2 px-2.5 min-[520px]:h-[44px] min-[520px]:px-3 sm:h-[52px] sm:gap-4 sm:px-5">
+        <div className="flex min-w-0 items-stretch gap-2.5 min-[520px]:gap-3.5 sm:gap-6">
+          <div className="flex items-center self-stretch sm:hidden">
+            <span
+              aria-label="UMAIN"
+              className="block h-[18px] w-[13px] bg-white min-[520px]:h-[20px] min-[520px]:w-[15px]"
+              style={{
+                WebkitMaskImage: `url(${smallLogoUrl})`,
+                maskImage: `url(${smallLogoUrl})`,
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain',
+                WebkitMaskPosition: 'center',
+                maskPosition: 'center',
+              }}
+            />
+          </div>
+
+          <nav className="flex items-center gap-1 sm:hidden">
+            {mobileNavItems.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                aria-label={label}
+                className={({ isActive }) =>
+                  cn(
+                    'grid h-6 w-6 place-items-center rounded-[7px] text-white/80 transition-[background-color,color,transform] duration-150 hover:bg-white/10 hover:text-white min-[520px]:h-7 min-[520px]:w-7',
+                    isActive && 'bg-white/12 text-white'
+                  )
+                }
+              >
+                <Icon className="h-4 w-4 min-[520px]:h-[17px] min-[520px]:w-[17px]" />
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="hidden items-center self-stretch sm:flex">
             <span
               aria-label="UMAIN Works"
               className="block h-[22px] w-[118px] bg-white"
@@ -66,7 +107,7 @@ export function TopBar() {
                 to={to}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center border-b-[3px] border-transparent px-4 text-[12.5px] font-medium text-white/80 transition-[color,border-color,background-color] duration-200 hover:text-white',
+                    'flex items-center border-b-[3px] border-transparent px-4 text-[12.5px] font-medium text-white/80 transition-[color,border-color,background-color] duration-150 hover:text-white',
                     isActive && 'border-[#f5d7cb] text-white'
                   )
                 }
@@ -75,36 +116,27 @@ export function TopBar() {
               </NavLink>
             ))}
           </nav>
-
-          <div className="flex items-center md:hidden">
-            <button
-              onClick={() => setMobileMenuOpen((previous) => !previous)}
-              className="rounded-[8px] p-2 text-white/80 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white motion-safe:hover:-translate-y-[1px]"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          </div>
         </div>
 
         <div className="relative flex items-center" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((previous) => !previous)}
-            className="flex items-center gap-2 rounded-[8px] px-2 py-1 text-[12px] font-semibold text-white transition-[background-color,transform] duration-200 hover:bg-white/8 motion-safe:hover:-translate-y-[1px]"
+            className="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[10px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-white/8 min-[520px]:gap-1.5 min-[520px]:rounded-[8px] min-[520px]:px-1.5 min-[520px]:text-[11px] sm:gap-2 sm:px-2 sm:py-1 sm:text-[12px] motion-safe:hover:-translate-y-[1px]"
           >
-            <span className="grid h-5 w-5 place-items-center rounded-[8px] bg-white/20 text-[10px] font-bold transition-colors duration-200">
+            <span className="grid h-5 w-5 place-items-center rounded-[4px] bg-white/20 text-[8px] font-bold transition-colors duration-150 min-[520px]:h-6 min-[520px]:w-6 min-[520px]:rounded-[6px] min-[520px]:text-[9px] sm:h-5 sm:w-5 sm:rounded-[8px] sm:text-[10px]">
               {activeProfile.initials}
             </span>
-            <span className="hidden sm:inline">{activeProfile.name}</span>
-            <ChevronDown className={cn('h-3 w-3 text-white/80 transition-transform', dropdownOpen && 'rotate-180')} />
+            <span className="hidden min-[520px]:inline sm:inline">{activeProfile.name}</span>
+            <ChevronDown className={cn('hidden h-3 w-3 text-white/80 transition-transform sm:block', dropdownOpen && 'rotate-180')} />
           </button>
 
           <AnimatePresence>
             {dropdownOpen ? (
               <motion.div
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
                 animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
-                transition={{ duration: reduceMotion ? 0.14 : 0.2, ease: [0.22, 1, 0.36, 1] }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.98 }}
+                transition={{ duration: reduceMotion ? 0.12 : 0.16, ease: [0.22, 1, 0.36, 1] }}
                 className="absolute right-0 top-full z-30 mt-2 min-w-[220px] rounded-[8px] border border-[#e3d7c8] bg-white py-1 text-[#2f2d29] shadow-lg"
               >
                 {profiles.map((profile) => (
@@ -115,7 +147,7 @@ export function TopBar() {
                       setDropdownOpen(false)
                     }}
                     className={cn(
-                      'flex w-full items-center gap-3 px-4 py-2 text-left transition-[background-color,transform] duration-200 motion-safe:hover:translate-x-[1px]',
+                      'flex w-full items-center gap-3 px-4 py-2 text-left transition-[background-color] duration-150',
                       activeProfileId === profile.id ? 'bg-[#fbf2ec]' : 'hover:bg-[#faf7f0]'
                     )}
                   >
@@ -133,36 +165,6 @@ export function TopBar() {
           </AnimatePresence>
         </div>
       </div>
-
-      <AnimatePresence>
-        {mobileMenuOpen ? (
-          <motion.div
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: reduceMotion ? 0.14 : 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-white/10 bg-[#c1633d] px-4 py-2 md:hidden"
-          >
-            <nav className="flex min-w-max items-center gap-4 overflow-x-auto">
-              {navItems.map(({ to, label }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      'whitespace-nowrap rounded-[8px] px-2 py-1 text-[12px] font-medium text-white/75 transition-[background-color,color] duration-200',
-                      isActive && 'bg-white/10 text-white'
-                    )
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
-            </nav>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </header>
   )
 }

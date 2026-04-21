@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ApexOptions } from 'apexcharts'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BadgeEuro, LineChart as LineChartIcon, Pencil, Save, Table2, X } from 'lucide-react'
@@ -40,20 +40,20 @@ function AnalysisToggle({
     <button
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[12px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.03)] transition-[transform,background-color,border-color,color,box-shadow] duration-200 motion-safe:hover:-translate-y-[1px]',
+        'inline-flex items-center gap-1 rounded-[8px] border px-2 py-1 text-[8px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.03)] transition-[transform,background-color,border-color,color,box-shadow] duration-200 motion-safe:hover:-translate-y-[1px] sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-[12px]',
         active
           ? 'border-[#e8c9b9] bg-[#fdf1ea] text-[#c1633d]'
           : 'border-[#e7e1d6] bg-white text-[#2d2b28] hover:border-[#d9cdbc] hover:bg-[#fffaf3] hover:text-[#201f1d]'
       )}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
       {label}
     </button>
   )
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-[15px] font-medium text-[#2d2b28]">{children}</h2>
+  return <h2 className="text-[12px] font-medium text-[#2d2b28] sm:text-[15px]">{children}</h2>
 }
 
 export function Analysis() {
@@ -61,6 +61,12 @@ export function Analysis() {
   const [selectedCourse, setSelectedCourse] = useState('Gestão de Empresas')
   const [roiRows, setRoiRows] = useState(roiParameterRows)
   const [editingRoiRow, setEditingRoiRow] = useState<RoiEditingRowState | null>(null)
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false
+  )
+  const [isCompactViewport, setIsCompactViewport] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 1279px)').matches : false
+  )
   const { createChartAnimation, createRevealVariants, createStaggerVariants } = useAppMotion()
 
   const viewParam = searchParams.get('view')
@@ -68,6 +74,31 @@ export function Analysis() {
     viewParam === 'retention' || viewParam === 'course' || viewParam === 'roi' ? viewParam : 'roi'
 
   const heatmapMix = courseHeatmapMix[selectedCourse]
+  const roiChartHeight = isMobileViewport ? 320 : isCompactViewport ? 420 : 600
+  const retentionChartHeight = isMobileViewport ? 330 : isCompactViewport ? 430 : 560
+  const courseTreemapHeight = isMobileViewport ? 320 : isCompactViewport ? 430 : 692
+  const roiCategories = isCompactViewport
+    ? ['CTeSP', 'Licenciat\nura', 'Mestrado', 'Internacio\nnal']
+    : roiChartData.map((item) => item.name)
+
+  useEffect(() => {
+    const mobileMediaQuery = window.matchMedia('(max-width: 640px)')
+    const compactMediaQuery = window.matchMedia('(max-width: 1279px)')
+
+    const syncViewport = () => {
+      setIsMobileViewport(mobileMediaQuery.matches)
+      setIsCompactViewport(compactMediaQuery.matches)
+    }
+
+    syncViewport()
+    mobileMediaQuery.addEventListener('change', syncViewport)
+    compactMediaQuery.addEventListener('change', syncViewport)
+
+    return () => {
+      mobileMediaQuery.removeEventListener('change', syncViewport)
+      compactMediaQuery.removeEventListener('change', syncViewport)
+    }
+  }, [])
 
   const roiBarChartOptions: ApexOptions = {
     chart: {
@@ -79,33 +110,34 @@ export function Analysis() {
     colors: [chartColors.green, chartColors.red],
     plotOptions: {
       bar: {
-        borderRadius: 8,
+        borderRadius: isMobileViewport ? 6 : 8,
         borderRadiusApplication: 'end',
-        columnWidth: '52%',
+        columnWidth: isCompactViewport ? '48%' : '52%',
       },
     },
     dataLabels: { enabled: false },
     legend: {
       position: 'bottom',
       horizontalAlign: 'center',
-      fontSize: '12px',
+      fontSize: isMobileViewport ? '9px' : '12px',
       labels: { colors: chartColors.legend },
       markers: {
-        size: 10,
+        size: isMobileViewport ? 6 : 10,
       },
       itemMargin: {
-        horizontal: 14,
+        horizontal: isMobileViewport ? 6 : 14,
       },
     },
     grid: { show: false },
     xaxis: {
-      categories: roiChartData.map((item) => item.name),
+      categories: roiCategories,
       labels: {
         style: {
-          colors: roiChartData.map(() => '#4d4a45'),
-          fontSize: '13px',
+          colors: roiCategories.map(() => '#4d4a45'),
+          fontSize: isMobileViewport ? '10px' : isCompactViewport ? '12px' : '13px',
           fontWeight: 400,
         },
+        trim: false,
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -131,7 +163,7 @@ export function Analysis() {
     colors: [chartColors.red, chartColors.green],
     stroke: {
       curve: 'straight',
-      width: 4,
+      width: isMobileViewport ? 3 : 4,
     },
     markers: {
       size: 0,
@@ -145,13 +177,13 @@ export function Analysis() {
     legend: {
       position: 'bottom',
       horizontalAlign: 'center',
-      fontSize: '12px',
+      fontSize: isMobileViewport ? '9px' : '12px',
       labels: { colors: chartColors.legend },
       markers: {
-        size: 10,
+        size: isMobileViewport ? 6 : 10,
       },
       itemMargin: {
-        horizontal: 14,
+        horizontal: isMobileViewport ? 6 : 14,
       },
     },
     tooltip: { enabled: false },
@@ -161,7 +193,7 @@ export function Analysis() {
         rotate: -55,
         style: {
           colors: retentionData.map(() => chartColors.textMuted),
-          fontSize: '14px',
+          fontSize: isMobileViewport ? '10px' : isCompactViewport ? '12px' : '14px',
         },
       },
       axisBorder: { show: false },
@@ -175,7 +207,7 @@ export function Analysis() {
         formatter: () => '%',
         style: {
           colors: [chartColors.textMuted],
-          fontSize: '12px',
+          fontSize: isMobileViewport ? '10px' : '12px',
         },
       },
     },
@@ -190,11 +222,11 @@ export function Analysis() {
           label: {
             text: '115.3',
             borderWidth: 0,
-            offsetX: 26,
+            offsetX: isMobileViewport ? 12 : 26,
             style: {
               background: 'transparent',
               color: chartColors.red,
-              fontSize: '14px',
+              fontSize: isMobileViewport ? '11px' : '14px',
               fontWeight: '400',
             },
           },
@@ -208,11 +240,11 @@ export function Analysis() {
           label: {
             text: '123.2',
             borderWidth: 0,
-            offsetX: 26,
+            offsetX: isMobileViewport ? 12 : 26,
             style: {
               background: 'transparent',
               color: chartColors.green,
-              fontSize: '14px',
+              fontSize: isMobileViewport ? '11px' : '14px',
               fontWeight: '400',
             },
           },
@@ -235,14 +267,7 @@ export function Analysis() {
     },
     legend: { show: false },
     dataLabels: {
-      enabled: true,
-      offsetY: 2,
-      style: {
-        fontSize: '14px',
-        fontWeight: '600',
-        colors: ['#1f1d1a'],
-      },
-      formatter: (text: string) => text,
+      enabled: false,
     },
     tooltip: { enabled: false },
     stroke: {
@@ -313,32 +338,30 @@ export function Analysis() {
 
   return (
     <div className="flex min-h-full flex-col bg-[#fffdf6]">
-      <div className="border-b border-[#ede5d7] bg-white px-5 py-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-[17px] font-semibold text-[#2e2d2a]">Visualização</h1>
-            <div className="flex flex-wrap items-center gap-2">
+      <div className="border-b border-[#ede5d7] bg-white px-2 py-2 sm:px-5 sm:py-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+          <h1 className="text-[15px] font-semibold text-[#2e2d2a] sm:text-[17px]">Visualização</h1>
+          <div className="flex flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 sm:gap-2 md:flex-wrap md:overflow-visible md:pb-0">
               <AnalysisToggle label="Gestão de ROI" icon={BadgeEuro} active={activeView === 'roi'} onClick={() => handleViewChange('roi')} />
               <AnalysisToggle label="Retenção" icon={LineChartIcon} active={activeView === 'retention'} onClick={() => handleViewChange('retention')} />
               <AnalysisToggle label="Por Curso" icon={Table2} active={activeView === 'course'} onClick={() => handleViewChange('course')} />
-            </div>
           </div>
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col gap-4 px-5 py-4">
+      <main className="mx-auto flex w-full max-w-[1800px] flex-1 flex-col gap-2 px-2 py-2 sm:gap-4 sm:px-5 sm:py-4">
         <AnimatePresence mode="wait">
           {activeView === 'roi' ? (
             <motion.div
               key="roi"
-              className="space-y-4"
+              className="space-y-2 sm:space-y-4"
               variants={createRevealVariants({ distance: 12, duration: 0.24 })}
               initial="hidden"
               animate="show"
               exit="hidden"
             >
               <motion.div
-                className="grid grid-cols-1 gap-4 xl:grid-cols-3"
+                className="grid grid-cols-1 gap-2 sm:gap-4 xl:grid-cols-3"
                 variants={createStaggerVariants({ staggerChildren: 0.08 })}
                 initial="hidden"
                 animate="show"
@@ -370,25 +393,25 @@ export function Analysis() {
               </motion.div>
 
               <motion.div
-                className="grid grid-cols-1 gap-4 xl:grid-cols-[430px_minmax(0,1fr)]"
+                className="grid grid-cols-1 gap-2 sm:gap-4 xl:grid-cols-[430px_minmax(0,1fr)]"
                 variants={createStaggerVariants({ staggerChildren: 0.08 })}
                 initial="hidden"
                 animate="show"
               >
-                <motion.div variants={createRevealVariants({ distance: 12 })}>
+                <motion.div className="order-2 xl:order-1" variants={createRevealVariants({ distance: 12 })}>
                   <Card className="overflow-hidden">
-                    <div className="px-4 py-4">
+                    <div className="px-3 py-3 sm:px-4 sm:py-4">
                       <SectionTitle>Parâmetros</SectionTitle>
                     </div>
 
-                    <div className="px-4 pb-4">
-                      <table className="w-full border-collapse text-left text-[12px]">
+                    <div className="overflow-x-auto px-3 pb-3 sm:px-4 sm:pb-4">
+                      <table className="w-full min-w-[280px] border-collapse text-left text-[10px] sm:text-[12px]">
                         <thead>
                           <tr className="bg-[#ececec] text-[#2f2d2a]">
-                            <th className="px-3 py-3 font-semibold">Tipo de Estud...</th>
-                            <th className="px-3 py-3 font-semibold">Max. Meses e...</th>
-                            <th className="px-3 py-3 font-semibold">Gravidade</th>
-                            <th className="px-3 py-3 text-center font-semibold">Ações</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Tipo de Estud...</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Max. Meses e...</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Gravidade</th>
+                            <th className="px-2 py-2 text-center font-semibold sm:px-3 sm:py-3">Ações</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -403,8 +426,8 @@ export function Analysis() {
                                   isEditing && 'bg-[#fef7f2]'
                                 )}
                               >
-                                <td className="px-3 py-3">{row.type}</td>
-                                <td className="px-3 py-3">
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">{row.type}</td>
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">
                                   {isEditing ? (
                                     <input
                                       type="text"
@@ -415,13 +438,13 @@ export function Analysis() {
                                         )
                                       }
                                       placeholder={row.maxDelay}
-                                      className="h-8 w-full rounded-[8px] border border-[#d88960] bg-white px-3 text-[12px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)]"
+                                      className="h-7 w-full rounded-[8px] border border-[#d88960] bg-white px-2 text-[10px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] sm:h-8 sm:px-3 sm:text-[12px]"
                                     />
                                   ) : (
                                     row.maxDelay
                                   )}
                                 </td>
-                                <td className="px-3 py-3">
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">
                                   {isEditing ? (
                                     <input
                                       type="text"
@@ -432,37 +455,37 @@ export function Analysis() {
                                         )
                                       }
                                       placeholder={row.severity}
-                                      className="h-8 w-full rounded-[8px] border border-[#d88960] bg-white px-3 text-[12px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)]"
+                                      className="h-7 w-full rounded-[8px] border border-[#d88960] bg-white px-2 text-[10px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] sm:h-8 sm:px-3 sm:text-[12px]"
                                     />
                                   ) : (
                                     row.severity
                                   )}
                                 </td>
-                                <td className="px-3 py-3 text-center text-[#c1633d]">
+                                <td className="px-2 py-2 text-center text-[#c1633d] sm:px-3 sm:py-3">
                                   {isEditing ? (
                                     <div className="flex items-center justify-center gap-1.5">
                                       <button
                                         onClick={saveRoiRowEdit}
-                                        className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
+                                        className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
                                         aria-label={`Guardar ${row.type}`}
                                       >
-                                        <Save className="h-3.5 w-3.5" />
+                                        <Save className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                       </button>
                                       <button
                                         onClick={cancelRoiRowEdit}
-                                        className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
+                                        className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
                                         aria-label={`Cancelar edição de ${row.type}`}
                                       >
-                                        <X className="h-3.5 w-3.5" />
+                                        <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                       </button>
                                     </div>
                                   ) : (
                                     <button
                                       onClick={() => startRoiRowEdit(row)}
-                                      className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
                                       aria-label={`Editar ${row.type}`}
                                     >
-                                      <Pencil className="h-3.5 w-3.5" />
+                                      <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                     </button>
                                   )}
                                 </td>
@@ -475,16 +498,16 @@ export function Analysis() {
                   </Card>
                 </motion.div>
 
-                <motion.div variants={createRevealVariants({ distance: 12 })}>
+                <motion.div className="order-1 xl:order-2" variants={createRevealVariants({ distance: 12 })}>
                   <Card className="overflow-hidden">
-                    <div className="px-4 py-4">
+                    <div className="px-3 py-3 sm:px-4 sm:py-4">
                       <SectionTitle>Retenção vs Risco Bruto (EUROS)</SectionTitle>
                     </div>
 
-                    <div className="h-[600px] px-2 pb-4 md:px-4">
+                    <div className="px-2 pb-3 sm:px-4 sm:pb-4">
                       <ApexChart
                         type="bar"
-                        height={600}
+                        height={roiChartHeight}
                         series={[
                           { name: 'Receita Preservada', data: roiChartData.map((item) => item.recovered) },
                           { name: 'Receita em Risco', data: roiChartData.map((item) => item.risk) },
@@ -501,14 +524,14 @@ export function Analysis() {
           {activeView === 'retention' ? (
             <motion.div
               key="retention"
-              className="space-y-4"
+              className="space-y-2 sm:space-y-4"
               variants={createRevealVariants({ distance: 12, duration: 0.24 })}
               initial="hidden"
               animate="show"
               exit="hidden"
             >
               <motion.div
-                className="grid grid-cols-1 gap-4 xl:grid-cols-2"
+                className="grid grid-cols-1 gap-2 sm:gap-4 xl:grid-cols-2"
                 variants={createStaggerVariants({ staggerChildren: 0.08 })}
                 initial="hidden"
                 animate="show"
@@ -533,14 +556,14 @@ export function Analysis() {
 
               <motion.div variants={createRevealVariants({ distance: 12 })} initial="hidden" animate="show">
                 <Card className="overflow-hidden">
-                  <div className="px-4 py-4">
+                  <div className="px-3 py-3 sm:px-4 sm:py-4">
                     <SectionTitle>Curva de Abandono (Histórico VS. Optimizado com RiskRadar)</SectionTitle>
                   </div>
 
-                  <div className="h-[560px] px-2 pb-4 md:px-4">
+                  <div className="px-2 pb-3 sm:px-4 sm:pb-4">
                     <ApexChart
                       type="line"
-                      height={560}
+                      height={retentionChartHeight}
                       series={[
                         { name: 'Taxa de Retenção Histórica', data: retentionData.map((item) => item.historical) },
                         { name: 'Taxa de Retenção Optimizada', data: retentionData.map((item) => item.optimized) },
@@ -556,7 +579,7 @@ export function Analysis() {
           {activeView === 'course' ? (
             <motion.div
               key="course"
-              className="space-y-3"
+              className="space-y-2 sm:space-y-3"
               variants={createRevealVariants({ distance: 12, duration: 0.24 })}
               initial="hidden"
               animate="show"
@@ -565,21 +588,21 @@ export function Analysis() {
               <SectionTitle>Heatmap de Risco</SectionTitle>
 
               <motion.div
-                className="grid grid-cols-1 gap-4 xl:grid-cols-[375px_minmax(0,1fr)]"
+                className="grid grid-cols-1 gap-2 sm:gap-4 xl:grid-cols-[375px_minmax(0,1fr)]"
                 variants={createStaggerVariants({ staggerChildren: 0.08 })}
                 initial="hidden"
                 animate="show"
               >
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <Card className="overflow-hidden">
-                    <div className="px-4 py-4">
-                      <div className="mb-4 text-[14px] font-medium text-[#2d2b28]">Seleção de Cursos</div>
+                    <div className="px-3 py-3 sm:px-4 sm:py-4">
+                      <div className="mb-3 text-[11px] font-medium text-[#2d2b28] sm:mb-4 sm:text-[14px]">Seleção de Cursos</div>
 
-                      <table className="w-full border-collapse text-left text-[12px]">
+                      <table className="w-full border-collapse text-left text-[10px] sm:text-[12px]">
                         <thead>
                           <tr className="bg-[#ececec] text-[#2f2d2a]">
-                            <th className="w-[58px] px-4 py-3 font-semibold">Ações</th>
-                            <th className="px-3 py-3 font-semibold">Curso</th>
+                            <th className="w-[44px] px-3 py-2 font-semibold sm:w-[58px] sm:px-4 sm:py-3">Ações</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Curso</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -587,15 +610,15 @@ export function Analysis() {
                             const checked = course === selectedCourse
                             return (
                               <tr key={course} className="border-b border-[#eee7db] text-[#47433f] transition-colors duration-200 hover:bg-[#fff9f2]">
-                                <td className="px-4 py-3">
+                                <td className="px-3 py-2 sm:px-4 sm:py-3">
                                   <input
                                     type="checkbox"
                                     checked={checked}
                                     onChange={() => setSelectedCourse(course)}
-                                    className="h-4 w-4 accent-[#c1633d]"
+                                    className="h-3.5 w-3.5 accent-[#c1633d] sm:h-4 sm:w-4"
                                   />
                                 </td>
-                                <td className="px-3 py-3">{course}</td>
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">{course}</td>
                               </tr>
                             )
                           })}
@@ -607,21 +630,21 @@ export function Analysis() {
 
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <Card className="overflow-hidden">
-                    <div className="flex flex-wrap items-center gap-6 px-4 py-4 text-[12px] font-medium text-[#2f2d2a]">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full bg-[#e72a2a]" />
+                    <div className="flex flex-nowrap items-center gap-2 overflow-x-auto px-3 py-3 text-[8px] font-medium text-[#2f2d2a] sm:flex-wrap sm:gap-6 sm:overflow-visible sm:px-4 sm:py-4 sm:text-[12px]">
+                      <span className="inline-flex items-center gap-1 sm:gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#e72a2a] sm:h-4 sm:w-4" />
                         Risco Alto
                       </span>
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full bg-[#e7a92a]" />
+                      <span className="inline-flex items-center gap-1 sm:gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#e7a92a] sm:h-4 sm:w-4" />
                         Risco Médio
                       </span>
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full bg-[#c1633d]" />
+                      <span className="inline-flex items-center gap-1 sm:gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#c1633d] sm:h-4 sm:w-4" />
                         Risco Baixo
                       </span>
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 rounded-full bg-[#2a9f4b]" />
+                      <span className="inline-flex items-center gap-1 sm:gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#2a9f4b] sm:h-4 sm:w-4" />
                         Sem Risco
                       </span>
                     </div>
@@ -631,18 +654,19 @@ export function Analysis() {
                       variants={createRevealVariants({ distance: 8, duration: 0.2 })}
                       initial="hidden"
                       animate="show"
-                      className="h-[694px] overflow-hidden px-[2px] pb-[2px]"
+                      className="overflow-hidden px-[2px] pb-[2px]"
+                      style={{ height: `${courseTreemapHeight + 2}px` }}
                     >
                       <ApexChart
                         type="treemap"
-                        height={692}
+                        height={courseTreemapHeight}
                         series={[
                           {
                             data: [
                               { x: 'Risco Alto', y: heatmapMix.high, fillColor: chartColors.red },
                               { x: 'Risco Médio', y: heatmapMix.medium, fillColor: chartColors.yellow },
-                              { x: 'Sem Risco', y: heatmapMix.none, fillColor: chartColors.green },
                               { x: 'Risco Baixo', y: heatmapMix.low, fillColor: chartColors.main },
+                              { x: 'Sem Risco', y: heatmapMix.none, fillColor: chartColors.green },
                             ],
                           },
                         ]}
