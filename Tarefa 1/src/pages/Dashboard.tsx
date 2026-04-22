@@ -63,11 +63,11 @@ function DashboardStatusBadge({ status }: { status: WorkflowStatus }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-[2px] border px-1.5 py-0.5 text-[9px] font-medium sm:px-2 sm:py-1 sm:text-[11px]',
+        'inline-flex items-center gap-1 rounded-[2px] border px-2 py-1 text-[11px] font-medium',
         config.className
       )}
     >
-      <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+      <Icon className="h-3.5 w-3.5" />
       {config.label}
     </span>
   )
@@ -260,14 +260,14 @@ export function Dashboard() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-3 min-[420px]:gap-4 sm:gap-4 xl:grid-cols-[minmax(0,1.82fr)_384px] xl:items-start">
+        <div className="grid grid-cols-1 gap-3 min-[420px]:gap-4 sm:gap-4 min-[1180px]:grid-cols-[minmax(0,1.55fr)_328px] min-[1180px]:items-start xl:grid-cols-[minmax(0,1.82fr)_384px]">
           <motion.div className="min-h-0" variants={createRevealVariants({ distance: 14 })}>
             <Card className="flex h-full min-h-0 flex-col overflow-hidden">
               <div className="flex flex-col gap-2 border-b border-[#eee7db] bg-white px-2 py-2 min-[420px]:gap-3 min-[420px]:px-4 min-[420px]:py-4">
-                <div className="flex flex-nowrap items-center gap-1 md:flex-wrap md:gap-3 lg:flex-nowrap lg:justify-between">
-                  <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-1 md:flex-wrap md:gap-2 lg:flex-nowrap">
-                    <div className="relative shrink min-w-0">
-                      <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9a958d] min-[420px]:left-3 min-[420px]:h-4 min-[420px]:w-4" />
+                <div className="grid gap-2 min-[720px]:grid-cols-[minmax(0,1fr)_auto] min-[720px]:items-center min-[720px]:gap-3">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <div className="relative min-w-0 flex-[1_1_210px]">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a958d]" />
                       <input
                         type="text"
                         value={searchTerm}
@@ -276,19 +276,19 @@ export function Dashboard() {
                           setCurrentPage(0)
                         }}
                         placeholder="Procurar por nome de aluno"
-                        className="h-8 w-[96px] rounded-[6px] border border-[#e6dfd4] bg-white pl-7 pr-2 text-[9px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[420px]:w-[170px] min-[420px]:rounded-[8px] min-[420px]:pl-9 min-[420px]:pr-3 min-[420px]:text-[12px] sm:w-[230px]"
+                        className="h-10 w-full rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-3 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[720px]:max-w-[270px]"
                       />
                     </div>
 
                     <div className="relative shrink-0">
-                      <ListFilter className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#716b64] min-[420px]:left-3" />
+                      <ListFilter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#716b64]" />
                       <select
                         value={statusFilter}
                         onChange={(event) => {
                           setStatusFilter(event.target.value as typeof statusFilter)
                           setCurrentPage(0)
                         }}
-                        className="h-8 w-[76px] appearance-none rounded-[6px] border border-[#e6dfd4] bg-white pl-6 pr-5 text-[9px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[420px]:w-[120px] min-[420px]:rounded-[8px] min-[420px]:pl-8 min-[420px]:pr-9 min-[420px]:text-[12px] sm:w-auto"
+                        className="h-10 w-[132px] appearance-none rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-9 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[520px]:w-[150px]"
                       >
                         {statusOptions.map((option) => (
                           <option key={option} value={option}>
@@ -296,28 +296,28 @@ export function Dashboard() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#716b64] min-[420px]:right-3" />
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#716b64]" />
                     </div>
                   </div>
 
-                  <button className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-[6px] bg-[#2d2c2b] px-2 text-[9px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-[background-color,box-shadow] duration-150 hover:bg-[#242321] hover:shadow-[0_8px_18px_rgba(26,24,22,0.14)] focus-visible:shadow-[0_0_0_3px_rgba(45,44,43,0.16)] min-[420px]:gap-2 min-[420px]:rounded-[8px] min-[420px]:px-4 min-[420px]:text-[12px]">
-                    <Download className="h-3.5 w-3.5 min-[420px]:h-4 min-[420px]:w-4" />
+                  <button className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-[8px] bg-[#2d2c2b] px-4 text-[12px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-[background-color,box-shadow] duration-150 hover:bg-[#242321] hover:shadow-[0_8px_18px_rgba(26,24,22,0.14)] focus-visible:shadow-[0_0_0_3px_rgba(45,44,43,0.16)] min-[720px]:w-auto">
+                    <Download className="h-4 w-4" />
                     Exportar relatório
                   </button>
                 </div>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-auto xl:max-h-[560px] 2xl:max-h-[640px]">
-                <table className="min-w-[560px] border-collapse text-left sm:min-w-[720px] xl:min-w-full">
+              <div className="overflow-x-auto overflow-y-visible min-[1180px]:min-h-0 min-[1180px]:flex-1 min-[1180px]:overflow-auto min-[1180px]:max-h-[560px] 2xl:max-h-[640px]">
+                <table className="w-full min-w-[760px] border-collapse text-left text-[11px] sm:min-w-[820px] sm:text-[12px]">
                   <thead>
                     <tr className="bg-[#ececec] font-semibold text-[#2f2d2a]">
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-4 sm:py-3 sm:text-[12px]">Nome de Aluno</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Curso</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Grau</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Causa</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Status</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Score</th>
-                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-2 py-2 text-center text-[9px] sm:px-3 sm:py-3 sm:text-[12px]">Ações</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-4 sm:text-[12px]">Nome de Aluno</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-3 sm:text-[12px]">Curso</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-3 sm:text-[12px]">Grau</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-3 sm:text-[12px]">Causa</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-3 sm:text-[12px]">Status</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-[11px] sm:px-3 sm:text-[12px]">Score</th>
+                      <th className="sticky top-0 z-10 border-b border-[#e2ddd3] bg-[#ececec] px-3 py-3 text-center text-[11px] sm:px-3 sm:text-[12px]">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -325,22 +325,22 @@ export function Dashboard() {
                       <tr
                         key={student.id}
                         onClick={() => navigate(`/students/${student.id}`)}
-                        className="cursor-pointer border-b border-[#efebe3] text-[9px] text-[#36332f] transition-[background-color,border-color] duration-150 hover:border-[#eadfce] hover:bg-[#fff9f2] sm:text-[12px]"
+                        className="cursor-pointer border-b border-[#efebe3] text-[11px] text-[#36332f] transition-[background-color,border-color] duration-150 hover:border-[#eadfce] hover:bg-[#fff9f2] sm:text-[12px]"
                       >
-                        <td className="px-2 py-2 font-medium text-[#2f2d2a] sm:px-4 sm:py-2.5">
+                        <td className="px-3 py-3 font-medium text-[#2f2d2a] sm:px-4 sm:py-2.5">
                           {obfuscateName(student.name, isObservatoryView)}
                         </td>
-                        <td className="max-w-[110px] truncate px-2 py-2 text-[#5b5650] sm:max-w-[170px] sm:px-3 sm:py-2.5">{student.course}</td>
-                        <td className="px-2 py-2 text-[#5b5650] sm:px-3 sm:py-2.5">{student.degree}</td>
-                        <td className="max-w-[100px] truncate px-2 py-2 text-[#5b5650] sm:max-w-[170px] sm:px-3 sm:py-2.5">{student.mainCause}</td>
-                        <td className="px-2 py-2 sm:px-3 sm:py-2.5">
+                        <td className="max-w-[140px] truncate px-3 py-3 text-[#5b5650] sm:max-w-[170px] sm:px-3 sm:py-2.5">{student.course}</td>
+                        <td className="px-3 py-3 text-[#5b5650] sm:px-3 sm:py-2.5">{student.degree}</td>
+                        <td className="max-w-[130px] truncate px-3 py-3 text-[#5b5650] sm:max-w-[170px] sm:px-3 sm:py-2.5">{student.mainCause}</td>
+                        <td className="px-3 py-3 sm:px-3 sm:py-2.5">
                           <DashboardStatusBadge status={student.workflowStatus} />
                         </td>
-                        <td className="px-2 py-2 sm:px-3 sm:py-2.5">
+                        <td className="px-3 py-3 sm:px-3 sm:py-2.5">
                           <RiskBadge score={student.riskScore} />
                         </td>
-                        <td className="px-2 py-2 text-center text-[#c1633d] sm:px-3 sm:py-2.5">
-                          <User className="mx-auto h-3 w-3 sm:h-4 sm:w-4" />
+                        <td className="px-3 py-3 text-center text-[#c1633d] sm:px-3 sm:py-2.5">
+                          <User className="mx-auto h-4 w-4" />
                         </td>
                       </tr>
                     ))}
@@ -348,7 +348,7 @@ export function Dashboard() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-between border-t border-[#ece6da] px-2 py-2 text-[9px] text-[#57534f] sm:px-4 sm:py-3 sm:text-[12px]">
+              <div className="flex items-center justify-between border-t border-[#ece6da] px-3 py-3 text-[11px] text-[#57534f] sm:px-4 sm:text-[12px]">
                 <span>{visibleStudentCount} de {footerTotalStudents} alunos</span>
                 <div className="flex items-center gap-1 sm:gap-2">
                   <button
