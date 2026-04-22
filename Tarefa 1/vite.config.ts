@@ -4,4 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  server: {
+    watch: {
+      ignored: [
+        '**/.chrome-debug/**',
+        '**/.chrome-headless/**',
+        '**/.playwright-mcp/**',
+        '**/.codex/**',
+      ],
+    },
+  },
 })

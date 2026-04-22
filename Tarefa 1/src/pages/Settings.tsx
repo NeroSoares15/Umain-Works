@@ -33,7 +33,7 @@ function SettingsTabButton({
     <button
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[12px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.03)] transition-[transform,background-color,border-color,color,box-shadow] duration-200 motion-safe:hover:-translate-y-[1px]',
+        'inline-flex items-center gap-1.5 rounded-[8px] border px-2.5 py-1.5 text-[12px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.03)] transition-[transform,background-color,border-color,color,box-shadow] duration-200 motion-safe:hover:-translate-y-[1px] sm:text-[12px]',
         active
           ? 'border-[#e8c9b9] bg-[#fdf1ea] text-[#c1633d]'
           : 'border-[#e7e1d6] bg-white text-[#2d2b28] hover:border-[#d9cdbc] hover:bg-[#fffaf3] hover:text-[#201f1d]'
@@ -103,10 +103,10 @@ export function Settings() {
 
   return (
     <div className="flex min-h-full flex-col bg-[#fffdf6]">
-      <div className="border-b border-[#ede5d7] bg-white px-5 py-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="border-b border-[#ede5d7] bg-white px-5 py-3">
+        <div className="flex flex-col gap-2.5 md:flex-row md:items-center">
           <div className="flex items-center gap-5">
-            <h1 className="text-[17px] font-semibold text-[#2e2d2a]">Configurações</h1>
+            <h1 className="text-[15px] font-semibold text-[#2e2d2a]">Configurações</h1>
             <div className="flex flex-wrap items-center gap-2">
               <SettingsTabButton active={activeTab === 'parameters'} icon={SlidersHorizontal} label="Parâmetros" onClick={() => handleTabChange('parameters')} />
               <SettingsTabButton active={activeTab === 'credits'} icon={BookCopy} label="Créditos" onClick={() => handleTabChange('credits')} />

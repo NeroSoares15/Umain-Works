@@ -39,7 +39,7 @@ export function KpiCard({
 
       <div className="flex h-full flex-col px-2.5 py-2.5 pl-[11px] min-[420px]:px-4 min-[420px]:py-3.5 min-[420px]:pl-[15px]">
         <div className="mb-1.5 flex items-start justify-between gap-3 min-[420px]:mb-2.5 min-[420px]:gap-4">
-          <p className="text-[9px] font-medium leading-[1.25] text-[#4f4b46] transition-colors duration-200 group-hover:text-[#2b2926] min-[420px]:text-[12.5px]">
+          <p className="text-[12px] font-medium leading-[1.25] text-[#4f4b46] transition-colors duration-200 group-hover:text-[#2b2926] min-[420px]:text-[13px]">
             {title}
           </p>
           {Icon ? (
@@ -65,7 +65,7 @@ export function KpiCard({
           {subtitle ? (
             <p
               className={cn(
-                'mt-1 text-[7px] font-medium leading-[1.3] min-[420px]:mt-2 min-[420px]:text-[11px] min-[420px]:leading-[1.35]',
+                'mt-1 text-[10px] font-medium leading-[1.3] min-[420px]:mt-2 min-[420px]:text-[11px] min-[420px]:leading-[1.35]',
                 subtitleClassName
               )}
             >

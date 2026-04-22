@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-sans: 'Manrope', Arial, sans-serif;
   --color-umain-primary: #c1633d;
   --color-umain-secondary: #fff8f1;
   --color-umain-accent: #c1633d;
@@ -26,6 +26,7 @@
 * { box-sizing: border-box; }
 html, body, #root {
   min-height: 100%;
+  font-family: var(--font-sans);
 }
 
 body {
@@ -50,10 +51,21 @@ body {
   border: 1px solid var(--color-umain-border);
 }
 
-button,
-input,
-select {
-  outline: none;
+@layer base {
+  button,
+  input,
+  select,
+  textarea {
+    outline: none;
+  }
+}
+
+.apexcharts-canvas,
+.apexcharts-canvas *,
+.apexcharts-tooltip,
+.apexcharts-xaxistooltip,
+.apexcharts-yaxistooltip {
+  font-family: 'Manrope', Arial, sans-serif !important;
 }
 
 .anim-fade-in {

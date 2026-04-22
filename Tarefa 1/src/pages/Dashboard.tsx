@@ -131,7 +131,7 @@ function RiskDistributionDonut({
   const chartOptions: ApexOptions = {
     chart: {
       type: 'donut',
-      fontFamily: 'Manrope, Arial, sans-serif',
+      fontFamily: 'Manrope',
       toolbar: { show: false },
       animations: createChartAnimation(380, 14),
     },
@@ -148,7 +148,7 @@ function RiskDistributionDonut({
         const value = Math.round(Number(series[seriesIndex] ?? 0))
 
         return [
-          '<div style="display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(45,43,40,0.94);color:#ffffff;font:600 11px Manrope, Arial, sans-serif;line-height:1.2;box-shadow:0 8px 18px rgba(0,0,0,0.18);">',
+          '<div style="display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(45,43,40,0.94);color:#ffffff;font-family:Manrope;font-size:11px;font-weight:600;line-height:1.2;box-shadow:0 8px 18px rgba(0,0,0,0.18);">',
           `<span>${entry.label}</span>`,
           `<span style="font-weight:700;">${value}%</span>`,
           '</div>',
@@ -357,7 +357,7 @@ export function Dashboard() {
                           setCurrentPage(0)
                         }}
                         placeholder="Procurar por nome de aluno"
-                        className="h-10 w-full rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-3 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[920px]:max-w-[270px]"
+                        className="h-10 w-full rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-3 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[920px]:h-9 min-[920px]:max-w-[270px]"
                       />
                     </div>
 
@@ -369,7 +369,7 @@ export function Dashboard() {
                           setCourseFilter(event.target.value)
                           setCurrentPage(0)
                         }}
-                        className="h-10 w-[170px] appearance-none rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-9 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)]"
+                        className="h-10 w-[170px] appearance-none rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-9 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[920px]:h-9 min-[920px]:w-[196px]"
                       >
                         {courseOptions.map((option) => (
                           <option key={option} value={option}>
@@ -388,7 +388,7 @@ export function Dashboard() {
                           setRiskFilter(event.target.value as RiskFilter)
                           setCurrentPage(0)
                         }}
-                        className="h-10 w-[150px] appearance-none rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-9 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)]"
+                        className="h-10 w-[150px] appearance-none rounded-[8px] border border-[#e6dfd4] bg-white pl-9 pr-9 text-[12px] text-[#2f2d2a] transition-[border-color,box-shadow,background-color] duration-150 hover:border-[#d8cebe] focus:border-[#d59d82] focus:bg-[#fffdfa] focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] min-[920px]:h-9 min-[920px]:w-[184px]"
                       >
                         <option value="All">Risco: Todos</option>
                         <option value="high">Risco Alto</option>
@@ -400,7 +400,7 @@ export function Dashboard() {
                     </div>
                   </div>
 
-                  <button className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-[8px] bg-[#2d2c2b] px-4 text-[12px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-[background-color,box-shadow] duration-150 hover:bg-[#242321] hover:shadow-[0_8px_18px_rgba(26,24,22,0.14)] focus-visible:shadow-[0_0_0_3px_rgba(45,44,43,0.16)] min-[920px]:w-auto">
+                  <button className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-[8px] bg-[#2d2c2b] px-4 text-[12px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-[background-color,box-shadow] duration-150 hover:bg-[#242321] hover:shadow-[0_8px_18px_rgba(26,24,22,0.14)] focus-visible:shadow-[0_0_0_3px_rgba(45,44,43,0.16)] min-[920px]:h-9 min-[920px]:w-auto min-[920px]:px-4">
                     <Download className="h-4 w-4" />
                     Exportar relatório
                   </button>

@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude
+.codex
+.playwright-mpc
+.chrome-headless
+.chrome-debug

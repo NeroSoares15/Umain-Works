@@ -35,7 +35,7 @@ function StudentSpiderChart({
       offsetX: 0,
       offsetY: compact ? 0 : -2,
       animations: createChartAnimation(380, 12),
-      fontFamily: 'Manrope, Arial, sans-serif',
+      fontFamily: 'Manrope',
     },
     legend: { show: false },
     tooltip: { enabled: false },
@@ -116,59 +116,48 @@ function StudentSpiderChart({
 }
 
 function RiskRing({ score, color, compact = false }: { score: number; color: string; compact?: boolean }) {
-  const { createChartAnimation } = useAppMotion()
+  const { reduceMotion } = useAppMotion()
+  const resolvedScore = Math.max(0, Math.min(100, score))
   const ringSize = compact ? 128 : 152
-  const innerInset = compact ? 24 : 28
-
-  const chartOptions: ApexOptions = {
-    chart: {
-      type: 'radialBar',
-      sparkline: { enabled: true },
-      toolbar: { show: false },
-      offsetY: compact ? 2 : 4,
-      animations: createChartAnimation(420, 12),
-      fontFamily: 'Manrope, Arial, sans-serif',
-    },
-    colors: [color],
-    plotOptions: {
-      radialBar: {
-        startAngle: -92,
-        endAngle: 268,
-        hollow: {
-          margin: 0,
-          size: compact ? '58%' : '56%',
-          background: 'transparent',
-        },
-        track: {
-          background: '#ece6da',
-          strokeWidth: '100%',
-          margin: 0,
-        },
-        dataLabels: {
-          show: false,
-        },
-      },
-    },
-    stroke: {
-      lineCap: 'round',
-    },
-    tooltip: { enabled: false },
-    states: {
-      active: { filter: { type: 'none' } },
-      hover: { filter: { type: 'none' } },
-    },
-  }
+  const strokeWidth = compact ? 12 : 14
+  const padding = compact ? 9 : 11
+  const radius = ringSize / 2 - padding - strokeWidth / 2
+  const circumference = 2 * Math.PI * radius
+  const dashOffset = circumference * (1 - resolvedScore / 100)
+  const innerInset = compact ? 28 : 32
 
   return (
     <div className="relative" style={{ height: `${ringSize}px`, width: `${ringSize}px` }}>
-      <ApexChart type="radialBar" series={[score]} options={chartOptions} height={ringSize} width={ringSize} />
+      <svg className="absolute inset-0 -rotate-90" viewBox={`0 0 ${ringSize} ${ringSize}`} aria-hidden="true">
+        <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none" stroke="#efe8dc" strokeWidth={strokeWidth} />
+        <motion.circle
+          cx={ringSize / 2}
+          cy={ringSize / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={reduceMotion ? false : { strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: dashOffset }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 0.42,
+                  ease: [0.22, 1, 0.36, 1],
+                }
+          }
+          style={{ filter: 'drop-shadow(0 6px 12px rgba(193,99,61,0.12))' }}
+        />
+      </svg>
       <div
-        className="pointer-events-none absolute rounded-full border border-[#efe6db] bg-white shadow-[0_14px_26px_rgba(88,70,50,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]"
+        className="pointer-events-none absolute rounded-full bg-white shadow-[0_10px_18px_rgba(88,70,50,0.05)]"
         style={{ inset: `${innerInset}px` }}
       />
-      <div className="pointer-events-none absolute rounded-full border border-[rgba(231,42,42,0.08)]" style={{ inset: compact ? '9px' : '11px' }} />
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className={cn('font-semibold leading-none text-[#161513]', compact ? 'text-[30px]' : 'text-[46px]')}>{score}</span>
+        <span className={cn('font-semibold leading-none text-[#161513]', compact ? 'text-[30px]' : 'text-[46px]')}>{resolvedScore}</span>
         <span className={cn('font-semibold text-[#2d2b28]', compact ? 'mt-1 text-[11px]' : 'mt-1 text-[15px]')}>/100</span>
       </div>
     </div>
@@ -511,7 +500,7 @@ export function StudentProfile() {
       <div className="border-b border-[#ece4d8] bg-white px-2 py-2 sm:px-5 sm:py-5">
         <button
           onClick={() => navigate('/dashboard')}
-          className="inline-flex items-center gap-2 rounded-[6px] px-1 py-1 text-[10px] font-medium text-[#6b6761] transition-[background-color,color,transform] duration-150 hover:bg-[#fbf5ec] hover:text-[#2d2b28] sm:gap-4 sm:rounded-[8px] sm:text-[17px]"
+          className="inline-flex items-center gap-2 rounded-[6px] px-1 py-1 text-[12px] font-medium text-[#6b6761] transition-[background-color,color,transform] duration-150 hover:bg-[#fbf5ec] hover:text-[#2d2b28] sm:gap-3 sm:rounded-[8px] sm:text-[13px]"
         >
           <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
           <span className="font-semibold text-[#6b6761]">Dashboard</span>
