@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BookCopy, Pencil, Save, X } from 'lucide-react'
+import { BookCopy, Pencil, Save, SlidersHorizontal, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
-import { platformVersion, settingsSections } from '../data/referenceData'
+import { useAppContext } from '../contexts/AppContext'
+import { canEditSettings } from '../lib/access'
 import { useAppMotion } from '../lib/appMotion'
 import { cn } from '../lib/utils'
+import { platformVersion } from '../data/referenceData'
 
 type SettingsTab = 'parameters' | 'credits'
 
@@ -45,10 +47,11 @@ function SettingsTabButton({
 
 export function Settings() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [sectionsState, setSectionsState] = useState(settingsSections)
+  const { activeProfileId, settingsSections, applySettingsTableEdit } = useAppContext()
   const [editingRow, setEditingRow] = useState<EditingRowState | null>(null)
   const { createRevealVariants, createStaggerVariants } = useAppMotion()
   const activeTab: SettingsTab = searchParams.get('tab') === 'credits' ? 'credits' : 'parameters'
+  const canEdit = canEditSettings(activeProfileId)
 
   function updateRoute(nextTab: SettingsTab, nextEditing = false) {
     const nextParams = new URLSearchParams()
@@ -57,7 +60,7 @@ export function Settings() {
       nextParams.set('tab', 'credits')
     }
 
-    if (nextTab === 'parameters' && nextEditing) {
+    if (nextTab === 'parameters' && nextEditing && canEdit) {
       nextParams.set('edit', '1')
     }
 
@@ -70,6 +73,8 @@ export function Settings() {
   }
 
   function startRowEdit(sectionId: string, row: { id: string; maxValue: string; severity?: string }) {
+    if (!canEdit) return
+
     setEditingRow({
       sectionId,
       rowId: row.id,
@@ -87,24 +92,10 @@ export function Settings() {
   function saveRowEdit() {
     if (!editingRow) return
 
-    setSectionsState((previousSections) =>
-      previousSections.map((section) => {
-        if (section.id !== editingRow.sectionId) return section
-
-        return {
-          ...section,
-          rows: section.rows.map((row) => {
-            if (row.id !== editingRow.rowId) return row
-
-            return {
-              ...row,
-              maxValue: editingRow.maxValue.trim() || row.maxValue,
-              severity: row.severity !== undefined ? editingRow.severity.trim() || row.severity : row.severity,
-            }
-          }),
-        }
-      })
-    )
+    applySettingsTableEdit(editingRow.sectionId, editingRow.rowId, {
+      maxValue: editingRow.maxValue,
+      severity: editingRow.severity,
+    })
 
     setEditingRow(null)
     updateRoute('parameters')
@@ -117,7 +108,7 @@ export function Settings() {
           <div className="flex items-center gap-5">
             <h1 className="text-[17px] font-semibold text-[#2e2d2a]">Configurações</h1>
             <div className="flex flex-wrap items-center gap-2">
-              <SettingsTabButton active={activeTab === 'parameters'} icon={X} label="Parâmetros" onClick={() => handleTabChange('parameters')} />
+              <SettingsTabButton active={activeTab === 'parameters'} icon={SlidersHorizontal} label="Parâmetros" onClick={() => handleTabChange('parameters')} />
               <SettingsTabButton active={activeTab === 'credits'} icon={BookCopy} label="Créditos" onClick={() => handleTabChange('credits')} />
             </div>
           </div>
@@ -135,13 +126,19 @@ export function Settings() {
               animate="show"
               exit="hidden"
             >
+              {!canEdit ? (
+                <div className="rounded-[8px] border border-[#eadfd0] bg-[#fff8f0] px-4 py-3 text-[13px] text-[#5d5954]">
+                  Este perfil tem acesso de leitura às regras do motor de risco. A edição está disponível apenas para o perfil SAS.
+                </div>
+              ) : null}
+
               <motion.div
                 className="space-y-6"
                 variants={createStaggerVariants({ staggerChildren: 0.08 })}
                 initial="hidden"
                 animate="show"
               >
-                {sectionsState.map((section) => (
+                {settingsSections.map((section) => (
                   <motion.section
                     key={section.id}
                     variants={createRevealVariants({ distance: 10 })}
@@ -169,8 +166,7 @@ export function Settings() {
                             </thead>
                             <tbody>
                               {section.rows.map((row) => {
-                                const isRowEditing =
-                                  editingRow?.sectionId === section.id && editingRow.rowId === row.id
+                                const isRowEditing = editingRow?.sectionId === section.id && editingRow.rowId === row.id
 
                                 return (
                                   <tr
@@ -221,28 +217,39 @@ export function Settings() {
                                     ) : null}
 
                                     <td className="px-3 py-3 text-center text-[#c1633d]">
-                                      {isRowEditing ? (
-                                        <div className="flex items-center justify-center gap-1.5">
+                                      {canEdit ? (
+                                        isRowEditing ? (
+                                          <div className="flex items-center justify-center gap-1.5">
+                                            <button
+                                              onClick={saveRowEdit}
+                                              className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
+                                              aria-label={`Guardar ${row.label}`}
+                                            >
+                                              <Save className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                              onClick={cancelRowEdit}
+                                              className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
+                                              aria-label={`Cancelar edição de ${row.label}`}
+                                            >
+                                              <X className="h-3.5 w-3.5" />
+                                            </button>
+                                          </div>
+                                        ) : (
                                           <button
-                                            onClick={saveRowEdit}
+                                            onClick={() => startRowEdit(section.id, row)}
                                             className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
-                                            aria-label={`Guardar ${row.label}`}
+                                            aria-label={`Editar ${row.label}`}
                                           >
-                                            <Save className="h-3.5 w-3.5" />
+                                            <Pencil className="h-3.5 w-3.5" />
                                           </button>
-                                          <button
-                                            onClick={cancelRowEdit}
-                                            className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
-                                            aria-label={`Cancelar edição de ${row.label}`}
-                                          >
-                                            <X className="h-3.5 w-3.5" />
-                                          </button>
-                                        </div>
+                                        )
                                       ) : (
                                         <button
-                                          onClick={() => startRowEdit(section.id, row)}
-                                          className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px]"
-                                          aria-label={`Editar ${row.label}`}
+                                          type="button"
+                                          disabled
+                                          className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] text-[#b9b2aa] opacity-70"
+                                          aria-label={`Sem permissão para editar ${row.label}`}
                                         >
                                           <Pencil className="h-3.5 w-3.5" />
                                         </button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import type { ApexOptions } from 'apexcharts'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BadgeEuro, LineChart as LineChartIcon, Pencil, Save, Table2, X } from 'lucide-react'
@@ -6,22 +7,18 @@ import { useSearchParams } from 'react-router-dom'
 import { ApexChart } from '../components/charts/ApexChart'
 import { Card } from '../components/ui/Card'
 import { KpiCard } from '../components/ui/KpiCard'
-import {
-  courseHeatmapMix,
-  courseSelectionRows,
-  retentionData,
-  roiChartData,
-  roiParameterRows,
-} from '../data/referenceData'
+import { useAppContext } from '../contexts/AppContext'
+import { canEditSettings } from '../lib/access'
 import { useAppMotion } from '../lib/appMotion'
 import { chartColors } from '../lib/chartColors'
+import { formatAnnualCurrency } from '../lib/riskEngine'
 import { cn } from '../lib/utils'
 
 type AnalysisView = 'roi' | 'retention' | 'course'
 
 type RoiEditingRowState = {
-  type: string
-  maxDelay: string
+  rowId: string
+  maxValue: string
   severity: string
 }
 
@@ -52,14 +49,16 @@ function AnalysisToggle({
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return <h2 className="text-[12px] font-medium text-[#2d2b28] sm:text-[15px]">{children}</h2>
 }
 
 export function Analysis() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedCourse, setSelectedCourse] = useState('Gestão de Empresas')
-  const [roiRows, setRoiRows] = useState(roiParameterRows)
+  const { activeProfileId, derivedData, settingsSections, applySettingsTableEdit } = useAppContext()
+  const [selectedCourses, setSelectedCourses] = useState<string[]>(() =>
+    derivedData.analysis.course.courses.length > 0 ? [derivedData.analysis.course.courses[0]] : []
+  )
   const [editingRoiRow, setEditingRoiRow] = useState<RoiEditingRowState | null>(null)
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false
@@ -73,13 +72,27 @@ export function Analysis() {
   const activeView: AnalysisView =
     viewParam === 'retention' || viewParam === 'course' || viewParam === 'roi' ? viewParam : 'roi'
 
-  const heatmapMix = courseHeatmapMix[selectedCourse]
+  const canEdit = canEditSettings(activeProfileId)
+  const roiSection = settingsSections.find((section) => section.id === 'risk-multipliers')
   const roiChartHeight = isMobileViewport ? 320 : isCompactViewport ? 420 : 600
   const retentionChartHeight = isMobileViewport ? 330 : isCompactViewport ? 430 : 560
   const courseTreemapHeight = isMobileViewport ? 320 : isCompactViewport ? 430 : 692
   const roiCategories = isCompactViewport
-    ? ['CTeSP', 'Licenciat\nura', 'Mestrado', 'Internacio\nnal']
-    : roiChartData.map((item) => item.name)
+    ? derivedData.analysis.roi.chartData.map((item) => item.name.replace('Licenciatura', 'Licenciat\nura').replace('Internacional', 'Internacio\nnal'))
+    : derivedData.analysis.roi.chartData.map((item) => item.name)
+
+  useEffect(() => {
+    setSelectedCourses((previous) => {
+      const availableCourses = derivedData.analysis.course.courses
+      const nextSelection = previous.filter((course) => availableCourses.includes(course))
+
+      if (nextSelection.length > 0) {
+        return nextSelection
+      }
+
+      return availableCourses.length > 0 ? [availableCourses[0]] : []
+    })
+  }, [derivedData.analysis.course.courses])
 
   useEffect(() => {
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)')
@@ -100,11 +113,61 @@ export function Analysis() {
     }
   }, [])
 
+  const selectedCourseMix = selectedCourses.reduce(
+    (accumulator, course) => {
+      const mix = derivedData.analysis.course.mixes[course]
+
+      if (!mix) return accumulator
+
+      accumulator.none += mix.none
+      accumulator.low += mix.low
+      accumulator.medium += mix.medium
+      accumulator.high += mix.high
+      return accumulator
+    },
+    { none: 0, low: 0, medium: 0, high: 0 }
+  )
+
+  const totalSelectedCourseStudents =
+    selectedCourseMix.none + selectedCourseMix.low + selectedCourseMix.medium + selectedCourseMix.high
+
+  const courseTreemapEntries = [
+    {
+      x: 'Risco Alto',
+      y: selectedCourseMix.high,
+      fillColor: chartColors.red,
+      percentLabel: `${Math.round((selectedCourseMix.high / Math.max(totalSelectedCourseStudents, 1)) * 100)}%`,
+    },
+    {
+      x: 'Risco Médio',
+      y: selectedCourseMix.medium,
+      fillColor: chartColors.yellow,
+      percentLabel: `${Math.round((selectedCourseMix.medium / Math.max(totalSelectedCourseStudents, 1)) * 100)}%`,
+    },
+    {
+      x: 'Risco Baixo',
+      y: selectedCourseMix.low,
+      fillColor: chartColors.main,
+      percentLabel: `${Math.round((selectedCourseMix.low / Math.max(totalSelectedCourseStudents, 1)) * 100)}%`,
+    },
+    {
+      x: 'Sem Risco',
+      y: selectedCourseMix.none,
+      fillColor: chartColors.green,
+      percentLabel: `${Math.round((selectedCourseMix.none / Math.max(totalSelectedCourseStudents, 1)) * 100)}%`,
+    },
+  ].filter((entry) => entry.y > 0)
+
+  const allCoursesSelected =
+    derivedData.analysis.course.courses.length > 0 && selectedCourses.length === derivedData.analysis.course.courses.length
+
+  const courseTreemapKey = [...selectedCourses].sort((left, right) => left.localeCompare(right, 'pt-PT')).join('|') || 'none'
+
   const roiBarChartOptions: ApexOptions = {
     chart: {
       type: 'bar',
       toolbar: { show: false },
-      animations: createChartAnimation(820, 75),
+      animations: createChartAnimation(380, 12),
       fontFamily: 'Manrope, Arial, sans-serif',
     },
     colors: [chartColors.green, chartColors.red],
@@ -145,7 +208,11 @@ export function Analysis() {
     yaxis: {
       show: false,
     },
-    tooltip: { enabled: false },
+    tooltip: {
+      y: {
+        formatter: (value) => formatAnnualCurrency(Number(value)),
+      },
+    },
     states: {
       active: { filter: { type: 'none' } },
       hover: { filter: { type: 'none' } },
@@ -157,7 +224,7 @@ export function Analysis() {
       type: 'line',
       toolbar: { show: false },
       zoom: { enabled: false },
-      animations: createChartAnimation(760, 65),
+      animations: createChartAnimation(360, 12),
       fontFamily: 'Manrope, Arial, sans-serif',
     },
     colors: [chartColors.red, chartColors.green],
@@ -186,13 +253,17 @@ export function Analysis() {
         horizontal: isMobileViewport ? 6 : 14,
       },
     },
-    tooltip: { enabled: false },
+    tooltip: {
+      y: {
+        formatter: (value) => `${Math.round(Number(value))}%`,
+      },
+    },
     xaxis: {
-      categories: retentionData.map((item) => item.month),
+      categories: derivedData.analysis.retention.chartData.map((item) => item.month),
       labels: {
         rotate: -55,
         style: {
-          colors: retentionData.map(() => chartColors.textMuted),
+          colors: derivedData.analysis.retention.chartData.map(() => chartColors.textMuted),
           fontSize: isMobileViewport ? '10px' : isCompactViewport ? '12px' : '14px',
         },
       },
@@ -204,7 +275,7 @@ export function Analysis() {
       max: 100,
       tickAmount: 5,
       labels: {
-        formatter: () => '%',
+        formatter: (value) => `${Math.round(value)}%`,
         style: {
           colors: [chartColors.textMuted],
           fontSize: isMobileViewport ? '10px' : '12px',
@@ -214,38 +285,34 @@ export function Analysis() {
     annotations: {
       points: [
         {
-          x: 'Mai',
-          y: 26,
-          marker: {
-            size: 0,
-          },
+          x: 'Jun',
+          y: derivedData.analysis.retention.withoutIntervention,
+          marker: { size: 0 },
           label: {
-            text: '115.3',
+            text: `${derivedData.analysis.retention.withoutIntervention}%`,
             borderWidth: 0,
-            offsetX: isMobileViewport ? 12 : 26,
+            offsetX: isMobileViewport ? 14 : 22,
             style: {
               background: 'transparent',
               color: chartColors.red,
               fontSize: isMobileViewport ? '11px' : '14px',
-              fontWeight: '400',
+              fontWeight: '500',
             },
           },
         },
         {
-          x: 'Mai',
-          y: 0,
-          marker: {
-            size: 0,
-          },
+          x: 'Jun',
+          y: derivedData.analysis.retention.optimized,
+          marker: { size: 0 },
           label: {
-            text: '123.2',
+            text: `${derivedData.analysis.retention.optimized}%`,
             borderWidth: 0,
-            offsetX: isMobileViewport ? 12 : 26,
+            offsetX: isMobileViewport ? 14 : 22,
             style: {
               background: 'transparent',
               color: chartColors.green,
               fontSize: isMobileViewport ? '11px' : '14px',
-              fontWeight: '400',
+              fontWeight: '500',
             },
           },
         },
@@ -262,14 +329,29 @@ export function Analysis() {
       type: 'treemap',
       toolbar: { show: false },
       parentHeightOffset: 0,
-      animations: createChartAnimation(720, 70),
+      animations: createChartAnimation(340, 10),
       fontFamily: 'Manrope, Arial, sans-serif',
     },
     legend: { show: false },
     dataLabels: {
-      enabled: false,
+      enabled: true,
+      formatter: (_, opts: any) => {
+        const item = opts?.w?.config?.series?.[opts?.seriesIndex]?.data?.[opts?.dataPointIndex]
+        if (!item) return ''
+        return item.percentLabel ? `${item.x}\n${item.percentLabel}` : `${item.x}`
+      },
+      style: {
+        fontSize: isMobileViewport ? '10px' : '12px',
+        fontWeight: '600',
+        colors: ['#ffffff'],
+      },
+      offsetY: -2,
     },
-    tooltip: { enabled: false },
+    tooltip: {
+      y: {
+        formatter: (value) => `${value} alunos`,
+      },
+    },
     stroke: {
       show: true,
       width: 2,
@@ -306,11 +388,13 @@ export function Analysis() {
     setSearchParams({ view })
   }
 
-  function startRoiRowEdit(row: (typeof roiRows)[number]) {
+  function startRoiRowEdit(row: { id: string; maxValue: string; severity?: string }) {
+    if (!canEdit) return
+
     setEditingRoiRow({
-      type: row.type,
-      maxDelay: row.maxDelay,
-      severity: row.severity,
+      rowId: row.id,
+      maxValue: row.maxValue,
+      severity: row.severity ?? '',
     })
   }
 
@@ -321,19 +405,18 @@ export function Analysis() {
   function saveRoiRowEdit() {
     if (!editingRoiRow) return
 
-    setRoiRows((previousRows) =>
-      previousRows.map((row) =>
-        row.type === editingRoiRow.type
-          ? {
-              ...row,
-              maxDelay: editingRoiRow.maxDelay.trim() || row.maxDelay,
-              severity: editingRoiRow.severity.trim() || row.severity,
-            }
-          : row
-      )
-    )
+    applySettingsTableEdit('risk-multipliers', editingRoiRow.rowId, {
+      maxValue: editingRoiRow.maxValue,
+      severity: editingRoiRow.severity,
+    })
 
     setEditingRoiRow(null)
+  }
+
+  function toggleCourseSelection(course: string) {
+    setSelectedCourses((previous) =>
+      previous.includes(course) ? previous.filter((entry) => entry !== course) : [...previous, course]
+    )
   }
 
   return (
@@ -342,9 +425,9 @@ export function Analysis() {
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
           <h1 className="text-[15px] font-semibold text-[#2e2d2a] sm:text-[17px]">Visualização</h1>
           <div className="flex flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 sm:gap-2 md:flex-wrap md:overflow-visible md:pb-0">
-              <AnalysisToggle label="Gestão de ROI" icon={BadgeEuro} active={activeView === 'roi'} onClick={() => handleViewChange('roi')} />
-              <AnalysisToggle label="Retenção" icon={LineChartIcon} active={activeView === 'retention'} onClick={() => handleViewChange('retention')} />
-              <AnalysisToggle label="Por Curso" icon={Table2} active={activeView === 'course'} onClick={() => handleViewChange('course')} />
+            <AnalysisToggle label="Gestão de ROI" icon={BadgeEuro} active={activeView === 'roi'} onClick={() => handleViewChange('roi')} />
+            <AnalysisToggle label="Retenção" icon={LineChartIcon} active={activeView === 'retention'} onClick={() => handleViewChange('retention')} />
+            <AnalysisToggle label="Por Curso" icon={Table2} active={activeView === 'course'} onClick={() => handleViewChange('course')} />
           </div>
         </div>
       </div>
@@ -369,23 +452,23 @@ export function Analysis() {
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <KpiCard
                     title="Receita em Risco (Anual)"
-                    value="€246,255"
-                    subtitle="Acumulado - Propinas de Alunos em Risco Alto"
+                    value={formatAnnualCurrency(derivedData.analysis.roi.revenueAtRisk)}
+                    subtitle="Acumulado - Propinas de Alunos em Risco"
                     subtitleTone="neutral"
                   />
                 </motion.div>
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <KpiCard
                     title="Receita Recuperável (Est.)"
-                    value="€98,502"
-                    subtitle="Com taxa de eficácia de 40% na intervenção"
+                    value={formatAnnualCurrency(derivedData.analysis.roi.recoverableEstimate)}
+                    subtitle="Estimativa dinâmica com base nas regras atuais"
                     subtitleTone="neutral"
                   />
                 </motion.div>
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <KpiCard
                     title="Multiplicador RiskRadar"
-                    value="6.6x"
+                    value={`${derivedData.analysis.roi.multiplier.toFixed(1)}x`}
                     subtitle="ROI estimado sobre o custo do software"
                     subtitleTone="neutral"
                   />
@@ -408,40 +491,39 @@ export function Analysis() {
                       <table className="w-full min-w-[280px] border-collapse text-left text-[10px] sm:text-[12px]">
                         <thead>
                           <tr className="bg-[#ececec] text-[#2f2d2a]">
-                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Tipo de Estud...</th>
-                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Max. Meses e...</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Tipo de Estud.</th>
+                            <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Max. Meses</th>
                             <th className="px-2 py-2 font-semibold sm:px-3 sm:py-3">Gravidade</th>
                             <th className="px-2 py-2 text-center font-semibold sm:px-3 sm:py-3">Ações</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {roiRows.map((row) => {
-                            const isEditing = editingRoiRow?.type === row.type
-
+                          {roiSection?.rows.map((row) => {
+                            const isEditing = editingRoiRow?.rowId === row.id
                             return (
                               <tr
-                                key={row.type}
+                                key={row.id}
                                 className={cn(
                                   'border-b border-[#eee7db] text-[#3c3935] transition-colors duration-200 last:border-b-0',
                                   isEditing && 'bg-[#fef7f2]'
                                 )}
                               >
-                                <td className="px-2 py-2 sm:px-3 sm:py-3">{row.type}</td>
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">{row.label}</td>
                                 <td className="px-2 py-2 sm:px-3 sm:py-3">
                                   {isEditing ? (
                                     <input
                                       type="text"
-                                      value={editingRoiRow.maxDelay}
+                                      value={editingRoiRow.maxValue}
                                       onChange={(event) =>
                                         setEditingRoiRow((previous) =>
-                                          previous ? { ...previous, maxDelay: event.target.value } : previous
+                                          previous ? { ...previous, maxValue: event.target.value } : previous
                                         )
                                       }
-                                      placeholder={row.maxDelay}
+                                      placeholder={row.maxValue}
                                       className="h-7 w-full rounded-[8px] border border-[#d88960] bg-white px-2 text-[10px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] sm:h-8 sm:px-3 sm:text-[12px]"
                                     />
                                   ) : (
-                                    row.maxDelay
+                                    row.maxValue
                                   )}
                                 </td>
                                 <td className="px-2 py-2 sm:px-3 sm:py-3">
@@ -454,7 +536,7 @@ export function Analysis() {
                                           previous ? { ...previous, severity: event.target.value } : previous
                                         )
                                       }
-                                      placeholder={row.severity}
+                                      placeholder={row.severity ?? ''}
                                       className="h-7 w-full rounded-[8px] border border-[#d88960] bg-white px-2 text-[10px] transition-[border-color,box-shadow] duration-200 focus:shadow-[0_0_0_3px_rgba(193,99,61,0.12)] sm:h-8 sm:px-3 sm:text-[12px]"
                                     />
                                   ) : (
@@ -462,28 +544,39 @@ export function Analysis() {
                                   )}
                                 </td>
                                 <td className="px-2 py-2 text-center text-[#c1633d] sm:px-3 sm:py-3">
-                                  {isEditing ? (
-                                    <div className="flex items-center justify-center gap-1.5">
+                                  {canEdit ? (
+                                    isEditing ? (
+                                      <div className="flex items-center justify-center gap-1.5">
+                                        <button
+                                          onClick={saveRoiRowEdit}
+                                          className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
+                                          aria-label={`Guardar ${row.label}`}
+                                        >
+                                          <Save className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={cancelRoiRowEdit}
+                                          className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
+                                          aria-label={`Cancelar edição de ${row.label}`}
+                                        >
+                                          <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                        </button>
+                                      </div>
+                                    ) : (
                                       <button
-                                        onClick={saveRoiRowEdit}
+                                        onClick={() => startRoiRowEdit(row)}
                                         className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
-                                        aria-label={`Guardar ${row.type}`}
+                                        aria-label={`Editar ${row.label}`}
                                       >
-                                        <Save className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                        <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                       </button>
-                                      <button
-                                        onClick={cancelRoiRowEdit}
-                                        className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
-                                        aria-label={`Cancelar edição de ${row.type}`}
-                                      >
-                                        <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                                      </button>
-                                    </div>
+                                    )
                                   ) : (
                                     <button
-                                      onClick={() => startRoiRowEdit(row)}
-                                      className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 hover:bg-[#fdf2eb] motion-safe:hover:-translate-y-[1px] sm:h-6 sm:w-6"
-                                      aria-label={`Editar ${row.type}`}
+                                      type="button"
+                                      disabled
+                                      className="inline-flex h-5 w-5 items-center justify-center rounded-[8px] text-[#b9b2aa] opacity-70 sm:h-6 sm:w-6"
+                                      aria-label={`Sem permissão para editar ${row.label}`}
                                     >
                                       <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                     </button>
@@ -509,8 +602,8 @@ export function Analysis() {
                         type="bar"
                         height={roiChartHeight}
                         series={[
-                          { name: 'Receita Preservada', data: roiChartData.map((item) => item.recovered) },
-                          { name: 'Receita em Risco', data: roiChartData.map((item) => item.risk) },
+                          { name: 'Receita Preservada', data: derivedData.analysis.roi.chartData.map((item) => item.preserved) },
+                          { name: 'Receita em Risco', data: derivedData.analysis.roi.chartData.map((item) => item.risk) },
                         ]}
                         options={roiBarChartOptions}
                       />
@@ -539,16 +632,16 @@ export function Analysis() {
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <KpiCard
                     title="Previsão de Retenção (Sem Intervenção)"
-                    value="71%"
-                    subtitle="Baseado no histórico dos últimos 5 anos"
+                    value={`${derivedData.analysis.retention.withoutIntervention}%`}
+                    subtitle="Recalculado com base no mix de risco atual"
                     subtitleTone="neutral"
                   />
                 </motion.div>
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <KpiCard
                     title="Previsão de Retenção (Optimizada)"
-                    value="88%"
-                    subtitle="Com intervenção guiada por Risk Radar"
+                    value={`${derivedData.analysis.retention.optimized}%`}
+                    subtitle="Com intervenção guiada pelas regras do RiskRadar"
                     subtitleTone="neutral"
                   />
                 </motion.div>
@@ -565,8 +658,8 @@ export function Analysis() {
                       type="line"
                       height={retentionChartHeight}
                       series={[
-                        { name: 'Taxa de Retenção Histórica', data: retentionData.map((item) => item.historical) },
-                        { name: 'Taxa de Retenção Optimizada', data: retentionData.map((item) => item.optimized) },
+                        { name: 'Taxa de Retenção Histórica', data: derivedData.analysis.retention.chartData.map((item) => item.historical) },
+                        { name: 'Taxa de Retenção Optimizada', data: derivedData.analysis.retention.chartData.map((item) => item.optimized) },
                       ]}
                       options={retentionLineChartOptions}
                     />
@@ -596,7 +689,32 @@ export function Analysis() {
                 <motion.div variants={createRevealVariants({ distance: 10 })}>
                   <Card className="overflow-hidden">
                     <div className="px-3 py-3 sm:px-4 sm:py-4">
-                      <div className="mb-3 text-[11px] font-medium text-[#2d2b28] sm:mb-4 sm:text-[14px]">Seleção de Cursos</div>
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <div className="text-[11px] font-medium text-[#2d2b28] sm:text-[14px]">Seleção de Cursos</div>
+                          <div className="mt-1 text-[10px] text-[#7f7a73] sm:text-[11px]">
+                            {selectedCourses.length} curso{selectedCourses.length === 1 ? '' : 's'} selecionado{selectedCourses.length === 1 ? '' : 's'}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCourses(derivedData.analysis.course.courses)}
+                            disabled={allCoursesSelected}
+                            className="rounded-[8px] border border-[#e6ddcf] bg-white px-3 py-1.5 text-[11px] font-medium text-[#5f5952] transition-colors duration-150 hover:bg-[#fffaf3] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Selecionar todos
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCourses([])}
+                            disabled={selectedCourses.length === 0}
+                            className="rounded-[8px] border border-[#e6ddcf] bg-white px-3 py-1.5 text-[11px] font-medium text-[#5f5952] transition-colors duration-150 hover:bg-[#fffaf3] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Limpar
+                          </button>
+                        </div>
+                      </div>
 
                       <table className="w-full border-collapse text-left text-[10px] sm:text-[12px]">
                         <thead>
@@ -606,19 +724,25 @@ export function Analysis() {
                           </tr>
                         </thead>
                         <tbody>
-                          {courseSelectionRows.map((course) => {
-                            const checked = course === selectedCourse
+                          {derivedData.analysis.course.courses.map((course) => {
+                            const checked = selectedCourses.includes(course)
+                            const mix = derivedData.analysis.course.mixes[course]
                             return (
                               <tr key={course} className="border-b border-[#eee7db] text-[#47433f] transition-colors duration-200 hover:bg-[#fff9f2]">
                                 <td className="px-3 py-2 sm:px-4 sm:py-3">
                                   <input
                                     type="checkbox"
                                     checked={checked}
-                                    onChange={() => setSelectedCourse(course)}
+                                    onChange={() => toggleCourseSelection(course)}
                                     className="h-3.5 w-3.5 accent-[#c1633d] sm:h-4 sm:w-4"
                                   />
                                 </td>
-                                <td className="px-2 py-2 sm:px-3 sm:py-3">{course}</td>
+                                <td className="px-2 py-2 sm:px-3 sm:py-3">
+                                  <div>{course}</div>
+                                  <div className="mt-1 text-[10px] text-[#8a857d]">
+                                    {mix.high + mix.medium} em risco
+                                  </div>
+                                </td>
                               </tr>
                             )
                           })}
@@ -650,28 +774,29 @@ export function Analysis() {
                     </div>
 
                     <motion.div
-                      key={selectedCourse}
+                      key={courseTreemapKey}
                       variants={createRevealVariants({ distance: 8, duration: 0.2 })}
                       initial="hidden"
                       animate="show"
                       className="overflow-hidden px-[2px] pb-[2px]"
                       style={{ height: `${courseTreemapHeight + 2}px` }}
                     >
-                      <ApexChart
-                        type="treemap"
-                        height={courseTreemapHeight}
-                        series={[
-                          {
-                            data: [
-                              { x: 'Risco Alto', y: heatmapMix.high, fillColor: chartColors.red },
-                              { x: 'Risco Médio', y: heatmapMix.medium, fillColor: chartColors.yellow },
-                              { x: 'Risco Baixo', y: heatmapMix.low, fillColor: chartColors.main },
-                              { x: 'Sem Risco', y: heatmapMix.none, fillColor: chartColors.green },
-                            ],
-                          },
-                        ]}
-                        options={courseTreemapOptions}
-                      />
+                      {selectedCourses.length > 0 ? (
+                        <ApexChart
+                          type="treemap"
+                          height={courseTreemapHeight}
+                          series={[
+                            {
+                              data: courseTreemapEntries,
+                            },
+                          ]}
+                          options={courseTreemapOptions}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center px-6 text-center text-[13px] text-[#706a63]">
+                          Seleciona pelo menos um curso para visualizar a distribuição agregada de risco.
+                        </div>
+                      )}
                     </motion.div>
                   </Card>
                 </motion.div>
